@@ -1,8 +1,37 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\TollController;
+// Aquí importaremos los demás controladores (TollController, IncidentController, etc.) más adelante
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+/*
+|--------------------------------------------------------------------------
+| Rutas Públicas
+|--------------------------------------------------------------------------
+| No requieren token de autenticación.
+*/
+Route::post('/login', [AuthController::class, 'login']);
+
+
+/*
+|--------------------------------------------------------------------------
+| Rutas Protegidas
+|--------------------------------------------------------------------------
+| Requieren enviar el 'access_token' en los headers de la petición HTTP.
+| Header -> Authorization: Bearer {tu_token_aqui}
+*/
+Route::middleware('auth:sanctum')->group(function () {
+    
+    // Ruta para cerrar sesión
+    Route::post('/logout', [AuthController::class, 'logout']);
+
+    // Ruta de prueba para verificar quién está logueado
+    Route::get('/user', function (Illuminate\Http\Request $request) {
+        return $request->user();
+    });
+
+    // En el futuro, aquí irán las rutas de la aplicación:
+    // Route::apiResource('tolls', TollController::class);
+    // Route::apiResource('incidents', IncidentController::class);
+});
