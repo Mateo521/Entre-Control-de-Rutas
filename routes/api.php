@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TollController;
+use App\Http\Controllers\Api\IncidentController;
 // Aquí importaremos los demás controladores (TollController, IncidentController, etc.) más adelante
 
 /*
@@ -31,7 +32,11 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 
-    // En el futuro, aquí irán las rutas de la aplicación:
-    // Route::apiResource('tolls', TollController::class);
-    // Route::apiResource('incidents', IncidentController::class);
+
+
+    Route::apiResource('incidents', IncidentController::class);
+
+  
+    Route::apiResource('tolls', TollController::class);
+    Route::apiResource('incidents', IncidentController::class);
 });

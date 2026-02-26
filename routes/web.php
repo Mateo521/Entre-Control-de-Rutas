@@ -2,8 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-// Cualquier URL ingresada en el navegador cargará la vista 'welcome'
-// y delegará la navegación a Vue Router.
+// Redirigir todas las rutas a la vista de Vue, EXCEPTO las que comienzan con 'api'
 Route::get('/{any}', function () {
     return view('welcome');
-})->where('any', '.*');
+})->where('any', '^(?!api).*$');

@@ -13,3 +13,16 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+/* Ajustes globales para los componentes nativos de Leaflet */
+.leaflet-popup-content-wrapper {
+    @apply bg-white dark:bg-[#0d1b2a] text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10 rounded-lg shadow-xl;
+}
+
+.leaflet-popup-tip {
+    @apply bg-white dark:bg-[#0d1b2a] border-t border-l border-slate-200 dark:border-white/10;
+}
+
+.leaflet-container {
+    font-family: 'DM Sans', sans-serif;
+}

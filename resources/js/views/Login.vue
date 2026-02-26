@@ -2,48 +2,38 @@
 import { ref } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
+import { toast } from 'vue3-toastify' // Importación
 
 const router = useRouter()
-
-const email = ref('admin@enterutas.gov.ar')
-const password = ref('Admin1234!')
-const errorMensaje = ref('')
-const cargando = ref(false)
+// ... resto de las variables
 
 const handleLogin = async () => {
     cargando.value = true
     errorMensaje.value = ''
 
     try {
-        // 1. Usamos ruta relativa y definimos los Headers obligatorios
         const response = await axios.post('/api/login', {
             email: email.value,
             password: password.value
-        }, {
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }
         })
 
         localStorage.setItem('access_token', response.data.access_token)
-        console.log('Login exitoso. Token:', response.data.access_token)
-           router.push('/panel')
+
+        // Reemplazamos el alert por un toast de éxito
+        toast.success('Ingreso exitoso al sistema');
+
+        router.push('/panel')
 
     } catch (error) {
-        // 2. Mejoramos la captura de errores para saber exactamente qué falla
         if (error.response) {
             if (error.response.status === 422) {
-                errorMensaje.value = 'Las credenciales son incorrectas.'
-            } else if (error.response.status === 404) {
-                errorMensaje.value = 'El endpoint de la API no existe. Verifica api.php.'
+                // Reemplazamos el manejo de error local por un toast de advertencia
+                toast.warning('Las credenciales son incorrectas.');
             } else {
-                // Muestra el error real que devuelve Laravel
-                errorMensaje.value = error.response.data.message || 'Error interno del servidor.'
-                console.error("Error del servidor:", error.response.data);
+                toast.error(error.response.data.message || 'Error interno del servidor.');
             }
         } else {
-            errorMensaje.value = 'No hay conexión con el backend.'
+            toast.error('No hay conexión con el backend.');
         }
     } finally {
         cargando.value = false

@@ -1,0 +1,195 @@
+<script setup>
+import { ref, reactive, onMounted } from 'vue'
+import axios from 'axios'
+
+// Estado de la tabla
+const peajes = ref([])
+const cargando = ref(true)
+
+// Estado del Modal
+const mostrarModal = ref(false)
+const guardando = ref(false)
+
+// Objeto reactivo para el nuevo peaje
+const nuevoPeaje = reactive({
+    name: '',
+    camposDinámicos: []
+})
+
+// Funciones de la Tabla
+const cargarPeajes = async () => {
+    cargando.value = true
+    try {
+        const respuesta = await axios.get('/api/tolls')
+        peajes.value = respuesta.data
+    } catch (error) {
+        console.error("Error al obtener peajes:", error)
+    } finally {
+        cargando.value = false
+    }
+}
+
+// Funciones del Modal y Formulario
+const abrirModal = () => {
+    nuevoPeaje.name = ''
+    nuevoPeaje.camposDinámicos = []
+    mostrarModal.value = true
+}
+
+const cerrarModal = () => {
+    mostrarModal.value = false
+}
+
+const agregarCampo = () => {
+    nuevoPeaje.camposDinámicos.push({ name: '', type: 'texto' })
+}
+
+const quitarCampo = (index) => {
+    nuevoPeaje.camposDinámicos.splice(index, 1)
+}
+
+const guardarPeaje = async () => {
+    if (!nuevoPeaje.name) return;
+    
+    guardando.value = true;
+    
+    try {
+        // Estructuramos el payload para que coincida con la validación de Laravel
+        const payload = {
+            name: nuevoPeaje.name,
+            dynamic_schema: {
+                inventory_fields: nuevoPeaje.camposDinámicos
+            }
+        }
+
+        await axios.post('/api/tolls', payload)
+        
+        // Si se guarda con éxito, cerramos modal y recargamos la tabla
+        cerrarModal()
+        cargarPeajes()
+        
+    } catch (error) {
+        console.error("Error al guardar:", error)
+        alert("Ocurrió un error al guardar el peaje.")
+    } finally {
+        guardando.value = false
+    }
+}
+
+onMounted(() => {
+    cargarPeajes()
+})
+</script>
+
+<template>
+    <div class="relative h-full">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="font-['Barlow_Condensed'] text-[28px] font-extrabold text-slate-900 dark:text-slate-100 m-0 mb-0.5 tracking-wide">Gestión de peajes</h2>
+                <p class="text-[13px] text-slate-500 dark:text-slate-400 m-0">Administración y configuración de campos personalizados por peaje</p>
+            </div>
+            <button @click="abrirModal" class="bg-amber-500 text-[#0d1b2a] font-['Barlow_Condensed'] text-sm font-bold tracking-wider uppercase px-5 py-2.5 rounded-lg border-none cursor-pointer inline-flex items-center gap-2 transition-all hover:bg-amber-400 hover:-translate-y-px shadow-sm">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                Nuevo peaje
+            </button>
+        </div>
+
+        <div class="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden shadow-sm dark:shadow-none transition-colors">
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-amber-500/5 dark:bg-amber-500/10 border-b border-amber-500/20">
+                            <th class="px-4 py-2.5 text-left font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-amber-600 dark:text-amber-500">ID</th>
+                            <th class="px-4 py-2.5 text-left font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-amber-600 dark:text-amber-500">Nombre</th>
+                            <th class="px-4 py-2.5 text-left font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-amber-600 dark:text-amber-500">Campos Dinámicos</th>
+                            <th class="px-4 py-2.5 text-left font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-amber-600 dark:text-amber-500">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-if="cargando">
+                            <td colspan="4" class="px-4 py-6 text-center text-slate-500 text-sm font-medium">Cargando peajes desde la base de datos...</td>
+                        </tr>
+                        <tr v-else-if="peajes.length === 0">
+                            <td colspan="4" class="px-4 py-8 text-center text-slate-500 text-sm">No hay peajes registrados aún. Haz clic en "Nuevo peaje".</td>
+                        </tr>
+                        <tr v-else v-for="peaje in peajes" :key="peaje.id" class="hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-b border-slate-100 dark:border-white/5">
+                            <td class="px-4 py-3 text-[13.5px] font-semibold text-slate-900 dark:text-slate-100">#{{ peaje.id }}</td>
+                            <td class="px-4 py-3">
+                                <div class="font-semibold text-slate-900 dark:text-slate-100">{{ peaje.name }}</div>
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="text-[13px] text-slate-700 dark:text-slate-300 font-medium">
+                                    {{ peaje.dynamic_schema && peaje.dynamic_schema.inventory_fields ? peaje.dynamic_schema.inventory_fields.length : 0 }} 
+                                    <span class="text-slate-500 dark:text-slate-500 font-normal">campos personalizados</span>
+                                </span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold tracking-wider uppercase transition-all bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400">
+                                    <span class="w-1.5 h-1.5 rounded-full inline-block bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
+                                    Activo
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div v-if="mostrarModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 dark:bg-[#0a1628]/80 backdrop-blur-sm transition-opacity">
+            <div class="w-full max-w-lg bg-white dark:bg-[#0d1b2a] rounded-2xl border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden relative">
+                
+                <div class="bg-gradient-to-r from-amber-500 to-amber-600 h-1"></div>
+                
+                <div class="px-6 py-4 border-b border-slate-100 dark:border-white/5 flex items-center justify-between">
+                    <h3 class="font-['Barlow_Condensed'] text-[20px] font-bold text-slate-900 dark:text-slate-100 tracking-wide m-0">Registrar nuevo peaje</h3>
+                    <button @click="cerrarModal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer bg-transparent border-none">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+
+                <form @submit.prevent="guardarPeaje" class="p-6">
+                    <div class="mb-5">
+                        <label class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-1.5">Nombre del Peaje</label>
+                        <input v-model="nuevoPeaje.name" type="text" required placeholder="Ej: Peaje La Carolina" class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg px-3.5 py-2.5 text-slate-900 dark:text-white text-sm outline-none transition-colors font-sans focus:border-amber-500/50" />
+                    </div>
+
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block">Campos Operativos Adicionales (JSON)</label>
+                            <button type="button" @click="agregarCampo" class="text-[11px] font-semibold text-amber-600 dark:text-amber-500 hover:text-amber-700 bg-amber-50 dark:bg-amber-500/10 px-2 py-1 rounded cursor-pointer border-none transition-colors">
+                                + Agregar campo
+                            </button>
+                        </div>
+                        
+                        <div v-if="nuevoPeaje.camposDinámicos.length === 0" class="text-[12px] text-slate-400 dark:text-slate-500 italic p-3 border border-dashed border-slate-300 dark:border-white/10 rounded-lg text-center bg-slate-50/50 dark:bg-transparent">
+                            No se solicitarán campos adicionales en los sucesos de este peaje.
+                        </div>
+
+                        <div v-else class="space-y-2 max-h-[160px] overflow-y-auto pr-1">
+                            <div v-for="(campo, index) in nuevoPeaje.camposDinámicos" :key="index" class="flex gap-2 items-center bg-slate-50 dark:bg-white/5 p-2 rounded-lg border border-slate-200 dark:border-white/5">
+                                <input v-model="campo.name" type="text" placeholder="Nombre del campo" required class="flex-1 bg-transparent border-none text-slate-900 dark:text-white text-xs outline-none focus:ring-0 placeholder:text-slate-400" />
+                                <select v-model="campo.type" class="bg-white dark:bg-[#0a1628] border border-slate-200 dark:border-white/10 rounded text-xs px-2 py-1 text-slate-700 dark:text-slate-300 outline-none">
+                                    <option value="texto">Texto</option>
+                                    <option value="numero">Número</option>
+                                    <option value="booleano">Sí/No</option>
+                                </select>
+                                <button type="button" @click="quitarCampo(index)" class="text-red-400 hover:text-red-600 p-1 cursor-pointer bg-transparent border-none">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14H6L5 6"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3 justify-end pt-2 border-t border-slate-100 dark:border-white/5">
+                        <button type="button" @click="cerrarModal" class="px-4 py-2 rounded-lg text-[13px] font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors cursor-pointer border-none bg-transparent font-['Barlow_Condensed'] uppercase tracking-wider">
+                            Cancelar
+                        </button>
+                        <button type="submit" :disabled="guardando" class="bg-amber-500 text-[#0d1b2a] font-['Barlow_Condensed'] text-[13px] font-bold tracking-wider uppercase px-6 py-2 rounded-lg border-none cursor-pointer inline-flex items-center transition-all hover:bg-amber-400 disabled:opacity-50">
+                            {{ guardando ? 'Guardando...' : 'Confirmar y Crear' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</template>
