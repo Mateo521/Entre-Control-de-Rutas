@@ -111,6 +111,19 @@ onUnmounted(() => {
                         <polyline points="10 9 9 9 8 9"></polyline>
                     </svg>Registro de Sucesos</router-link>
 
+                <router-link to="/panel/acciones"
+                    active-class="border-amber-500 text-amber-600 dark:text-amber-500 bg-amber-500/10"
+                    class="flex items-center gap-2.5 px-5 py-2.5 text-[13.5px] font-medium transition-all no-underline border-l-[3px] border-transparent text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round">
+                        <path
+                            d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z">
+                        </path>
+                    </svg>
+                    Gestión de Acciones
+                </router-link>
+
+
                 <router-link to="/panel/busqueda"
                     active-class="border-amber-500 text-amber-600 dark:text-amber-500 bg-amber-500/10"
                     class="flex items-center gap-2.5 px-5 py-2.5 text-[13.5px] font-medium transition-all no-underline border-l-[3px] border-transparent text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5"><svg
@@ -131,6 +144,8 @@ onUnmounted(() => {
                         <line x1="9" y1="3" x2="9" y2="21"></line>
                         <line x1="15" y1="3" x2="15" y2="21"></line>
                     </svg>Mapa Interactivo</router-link>
+
+
 
                 <div
                     class="font-['Barlow_Condensed'] text-[10px] font-bold tracking-[0.15em] uppercase text-slate-400 dark:text-slate-500 px-5 pt-5 pb-1.5 transition-colors mt-2">

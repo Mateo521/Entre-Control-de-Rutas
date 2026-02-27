@@ -23,7 +23,7 @@ Route::post('/login', [AuthController::class, 'login']);
 | Header -> Authorization: Bearer {tu_token_aqui}
 */
 Route::middleware('auth:sanctum')->group(function () {
-    
+
     // Ruta para cerrar sesión
     Route::post('/logout', [AuthController::class, 'logout']);
 
@@ -36,7 +36,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('incidents', IncidentController::class);
 
-  
+
     Route::apiResource('tolls', TollController::class);
     Route::apiResource('incidents', IncidentController::class);
+
+    Route::apiResource('actions', \App\Http\Controllers\ActionController::class);
+
 });

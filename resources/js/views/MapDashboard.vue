@@ -18,28 +18,130 @@ const mostrarModal = ref(false)
 const guardando = ref(false)
 const puntoFormulario = reactive({ lat: null, lng: null, tipo: '', observaciones: '' })
 
+// Resultado de la búsqueda de progresivas
+const resultadoBusqueda = ref(null)
+
 const lightTile = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
 const darkTile = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
 
-// Datos Estáticos de Rutas
+// Datos Estáticos de Rutas y Peajes (Coordenadas Reales)
 const trazasVialesGeoJSON = {
     "type": "FeatureCollection",
     "features": [
         {
             "type": "Feature",
-            "properties": { "nombre": "Corredor Ruta 20", "color": "#3b82f6", "peajes": [{ nombre: "Peaje Cruz de Piedra", lat: -33.2500, lng: -66.2300 }] },
-            "geometry": { "type": "LineString", "coordinates": [[-66.3378, -33.3017], [-66.2800, -33.2800], [-66.2300, -33.2500], [-66.1800, -33.2000]] }
+            "properties": { 
+                "nombre": "Corredor Ruta 20 y Ruta 30", 
+                "color": "#3b82f6", 
+                "peajes": [
+                    { nombre: "Peaje Cruz de Piedra", lat: -33.2541131, lng: -66.2270219 },
+                    { nombre: "Peaje Perilago", lat: -33.2542911, lng: -66.2124143 },
+                    { nombre: "Peaje Ruta 30", lat: -33.3026376, lng: -66.1093417 }
+                ] 
+            },
+            // Geometría visual aproximada para pintar la línea en el mapa
+            "geometry": { "type": "LineString", "coordinates": [[-66.3026, -33.3026], [-66.2270, -33.2541], [-66.2124, -33.2542]] }
         },
         {
             "type": "Feature",
-            "properties": { "nombre": "Corredor Ruta 9", "color": "#10b981", "peajes": [{ nombre: "Peaje La Florida", lat: -33.1200, lng: -66.0500 }] },
-            "geometry": { "type": "LineString", "coordinates": [[-66.2300, -33.2500], [-66.1500, -33.1800], [-66.0500, -33.1200], [-65.9500, -33.0500]] }
+            "properties": { 
+                "nombre": "Autopista Los Puquios (Ruta Prov. 9)", 
+                "color": "#10b981", 
+                "peajes": [
+                    { nombre: "Peaje Los Puquios", lat: -33.2714449, lng: -66.1965004 }
+                ] 
+            },
+            "geometry": { "type": "LineString", "coordinates": [[-66.2500, -33.3000], [-66.1965, -33.2714], [-66.1000, -33.2000]] }
         },
         {
             "type": "Feature",
-            "properties": { "nombre": "Autopista Serranías Puntanas", "color": "#f59e0b", "peajes": [{ nombre: "Peaje Desaguadero", lat: -33.3980, lng: -68.2750 }, { nombre: "Peaje Justo Daract", lat: -33.8600, lng: -65.1800 }] },
-            "geometry": { "type": "LineString", "coordinates": [[-68.2750, -33.3980], [-66.3378, -33.3017], [-65.1800, -33.8600]] }
+            "properties": { 
+                "nombre": "Autopista Serranías Puntanas (Ruta Nac. 7)", 
+                "color": "#f59e0b", 
+                "peajes": [
+                    { nombre: "Peaje La Cumbre", lat: -33.3590784, lng: -66.0670751 },
+                    { nombre: "Peaje Desaguadero (Isla Este)", lat: -33.4117474, lng: -67.1234507 },
+                    { nombre: "Peaje Desaguadero (Isla Oeste)", lat: -33.4128459, lng: -67.1147563 }
+                ] 
+            },
+            "geometry": { "type": "LineString", "coordinates": [[-67.1234, -33.4117], [-66.0670, -33.3590], [-65.5000, -33.5000]] }
         }
+    ]
+}
+
+// Tablas de referencias kilométricas reales
+const referenciasViales = {
+    '20': [
+        { km: 4, desc: 'Puente Derivador' },
+        { km: 5, desc: 'Rodeo del Alto' },
+        { km: 7, desc: 'Club La Estrega' },
+        { km: 9, desc: 'Ave Fenix' },
+        { km: 12, desc: 'Rotonda Cruz de Piedra' },
+        { km: 13, desc: 'Peaje Cruz de Piedra' },
+        { km: 15, desc: 'Peaje Perilago' },
+        { km: 17, desc: 'La Hoya' },
+        { km: 19, desc: 'Rotonda La Virgen / El Volcan' },
+        { km: 20, desc: 'Puente Los Puquios' },
+        { km: 27, desc: 'Cruce Ruta Prov. 30 / Control policial' },
+        { km: 33, desc: 'Arroyo y retorno Los Risma' },
+        { km: 36.5, desc: 'Puente arroyo La Petra' },
+        { km: 38, desc: 'Retorno La Petra' },
+        { km: 44.7, desc: 'Ingreso presa Saladillo' },
+        { km: 46, desc: 'Puente Rio 5to.' }
+    ],
+    '9': [
+        { km: 8, desc: 'Rotonda Rotary Club San Luis' },
+        { km: 10.5, desc: 'Rotonda Malvinas' },
+        { km: 11.8, desc: 'Ingreso a San Roque' },
+        { km: 13.5, desc: 'Ingreso a Cuchi Corral' },
+        { km: 14.6, desc: 'Ingreso a perilago, Dique Cruz de Piedra' },
+        { km: 15.1, desc: 'Peaje Los Puquios' },
+        { km: 16.5, desc: 'Puente arroyo los p. y escultura del ciclista' },
+        { km: 18.4, desc: 'Puente Los Puquios - ingreso al Volcán' },
+        { km: 20, desc: 'Rotonda El Alpatacal' },
+        { km: 23, desc: 'Retorno arroyo Las Mondinas' },
+        { km: 25.8, desc: 'Rotonda El Zorrito / 4 Esquina' },
+        { km: 30, desc: 'Retorno - ingreso a Polo Club' },
+        { km: 32, desc: 'Arroyo Las Barranquitas / Ingreso El Durazno' },
+        { km: 34, desc: 'Retorno - ingreso a Las Barranquitas' },
+        { km: 36, desc: 'Ingreso a Barrio Altos Del Trapiche' },
+        { km: 37, desc: 'Rotonda El Trapiche - Acceso a La Florida' },
+        { km: 39.7, desc: 'Rotonda acceso a la Carolina - 7 Cajones' },
+        { km: 41, desc: 'Limite El Trapiche - Rio Grande' },
+        { km: 43.4, desc: 'Puente Rio Grande' },
+        { km: 45, desc: 'Ingreso a dique Rio Grande - Nogoli' },
+        { km: 50, desc: 'Ingreso Monumento a Pringles' },
+        { km: 60, desc: 'Paso del Rey - La Arenilla' },
+        { km: 66, desc: 'Valle de Pancanta' },
+        { km: 79, desc: 'La Carolina' }
+    ],
+    '7': [
+        { km: 715, desc: 'Liborio Luna - Inicio región centro' },
+        { km: 731, desc: 'Puente de Fraga' },
+        { km: 740, desc: 'Retorno Granville' },
+        { km: 742, desc: 'Puente Los Italianos - Ser Beef SA' },
+        { km: 751.65, desc: 'Acceso a Dique Paso de Las Carretas' },
+        { km: 755.25, desc: 'Eleodoro Lobos' },
+        { km: 756.6, desc: 'La Petra' },
+        { km: 761, desc: 'Peaje La Cumbre' },
+        { km: 765.75, desc: 'Destacamento Policial La Cumbre' },
+        { km: 779.7, desc: 'Ingreso a Donovan' },
+        { km: 781, desc: 'Puente los Donovan' },
+        { km: 782, desc: 'Puente Hospital Ramón Carrillo' },
+        { km: 783.5, desc: 'Terrazas del Portezuelo' },
+        { km: 785, desc: 'Puente Ruta Prov. Nº 3 (zanjitas)' },
+        { km: 788.9, desc: 'Puente Ruta Nac. Nº 146 (Beazley)' },
+        { km: 792.5, desc: 'Puente Autódromo' },
+        { km: 793, desc: 'Autódromo' },
+        { km: 796, desc: 'Escuela Agraria' },
+        { km: 798, desc: 'Centro de Disposición Final - Basural' },
+        { km: 815.7, desc: 'Puente Balde - Salinas del Bebed.' },
+        { km: 832, desc: 'Ingreso a Chosme' },
+        { km: 844.2, desc: 'Ingreso Alto Pencoso' },
+        { km: 856, desc: 'Ingreso a Jarilla' },
+        { km: 862, desc: 'Peaje Desaguadero Isla Este' },
+        { km: 863, desc: 'Peaje Desaguadero Isla Oeste' },
+        { km: 866, desc: 'Limite Provincia de Mendoza - Arco Desaguadero' }
     ]
 }
 
@@ -62,16 +164,13 @@ const renderizarTrazasEstaticas = () => {
     }).addTo(map);
 }
 
- 
 const cargarPuntosGuardados = async () => {
     try {
         const respuesta = await axios.get('/api/incidents')
         const sucesos = respuesta.data
 
         sucesos.forEach(suceso => {
-             
             if (suceso.dynamic_data && suceso.dynamic_data.latitud && suceso.dynamic_data.longitud) {
-                
                 const lat = suceso.dynamic_data.latitud
                 const lng = suceso.dynamic_data.longitud
                 const tipoFormateado = suceso.incident_type.replace('_', ' ').toUpperCase()
@@ -83,7 +182,6 @@ const cargarPuntosGuardados = async () => {
                     iconSize: [20, 20]
                 })
 
-                 
                 L.marker([lat, lng], { icon: iconoFijo })
                  .addTo(map)
                  .bindPopup(`
@@ -94,7 +192,6 @@ const cargarPuntosGuardados = async () => {
             }
         })
     } catch (error) {
-        console.error("Error al cargar puntos históricos:", error)
         toast.error('No se pudieron cargar los sucesos históricos del mapa.')
     }
 }
@@ -110,8 +207,6 @@ const initMap = () => {
     L.control.zoom({ position: 'bottomright' }).addTo(map)
 
     renderizarTrazasEstaticas()
-
-   
     cargarPuntosGuardados()
 
     map.on('click', (e) => {
@@ -164,16 +259,37 @@ const initMap = () => {
 }
 
 const buscarKilometro = () => {
-    if (!searchKm.value) return
-    marcadoresKm.forEach(m => map.removeLayer(m))
-    const mockLat = -33.3017 + (searchKm.value * 0.0005)
-    const mockLng = -66.3378 + (searchKm.value * 0.0005)
-    const dotKm = L.circleMarker([mockLat, mockLng], {
-        radius: 7, fillColor: "#ef4444", color: "#ffffff", weight: 2, opacity: 1, fillOpacity: 0.9
-    }).addTo(map)
-    dotKm.bindPopup(`<strong class="font-[Barlow_Condensed]">Ruta ${searchRuta.value} - Km ${searchKm.value}</strong><br>Punto aproximado calculado.`).openPopup()
-    map.flyTo([mockLat, mockLng], 13, { duration: 1.5 })
-    marcadoresKm.push(dotKm)
+    if (!searchRuta.value || searchKm.value === '') {
+        toast.warning('Debe ingresar un kilómetro válido.')
+        return
+    }
+
+    const puntos = referenciasViales[searchRuta.value]
+    const km = parseFloat(searchKm.value)
+
+    const exacto = puntos.find(p => p.km === km)
+    if (exacto) {
+        resultadoBusqueda.value = { tipo: 'exacto', punto: exacto }
+        toast.info('Punto kilométrico exacto encontrado.')
+        return
+    }
+
+    // Algoritmo para encontrar las dos referencias más cercanas
+    const puntosOrdenados = [...puntos].sort((a, b) => Math.abs(a.km - km) - Math.abs(b.km - km))
+    const cercano1 = puntosOrdenados[0]
+    const cercano2 = puntosOrdenados[1]
+    const limites = [cercano1, cercano2].sort((a, b) => a.km - b.km)
+
+    resultadoBusqueda.value = { 
+        tipo: 'aproximado', 
+        anterior: limites[0], 
+        posterior: limites[1]
+    }
+}
+
+const limpiarBusqueda = () => {
+    searchKm.value = ''
+    resultadoBusqueda.value = null
 }
 
 const confirmarPunto = async () => {
@@ -195,7 +311,6 @@ const confirmarPunto = async () => {
         })
         marcadorTemporal.setIcon(iconoFijo)
         const tipoFormateado = puntoFormulario.tipo.replace('_', ' ').toUpperCase()
-        
         
         const fechaActual = new Date().toLocaleDateString('es-AR')
         
@@ -227,25 +342,52 @@ onBeforeUnmount(() => { if (map) { map.remove() } })
             </div>
 
             <div class="p-5 flex-1 overflow-y-auto">
-                <div class="mb-8">
+                <div class="mb-6">
                     <h4 class="font-['Barlow_Condensed'] text-[13px] font-bold tracking-widest uppercase text-amber-600 dark:text-amber-500 mb-4 border-b border-amber-500/20 pb-2">Localizador por Progresiva</h4>
                     <form @submit.prevent="buscarKilometro" class="space-y-4">
                         <div>
                             <label class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-1.5">Corredor Vial</label>
                             <select v-model="searchRuta" class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500/50">
-                                <option value="20">Ruta Nacional 20</option>
-                                <option value="7">Ruta Nacional 7</option>
-                                <option value="9">Ruta Provincial 9</option>
+                                <option value="20">Ruta Nacional 20 / Autopista 20</option>
+                                <option value="9">Ruta Prov. 9 (Autopista Puquios)</option>
+                                <option value="7">Ruta Nac. 7 (Autopista Serranías)</option>
                             </select>
                         </div>
                         <div>
                             <label class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-1.5">Kilómetro (Aprox)</label>
-                            <input v-model="searchKm" type="number" step="0.1" placeholder="Ej: 145.5" required class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500/50" />
+                            <input v-model="searchKm" type="number" step="0.1" placeholder="Ej: 781.5" required class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500/50" />
                         </div>
-                        <button type="submit" class="w-full bg-slate-800 dark:bg-white/10 text-white hover:bg-slate-700 dark:hover:bg-white/20 font-['Barlow_Condensed'] text-xs font-bold tracking-wider uppercase px-4 py-2.5 rounded-lg border-none cursor-pointer transition-all">
-                            Localizar en mapa
-                        </button>
+                        <div class="flex gap-2">
+                            <button type="button" @click="limpiarBusqueda" class="w-1/3 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 font-['Barlow_Condensed'] text-xs font-bold tracking-wider uppercase px-2 py-2.5 rounded-lg border border-slate-200 dark:border-white/10 cursor-pointer transition-all">Limpiar</button>
+                            <button type="submit" class="w-2/3 bg-slate-800 dark:bg-white/10 text-white hover:bg-slate-700 dark:hover:bg-white/20 font-['Barlow_Condensed'] text-xs font-bold tracking-wider uppercase px-4 py-2.5 rounded-lg border-none cursor-pointer transition-all">Localizar Punto</button>
+                        </div>
                     </form>
+                </div>
+
+                <div v-if="resultadoBusqueda" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded-xl p-4 shadow-sm transition-colors mb-6">
+                    <h4 class="font-['Barlow_Condensed'] text-[13px] font-bold text-blue-800 dark:text-blue-400 uppercase tracking-widest mb-3 border-b border-blue-200 dark:border-blue-800/50 pb-2">Resultado Espacial</h4>
+                    
+                    <div v-if="resultadoBusqueda.tipo === 'exacto'" class="text-sm">
+                        <div class="text-slate-600 dark:text-slate-300 mb-1 text-[11px] uppercase tracking-widest">Coincidencia en Km {{ resultadoBusqueda.punto.km }}:</div>
+                        <strong class="text-blue-900 dark:text-blue-300 block text-sm font-['DM_Sans']">{{ resultadoBusqueda.punto.desc }}</strong>
+                    </div>
+
+                    <div v-else class="text-sm">
+                        <div class="text-slate-600 dark:text-slate-300 mb-3 leading-relaxed text-xs">
+                            El Km {{ searchKm }} se encuentra en el tramo comprendido entre:
+                        </div>
+                        <ul class="list-none p-0 m-0 space-y-3 relative">
+                            <li class="flex items-start gap-2 relative z-10">
+                                <span class="bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm">Km {{ resultadoBusqueda.anterior.km }}</span>
+                                <span class="font-semibold text-slate-800 dark:text-slate-200 text-xs">{{ resultadoBusqueda.anterior.desc }}</span>
+                            </li>
+                            <li class="pl-4 border-l-2 border-dashed border-blue-300 dark:border-blue-700/50 py-1.5 text-[10px] text-blue-600 dark:text-blue-400 font-bold tracking-widest uppercase ml-3">Punto Reportado</li>
+                            <li class="flex items-start gap-2 relative z-10">
+                                <span class="bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm">Km {{ resultadoBusqueda.posterior.km }}</span>
+                                <span class="font-semibold text-slate-800 dark:text-slate-200 text-xs">{{ resultadoBusqueda.posterior.desc }}</span>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
 
                 <div>
@@ -267,7 +409,6 @@ onBeforeUnmount(() => { if (map) { map.remove() } })
         <div v-if="mostrarModal" class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
             <div class="w-full max-w-sm bg-white dark:bg-[#0d1b2a]  border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden relative">
                 <div class="bg-gradient-to-r from-amber-500 to-amber-600 h-1"></div>
-                
                 <div class="px-5 py-4 border-b border-slate-100 dark:border-white/5 flex items-center justify-between">
                     <h3 class="font-['Barlow_Condensed'] text-[18px] font-bold text-slate-900 dark:text-slate-100 tracking-wide m-0">Clasificar Coordenada</h3>
                 </div>

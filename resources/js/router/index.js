@@ -58,6 +58,21 @@ const routes = [
                 name: 'IncidentsEdit',
                 component: Incidents
             },
+            {
+                path: 'acciones',
+                name: 'ActionsList',
+                component: () => import('../views/ActionsList.vue')
+            },
+            {
+                path: 'acciones/nuevo',
+                name: 'ActionsCreate',
+                component: () => import('../views/Actions.vue')
+            },
+            {
+                path: 'acciones/editar/:id',
+                name: 'ActionsEdit',
+                component: () => import('../views/Actions.vue')
+            },
 
         ]
     }
