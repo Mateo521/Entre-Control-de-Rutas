@@ -265,7 +265,7 @@ onBeforeUnmount(() => { if (map) { map.remove() } })
         </div>
         
         <div v-if="mostrarModal" class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
-            <div class="w-full max-w-sm bg-white dark:bg-[#0d1b2a] rounded-2xl border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden relative">
+            <div class="w-full max-w-sm bg-white dark:bg-[#0d1b2a]  border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden relative">
                 <div class="bg-gradient-to-r from-amber-500 to-amber-600 h-1"></div>
                 
                 <div class="px-5 py-4 border-b border-slate-100 dark:border-white/5 flex items-center justify-between">
