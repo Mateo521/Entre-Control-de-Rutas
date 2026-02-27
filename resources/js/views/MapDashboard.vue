@@ -11,14 +11,15 @@ let tileLayer = null
 
 const searchRuta = ref('20')
 const searchKm = ref('')
-const marcadoresKm = []
-let marcadorTemporal = null 
+let marcadorTemporal = null
+
+// NUEVO: Arreglo para guardar el marcador de búsqueda kilométrico y poder borrarlo
+const marcadoresBusqueda = []
 
 const mostrarModal = ref(false)
 const guardando = ref(false)
 const puntoFormulario = reactive({ lat: null, lng: null, tipo: '', observaciones: '' })
 
-// Resultado de la búsqueda de progresivas
 const resultadoBusqueda = ref(null)
 
 const lightTile = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
@@ -30,119 +31,155 @@ const trazasVialesGeoJSON = {
     "features": [
         {
             "type": "Feature",
-            "properties": { 
-                "nombre": "Corredor Ruta 20 y Ruta 30", 
-                "color": "#3b82f6", 
+            "properties": {
+                "nombre": "Corredor Ruta 20 y Ruta 30",
+                "color": "#3b82f6",
                 "peajes": [
                     { nombre: "Peaje Cruz de Piedra", lat: -33.2541131, lng: -66.2270219 },
                     { nombre: "Peaje Perilago", lat: -33.2542911, lng: -66.2124143 },
                     { nombre: "Peaje Ruta 30", lat: -33.3026376, lng: -66.1093417 }
-                ] 
+                ]
             },
-            // Geometría visual aproximada para pintar la línea en el mapa
             "geometry": { "type": "LineString", "coordinates": [[-66.3026, -33.3026], [-66.2270, -33.2541], [-66.2124, -33.2542]] }
         },
         {
             "type": "Feature",
-            "properties": { 
-                "nombre": "Autopista Los Puquios (Ruta Prov. 9)", 
-                "color": "#10b981", 
+            "properties": {
+                "nombre": "Autopista Los Puquios (Ruta Prov. 9)",
+                "color": "#10b981",
                 "peajes": [
                     { nombre: "Peaje Los Puquios", lat: -33.2714449, lng: -66.1965004 }
-                ] 
+                ]
             },
             "geometry": { "type": "LineString", "coordinates": [[-66.2500, -33.3000], [-66.1965, -33.2714], [-66.1000, -33.2000]] }
         },
         {
             "type": "Feature",
-            "properties": { 
-                "nombre": "Autopista Serranías Puntanas (Ruta Nac. 7)", 
-                "color": "#f59e0b", 
+            "properties": {
+                "nombre": "Autopista Serranías Puntanas (Ruta Nac. 7)",
+                "color": "#f59e0b",
                 "peajes": [
                     { nombre: "Peaje La Cumbre", lat: -33.3590784, lng: -66.0670751 },
                     { nombre: "Peaje Desaguadero (Isla Este)", lat: -33.4117474, lng: -67.1234507 },
                     { nombre: "Peaje Desaguadero (Isla Oeste)", lat: -33.4128459, lng: -67.1147563 }
-                ] 
+                ]
             },
-            "geometry": { "type": "LineString", "coordinates": [[-67.1234, -33.4117], [-66.0670, -33.3590], [-65.5000, -33.5000]] }
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [-65.6302887, -33.5853571],
+                    [-65.6341452, -33.5833255],
+                    [-65.6393134, -33.5805195],
+                    [-65.7934509, -33.4976835],
+                    [-65.8763957, -33.4549006],
+                    [-65.8857256, -33.4502931],
+                    [-65.8945380, -33.4459664],
+                    [-65.9407026, -33.4219924],
+                    [-65.9588587, -33.4123603],
+                    [-65.9825863, -33.3989463],
+                    [-65.9849649, -33.3975869],
+                    [-65.9942073, -33.3923420],
+                    [-66.0120921, -33.3820531],
+                    [-66.0132379, -33.3815848],
+                    [-66.0255856, -33.3743804],
+                    [-66.0390462, -33.3668776], // Punto de curva inyectado
+                    [-66.0670751, -33.3590784],
+                    [-66.0999390, -33.3497519],
+                    [-66.1199303, -33.3441651],
+                    [-66.1266905, -33.3420922],
+                    [-66.2525518, -33.3066128],
+                    [-66.2602336, -33.3044338],
+                    [-66.2663436, -33.3033534],
+                    [-66.2875658, -33.3053900],
+                    [-66.2913012, -33.3058348],
+                    [-66.2981583, -33.3072593], // Punto de curva inyectado
+                    [-66.3014272, -33.3117297], // Punto de curva inyectado
+                    [-66.3017314, -33.3196764],
+                    [-66.3015280, -33.3225595], // Punto de curva inyectado
+                    [-66.3026522, -33.3305993], // Punto de curva inyectado
+                    [-66.3193233, -33.3367288],
+                    [-66.3358926, -33.3420111], // Punto de curva inyectado
+                    [-66.3420783, -33.3440042], // Punto de curva inyectado
+                    [-66.3522412, -33.3472516], // Punto de curva inyectado
+                    [-66.3660286, -33.3508666], // Punto de curva inyectado
+                    [-66.3705350, -33.3487985], // Punto de curva inyectado
+                    [-66.3732413, -33.3451749],
+                    [-66.3744212, -33.3431870], // Punto de curva inyectado
+                    [-66.3799839, -33.3336621], // Punto de curva inyectado
+                    [-66.3821916, -33.3308561], // Punto de curva inyectado
+                    [-66.3848813, -33.3290849],
+                    [-66.3880909, -33.3282726],
+                    [-66.4214244, -33.3345070],
+                    [-66.4423880, -33.3386702],
+                    [-66.6278656, -33.3753655],
+                    [-66.8017819, -33.4095785],
+                    [-66.9266112, -33.4373185],
+                    [-66.9366819, -33.4391916], // Punto de curva inyectado
+                    [-67.0281041, -33.4255681],
+                    [-67.1147563, -33.4128459],
+                    [-67.1234507, -33.4117474],
+                    [-67.1295566, -33.4107981], // Punto de curva inyectado
+                    [-67.1444324, -33.4071170], // Punto de curva inyectado
+                    [-67.1489651, -33.4052565], // Punto de curva inyectado
+                    [-67.1515111, -33.4042217]
+                ]
+            }
         }
     ]
 }
 
-// Tablas de referencias kilométricas reales
 const referenciasViales = {
     '20': [
-        { km: 4, desc: 'Puente Derivador' },
-        { km: 5, desc: 'Rodeo del Alto' },
-        { km: 7, desc: 'Club La Estrega' },
-        { km: 9, desc: 'Ave Fenix' },
-        { km: 12, desc: 'Rotonda Cruz de Piedra' },
-        { km: 13, desc: 'Peaje Cruz de Piedra' },
-        { km: 15, desc: 'Peaje Perilago' },
-        { km: 17, desc: 'La Hoya' },
-        { km: 19, desc: 'Rotonda La Virgen / El Volcan' },
-        { km: 20, desc: 'Puente Los Puquios' },
-        { km: 27, desc: 'Cruce Ruta Prov. 30 / Control policial' },
-        { km: 33, desc: 'Arroyo y retorno Los Risma' },
-        { km: 36.5, desc: 'Puente arroyo La Petra' },
-        { km: 38, desc: 'Retorno La Petra' },
-        { km: 44.7, desc: 'Ingreso presa Saladillo' },
-        { km: 46, desc: 'Puente Rio 5to.' }
+        { km: 4, desc: 'Puente Derivador' }, { km: 5, desc: 'Rodeo del Alto' },
+
+        { km: 7, desc: 'Club La Estrega' }, { km: 9, desc: 'Ave Fenix' }, { km: 12, desc: 'Rotonda Cruz de Piedra' }, { km: 13, desc: 'Peaje Cruz de Piedra' }, { km: 15, desc: 'Peaje Perilago' }, { km: 17, desc: 'La Hoya' }, { km: 19, desc: 'Rotonda La Virgen / El Volcan' }, { km: 20, desc: 'Puente Los Puquios' }, { km: 27, desc: 'Cruce Ruta Prov. 30 / Control policial' }, { km: 33, desc: 'Arroyo y retorno Los Risma' }, { km: 36.5, desc: 'Puente arroyo La Petra' }, { km: 38, desc: 'Retorno La Petra' }, { km: 44.7, desc: 'Ingreso presa Saladillo' }, { km: 46, desc: 'Puente Rio 5to.' }
     ],
     '9': [
-        { km: 8, desc: 'Rotonda Rotary Club San Luis' },
-        { km: 10.5, desc: 'Rotonda Malvinas' },
-        { km: 11.8, desc: 'Ingreso a San Roque' },
-        { km: 13.5, desc: 'Ingreso a Cuchi Corral' },
-        { km: 14.6, desc: 'Ingreso a perilago, Dique Cruz de Piedra' },
-        { km: 15.1, desc: 'Peaje Los Puquios' },
-        { km: 16.5, desc: 'Puente arroyo los p. y escultura del ciclista' },
-        { km: 18.4, desc: 'Puente Los Puquios - ingreso al Volcán' },
-        { km: 20, desc: 'Rotonda El Alpatacal' },
-        { km: 23, desc: 'Retorno arroyo Las Mondinas' },
-        { km: 25.8, desc: 'Rotonda El Zorrito / 4 Esquina' },
-        { km: 30, desc: 'Retorno - ingreso a Polo Club' },
-        { km: 32, desc: 'Arroyo Las Barranquitas / Ingreso El Durazno' },
-        { km: 34, desc: 'Retorno - ingreso a Las Barranquitas' },
-        { km: 36, desc: 'Ingreso a Barrio Altos Del Trapiche' },
-        { km: 37, desc: 'Rotonda El Trapiche - Acceso a La Florida' },
-        { km: 39.7, desc: 'Rotonda acceso a la Carolina - 7 Cajones' },
-        { km: 41, desc: 'Limite El Trapiche - Rio Grande' },
-        { km: 43.4, desc: 'Puente Rio Grande' },
-        { km: 45, desc: 'Ingreso a dique Rio Grande - Nogoli' },
-        { km: 50, desc: 'Ingreso Monumento a Pringles' },
-        { km: 60, desc: 'Paso del Rey - La Arenilla' },
-        { km: 66, desc: 'Valle de Pancanta' },
-        { km: 79, desc: 'La Carolina' }
+        { km: 8, desc: 'Rotonda Rotary Club San Luis' }, { km: 10.5, desc: 'Rotonda Malvinas' }, { km: 11.8, desc: 'Ingreso a San Roque' }, { km: 13.5, desc: 'Ingreso a Cuchi Corral' }, { km: 14.6, desc: 'Ingreso a perilago, Dique Cruz de Piedra' }, { km: 15.1, desc: 'Peaje Los Puquios' }, { km: 16.5, desc: 'Puente arroyo los p. y escultura del ciclista' }, { km: 18.4, desc: 'Puente Los Puquios - ingreso al Volcán' }, { km: 20, desc: 'Rotonda El Alpatacal' }, { km: 23, desc: 'Retorno arroyo Las Mondinas' }, { km: 25.8, desc: 'Rotonda El Zorrito / 4 Esquina' }, { km: 30, desc: 'Retorno - ingreso a Polo Club' }, { km: 32, desc: 'Arroyo Las Barranquitas / Ingreso El Durazno' }, { km: 34, desc: 'Retorno - ingreso a Las Barranquitas' }, { km: 36, desc: 'Ingreso a Barrio Altos Del Trapiche' }, { km: 37, desc: 'Rotonda El Trapiche - Acceso a La Florida' }, { km: 39.7, desc: 'Rotonda acceso a la Carolina - 7 Cajones' }, { km: 41, desc: 'Limite El Trapiche - Rio Grande' }, { km: 43.4, desc: 'Puente Rio Grande' }, { km: 45, desc: 'Ingreso a dique Rio Grande - Nogoli' }, { km: 50, desc: 'Ingreso Monumento a Pringles' }, { km: 60, desc: 'Paso del Rey - La Arenilla' }, { km: 66, desc: 'Valle de Pancanta' }, { km: 79, desc: 'La Carolina' }
     ],
+
     '7': [
-        { km: 715, desc: 'Liborio Luna - Inicio región centro' },
-        { km: 731, desc: 'Puente de Fraga' },
-        { km: 740, desc: 'Retorno Granville' },
-        { km: 742, desc: 'Puente Los Italianos - Ser Beef SA' },
-        { km: 751.65, desc: 'Acceso a Dique Paso de Las Carretas' },
-        { km: 755.25, desc: 'Eleodoro Lobos' },
-        { km: 756.6, desc: 'La Petra' },
-        { km: 761, desc: 'Peaje La Cumbre' },
-        { km: 765.75, desc: 'Destacamento Policial La Cumbre' },
-        { km: 779.7, desc: 'Ingreso a Donovan' },
-        { km: 781, desc: 'Puente los Donovan' },
-        { km: 782, desc: 'Puente Hospital Ramón Carrillo' },
-        { km: 783.5, desc: 'Terrazas del Portezuelo' },
-        { km: 785, desc: 'Puente Ruta Prov. Nº 3 (zanjitas)' },
-        { km: 788.9, desc: 'Puente Ruta Nac. Nº 146 (Beazley)' },
-        { km: 792.5, desc: 'Puente Autódromo' },
-        { km: 793, desc: 'Autódromo' },
-        { km: 796, desc: 'Escuela Agraria' },
-        { km: 798, desc: 'Centro de Disposición Final - Basural' },
-        { km: 815.7, desc: 'Puente Balde - Salinas del Bebed.' },
-        { km: 832, desc: 'Ingreso a Chosme' },
-        { km: 844.2, desc: 'Ingreso Alto Pencoso' },
-        { km: 856, desc: 'Ingreso a Jarilla' },
-        { km: 862, desc: 'Peaje Desaguadero Isla Este' },
-        { km: 863, desc: 'Peaje Desaguadero Isla Oeste' },
-        { km: 866, desc: 'Limite Provincia de Mendoza - Arco Desaguadero' }
+        { km: 713, desc: 'Marcador Km 713', lat: -33.5853571, lng: -65.6302887 },
+        { km: 714, desc: 'Marcador Km 714', lat: -33.5805195, lng: -65.6393134 },
+        { km: 715, desc: 'Liborio Luna - Inicio región centro', lat: -33.5833255, lng: -65.6341452 },
+        { km: 731, desc: 'Puente de Fraga', lat: -33.4976835, lng: -65.7934509 },
+        { km: 740, desc: 'Retorno Granville', lat: -33.4549006, lng: -65.8763957 },
+        { km: 741, desc: 'Marcador Km 741', lat: -33.4502931, lng: -65.8857256 },
+        { km: 742, desc: 'Puente Los Italianos - Ser Beef SA', lat: -33.4459664, lng: -65.894538 },
+        { km: 747, desc: 'Marcador Km 747', lat: -33.4219924, lng: -65.9407026 },
+        { km: 749, desc: 'Marcador Km 749', lat: -33.4123603, lng: -65.9588587 },
+        { km: 751.65, desc: 'Acceso a Dique Paso de Las Carretas', lat: -33.3989463, lng: -65.9825863 },
+        { km: 752, desc: 'Marcador Km 752', lat: -33.3975869, lng: -65.9849649 },
+        { km: 753, desc: 'Marcador Km 753', lat: -33.392342, lng: -65.9942073 },
+        { km: 755, desc: 'Marcador Km 755', lat: -33.3820531, lng: -66.0120921 },
+        { km: 755.25, desc: 'Eleodoro Lobos', lat: -33.3815848, lng: -66.0132379 },
+        { km: 756.6, desc: 'La Petra', lat: -33.3743804, lng: -66.0255856 },
+        { km: 761, desc: 'Peaje La Cumbre', lat: -33.3590784, lng: -66.0670751 },
+        { km: 764, desc: 'Marcador Km 764', lat: -33.3497519, lng: -66.099939 },
+        { km: 765.75, desc: 'Destacamento Policial La Cumbre', lat: -33.3420922, lng: -66.1266905 },
+        { km: 766, desc: 'Marcador Km 766', lat: -33.3441651, lng: -66.1199303 },
+        { km: 779, desc: 'Marcador Km 779', lat: -33.3066128, lng: -66.2525518 },
+        { km: 780.45, desc: 'Ingreso a Donovan', lat: -33.3044338, lng: -66.2602336 },
+        { km: 781, desc: 'Puente los Donovan', lat: -33.3033534, lng: -66.2663436 },
+        { km: 782, desc: 'Puente Hospital Ramón Carrillo', lat: -33.30539, lng: -66.2875658 },
+        { km: 783, desc: 'Terrazas del Portezuelo', lat: -33.3058348, lng: -66.2913012 },
+        { km: 784, desc: 'Marcador Km 784', lat: -33.3196764, lng: -66.3017314 },
+        { km: 786.91, desc: 'Puente Ruta Prov. Nº 3 (Zanjitas)', lat: -33.3367288, lng: -66.3193233 },
+        { km: 792.51, desc: 'Puente Ruta Nac. Nº 146 (Beazley)', lat: -33.3451749, lng: -66.3732413 },
+        { km: 794.65, desc: 'Puente Autódromo', lat: -33.3290849, lng: -66.3848813 },
+        { km: 794.95, desc: 'Autódromo', lat: -33.3282726, lng: -66.3880909 },
+        { km: 796, desc: 'Escuela Agraria', lat: -33.334507, lng: -66.4214244 },
+        { km: 798, desc: 'Centro de Disposición Final - Basural', lat: -33.3386702, lng: -66.4423880 },
+        { km: 815.7, desc: 'Puente Balde - Salinas del Bebed.', lat: -33.3753655, lng: -66.6278656 },
+        { km: 832, desc: 'Ingreso a Chosme', lat: -33.4095785, lng: -66.8017819 },
+        { km: 844.2, desc: 'Ingreso Alto Pencoso', lat: -33.4373185, lng: -66.9266112 },
+        { km: 856, desc: 'Ingreso a Jarilla', lat: -33.4255681, lng: -67.0281041 },
+        { km: 862, desc: 'Peaje Desaguadero Isla Este', lat: -33.4117474, lng: -67.1234507 },
+        { km: 863, desc: 'Peaje Desaguadero Isla Oeste', lat: -33.4128459, lng: -67.1147563 },
+        { km: 866, desc: 'Limite Provincia de Mendoza - Arco', lat: -33.4042217, lng: -67.1515111 }
     ]
+
+
 }
 
 const renderizarTrazasEstaticas = () => {
@@ -183,8 +220,8 @@ const cargarPuntosGuardados = async () => {
                 })
 
                 L.marker([lat, lng], { icon: iconoFijo })
-                 .addTo(map)
-                 .bindPopup(`
+                    .addTo(map)
+                    .bindPopup(`
                     <strong class="font-[Barlow_Condensed] text-emerald-600 dark:text-emerald-400 uppercase tracking-widest text-xs">${tipoFormateado}</strong>
                     <div class="text-[10px] text-slate-400 mb-1">${new Date(suceso.created_at).toLocaleDateString('es-AR')}</div>
                     <p class="text-xs mt-1 text-slate-600 dark:text-slate-300">${obs}</p>
@@ -199,7 +236,7 @@ const cargarPuntosGuardados = async () => {
 const initMap = () => {
     map = L.map(mapContainer.value, { zoomControl: false }).setView([-33.3017, -66.3378], 8)
     const isDark = document.documentElement.classList.contains('dark')
-    
+
     tileLayer = L.tileLayer(isDark ? darkTile : lightTile, {
         attribution: '&copy; OpenStreetMap contributors &copy; CARTO', subdomains: 'abcd', maxZoom: 19
     }).addTo(map)
@@ -212,7 +249,7 @@ const initMap = () => {
     map.on('click', (e) => {
         const { lat, lng } = e.latlng
         if (marcadorTemporal) { map.removeLayer(marcadorTemporal) }
-        
+
         const customIcon = L.divIcon({
             className: 'bg-transparent border-none',
             html: `<div class="w-4 h-4 bg-red-500 rounded-full border-2 border-white shadow-[0_0_10px_rgba(239,68,68,0.8)] animate-pulse"></div>`,
@@ -258,6 +295,59 @@ const initMap = () => {
     observer.observe(document.documentElement, { attributes: true })
 }
 
+// NUEVO: Algoritmo matemático temporal para simular coordenadas de los km
+const calcularCoordenadaAproximada = (rutaId, kmBuscado) => {
+    // Obtenemos los puntos de la ruta seleccionada que SÍ tienen lat y lng registrados
+    const puntosConCoordenadas = referenciasViales[rutaId].filter(p => p.lat && p.lng);
+
+    // Si la ruta aún no tiene coordenadas reales, aplicamos la matemática de respaldo anterior
+    if (puntosConCoordenadas.length === 0) {
+        let lat = -33.30, lng = -66.33;
+        if (rutaId === '9') { lat = -33.27 + (kmBuscado * 0.006); lng = -66.20 + (kmBuscado * 0.004); }
+        else if (rutaId === '20') { lat = -33.25 + (kmBuscado * 0.008); lng = -66.22 - (kmBuscado * 0.005); }
+        return [lat, lng];
+    }
+
+    // Ordenamos los puntos de menor a mayor kilometraje para asegurar el flujo de la ruta
+    puntosConCoordenadas.sort((a, b) => a.km - b.km);
+
+    // 1. Si el Km buscado es exacto a un punto registrado
+    const exacto = puntosConCoordenadas.find(p => p.km === kmBuscado);
+    if (exacto) return [exacto.lat, exacto.lng];
+
+    // 2. Si el Km buscado es menor al primer punto registrado (Extrapolación inicial)
+    if (kmBuscado < puntosConCoordenadas[0].km) {
+        return [puntosConCoordenadas[0].lat, puntosConCoordenadas[0].lng]; // Lo anclamos al inicio
+    }
+
+    // 3. Si el Km buscado es mayor al último punto registrado (Extrapolación final)
+    const ultimoPunto = puntosConCoordenadas[puntosConCoordenadas.length - 1];
+    if (kmBuscado > ultimoPunto.km) {
+        return [ultimoPunto.lat, ultimoPunto.lng]; // Lo anclamos al final
+    }
+
+    // 4. Interpolación Lineal: Encontrar entre qué dos puntos está el Km buscado
+    let puntoA = puntosConCoordenadas[0];
+    let puntoB = puntosConCoordenadas[1];
+
+    for (let i = 0; i < puntosConCoordenadas.length - 1; i++) {
+        if (kmBuscado > puntosConCoordenadas[i].km && kmBuscado < puntosConCoordenadas[i + 1].km) {
+            puntoA = puntosConCoordenadas[i];
+            puntoB = puntosConCoordenadas[i + 1];
+            break;
+        }
+    }
+
+    // Fórmula matemática para calcular el porcentaje de distancia entre Punto A y Punto B
+    const porcentajeRecorrido = (kmBuscado - puntoA.km) / (puntoB.km - puntoA.km);
+
+    // Aplicar ese porcentaje a las latitudes y longitudes
+    const latCalculada = puntoA.lat + ((puntoB.lat - puntoA.lat) * porcentajeRecorrido);
+    const lngCalculada = puntoA.lng + ((puntoB.lng - puntoA.lng) * porcentajeRecorrido);
+
+    return [latCalculada, lngCalculada];
+}
+
 const buscarKilometro = () => {
     if (!searchRuta.value || searchKm.value === '') {
         toast.warning('Debe ingresar un kilómetro válido.')
@@ -267,29 +357,57 @@ const buscarKilometro = () => {
     const puntos = referenciasViales[searchRuta.value]
     const km = parseFloat(searchKm.value)
 
+    // 1. Calcular el texto en el panel lateral (Exacto o Aproximado)
     const exacto = puntos.find(p => p.km === km)
     if (exacto) {
         resultadoBusqueda.value = { tipo: 'exacto', punto: exacto }
         toast.info('Punto kilométrico exacto encontrado.')
-        return
+    } else {
+        const puntosOrdenados = [...puntos].sort((a, b) => Math.abs(a.km - km) - Math.abs(b.km - km))
+        const cercano1 = puntosOrdenados[0]
+        const cercano2 = puntosOrdenados[1]
+        const limites = [cercano1, cercano2].sort((a, b) => a.km - b.km)
+
+        resultadoBusqueda.value = {
+            tipo: 'aproximado',
+            anterior: limites[0],
+            posterior: limites[1]
+        }
     }
 
-    // Algoritmo para encontrar las dos referencias más cercanas
-    const puntosOrdenados = [...puntos].sort((a, b) => Math.abs(a.km - km) - Math.abs(b.km - km))
-    const cercano1 = puntosOrdenados[0]
-    const cercano2 = puntosOrdenados[1]
-    const limites = [cercano1, cercano2].sort((a, b) => a.km - b.km)
+    // 2. Limpiar marcador anterior del mapa
+    marcadoresBusqueda.forEach(m => map.removeLayer(m))
+    marcadoresBusqueda.length = 0
 
-    resultadoBusqueda.value = { 
-        tipo: 'aproximado', 
-        anterior: limites[0], 
-        posterior: limites[1]
-    }
+    // 3. Simular coordenada y dibujar en el mapa
+    const [mockLat, mockLng] = calcularCoordenadaAproximada(searchRuta.value, km)
+
+    const dotKm = L.circleMarker([mockLat, mockLng], {
+        radius: 8, fillColor: "#ef4444", color: "#ffffff", weight: 3, opacity: 1, fillOpacity: 0.9
+    }).addTo(map)
+
+    dotKm.bindPopup(`
+        <div class="font-[Barlow_Condensed] text-sm tracking-wide font-bold border-b border-slate-200 dark:border-white/10 pb-1 mb-1 text-red-600 dark:text-red-400">
+            Marcador Kilométrico (Aprox)
+        </div>
+        <div class="text-[11px] text-slate-600 dark:text-slate-400 uppercase tracking-widest font-bold mb-1">
+            Ruta ${searchRuta.value === '7' ? 'Nac. 7' : (searchRuta.value === '9' ? 'Prov. 9' : 'Prov. 20')} - Km ${km}
+        </div>
+        <div class="text-[10px] text-slate-500 italic">Coordenada temporal pendiente de relevamiento.</div>
+    `).openPopup()
+
+    // 4. Volar a la posición
+    map.flyTo([mockLat, mockLng], 12, { duration: 1.5 })
+
+    marcadoresBusqueda.push(dotKm)
 }
 
 const limpiarBusqueda = () => {
     searchKm.value = ''
     resultadoBusqueda.value = null
+    marcadoresBusqueda.forEach(m => map.removeLayer(m))
+    marcadoresBusqueda.length = 0
+    map.setView([-33.3017, -66.3378], 8) // Volver al centro de la provincia
 }
 
 const confirmarPunto = async () => {
@@ -297,13 +415,13 @@ const confirmarPunto = async () => {
     guardando.value = true;
     try {
         const payload = {
-            toll_id: 1, 
+            toll_id: 1,
             incident_type: puntoFormulario.tipo,
             dynamic_data: { latitud: puntoFormulario.lat, longitud: puntoFormulario.lng, observaciones_mapa: puntoFormulario.observaciones }
         }
         await axios.post('/api/incidents', payload)
         toast.success('Punto georreferenciado guardado en el sistema.')
-        
+
         const iconoFijo = L.divIcon({
             className: 'bg-transparent border-none',
             html: `<div class="w-5 h-5 bg-emerald-500 rounded-full border-2 border-white shadow-md"></div>`,
@@ -311,9 +429,9 @@ const confirmarPunto = async () => {
         })
         marcadorTemporal.setIcon(iconoFijo)
         const tipoFormateado = puntoFormulario.tipo.replace('_', ' ').toUpperCase()
-        
+
         const fechaActual = new Date().toLocaleDateString('es-AR')
-        
+
         marcadorTemporal.bindPopup(`
             <strong class="font-[Barlow_Condensed] text-emerald-600 dark:text-emerald-400 uppercase tracking-widest text-xs">${tipoFormateado}</strong>
             <div class="text-[10px] text-slate-400 mb-1">${fechaActual}</div>
@@ -334,42 +452,61 @@ onBeforeUnmount(() => { if (map) { map.remove() } })
 
 <template>
     <div class="relative w-full h-[calc(100vh-56px)] flex">
-        
-        <div class="w-80 bg-white dark:bg-[#0d1b2a] border-r border-slate-200 dark:border-white/10 z-[400] flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.05)] transition-colors">
+
+        <div
+            class="w-80 bg-white dark:bg-[#0d1b2a] border-r border-slate-200 dark:border-white/10 z-[400] flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.05)] transition-colors">
             <div class="p-5 border-b border-slate-100 dark:border-white/5">
-                <h3 class="font-['Barlow_Condensed'] text-[22px] font-extrabold text-slate-900 dark:text-slate-100 m-0 leading-none">Herramientas SIG</h3>
+                <h3
+                    class="font-['Barlow_Condensed'] text-[22px] font-extrabold text-slate-900 dark:text-slate-100 m-0 leading-none">
+                    Herramientas SIG</h3>
                 <p class="text-[12px] text-slate-500 dark:text-slate-400 mt-1">Sistema de Información Geográfica</p>
             </div>
 
             <div class="p-5 flex-1 overflow-y-auto">
                 <div class="mb-6">
-                    <h4 class="font-['Barlow_Condensed'] text-[13px] font-bold tracking-widest uppercase text-amber-600 dark:text-amber-500 mb-4 border-b border-amber-500/20 pb-2">Localizador por Progresiva</h4>
+                    <h4
+                        class="font-['Barlow_Condensed'] text-[13px] font-bold tracking-widest uppercase text-amber-600 dark:text-amber-500 mb-4 border-b border-amber-500/20 pb-2">
+                        Localizador por Progresiva</h4>
                     <form @submit.prevent="buscarKilometro" class="space-y-4">
                         <div>
-                            <label class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-1.5">Corredor Vial</label>
-                            <select v-model="searchRuta" class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500/50">
+                            <label
+                                class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-1.5">Corredor
+                                Vial</label>
+                            <select v-model="searchRuta"
+                                class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500/50">
                                 <option value="20">Ruta Nacional 20 / Autopista 20</option>
                                 <option value="9">Ruta Prov. 9 (Autopista Puquios)</option>
                                 <option value="7">Ruta Nac. 7 (Autopista Serranías)</option>
                             </select>
                         </div>
                         <div>
-                            <label class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-1.5">Kilómetro (Aprox)</label>
-                            <input v-model="searchKm" type="number" step="0.1" placeholder="Ej: 781.5" required class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500/50" />
+                            <label
+                                class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-1.5">Kilómetro
+                                (Aprox)</label>
+                            <input v-model="searchKm" type="number" step="0.1" placeholder="Ej: 781.5" required
+                                class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500/50" />
                         </div>
                         <div class="flex gap-2">
-                            <button type="button" @click="limpiarBusqueda" class="w-1/3 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 font-['Barlow_Condensed'] text-xs font-bold tracking-wider uppercase px-2 py-2.5 rounded-lg border border-slate-200 dark:border-white/10 cursor-pointer transition-all">Limpiar</button>
-                            <button type="submit" class="w-2/3 bg-slate-800 dark:bg-white/10 text-white hover:bg-slate-700 dark:hover:bg-white/20 font-['Barlow_Condensed'] text-xs font-bold tracking-wider uppercase px-4 py-2.5 rounded-lg border-none cursor-pointer transition-all">Localizar Punto</button>
+                            <button type="button" @click="limpiarBusqueda"
+                                class="w-1/3 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 font-['Barlow_Condensed'] text-xs font-bold tracking-wider uppercase px-2 py-2.5 rounded-lg border border-slate-200 dark:border-white/10 cursor-pointer transition-all">Limpiar</button>
+                            <button type="submit"
+                                class="w-2/3 bg-slate-800 dark:bg-white/10 text-white hover:bg-slate-700 dark:hover:bg-white/20 font-['Barlow_Condensed'] text-xs font-bold tracking-wider uppercase px-4 py-2.5 rounded-lg border-none cursor-pointer transition-all">Localizar
+                                Punto</button>
                         </div>
                     </form>
                 </div>
 
-                <div v-if="resultadoBusqueda" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded-xl p-4 shadow-sm transition-colors mb-6">
-                    <h4 class="font-['Barlow_Condensed'] text-[13px] font-bold text-blue-800 dark:text-blue-400 uppercase tracking-widest mb-3 border-b border-blue-200 dark:border-blue-800/50 pb-2">Resultado Espacial</h4>
-                    
+                <div v-if="resultadoBusqueda"
+                    class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded-xl p-4 shadow-sm transition-colors mb-6">
+                    <h4
+                        class="font-['Barlow_Condensed'] text-[13px] font-bold text-blue-800 dark:text-blue-400 uppercase tracking-widest mb-3 border-b border-blue-200 dark:border-blue-800/50 pb-2">
+                        Resultado Espacial</h4>
+
                     <div v-if="resultadoBusqueda.tipo === 'exacto'" class="text-sm">
-                        <div class="text-slate-600 dark:text-slate-300 mb-1 text-[11px] uppercase tracking-widest">Coincidencia en Km {{ resultadoBusqueda.punto.km }}:</div>
-                        <strong class="text-blue-900 dark:text-blue-300 block text-sm font-['DM_Sans']">{{ resultadoBusqueda.punto.desc }}</strong>
+                        <div class="text-slate-600 dark:text-slate-300 mb-1 text-[11px] uppercase tracking-widest">
+                            Coincidencia en Km {{ resultadoBusqueda.punto.km }}:</div>
+                        <strong class="text-blue-900 dark:text-blue-300 block text-sm font-['DM_Sans']">{{
+                            resultadoBusqueda.punto.desc }}</strong>
                     </div>
 
                     <div v-else class="text-sm">
@@ -378,25 +515,39 @@ onBeforeUnmount(() => { if (map) { map.remove() } })
                         </div>
                         <ul class="list-none p-0 m-0 space-y-3 relative">
                             <li class="flex items-start gap-2 relative z-10">
-                                <span class="bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm">Km {{ resultadoBusqueda.anterior.km }}</span>
-                                <span class="font-semibold text-slate-800 dark:text-slate-200 text-xs">{{ resultadoBusqueda.anterior.desc }}</span>
+                                <span
+                                    class="bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm">Km
+                                    {{ resultadoBusqueda.anterior.km }}</span>
+                                <span class="font-semibold text-slate-800 dark:text-slate-200 text-xs">{{
+                                    resultadoBusqueda.anterior.desc }}</span>
                             </li>
-                            <li class="pl-4 border-l-2 border-dashed border-blue-300 dark:border-blue-700/50 py-1.5 text-[10px] text-blue-600 dark:text-blue-400 font-bold tracking-widest uppercase ml-3">Punto Reportado</li>
+                            <li
+                                class="pl-4 border-l-2 border-dashed border-blue-300 dark:border-blue-700/50 py-1.5 text-[10px] text-blue-600 dark:text-blue-400 font-bold tracking-widest uppercase ml-3">
+                                Punto Reportado</li>
                             <li class="flex items-start gap-2 relative z-10">
-                                <span class="bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm">Km {{ resultadoBusqueda.posterior.km }}</span>
-                                <span class="font-semibold text-slate-800 dark:text-slate-200 text-xs">{{ resultadoBusqueda.posterior.desc }}</span>
+                                <span
+                                    class="bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm">Km
+                                    {{ resultadoBusqueda.posterior.km }}</span>
+                                <span class="font-semibold text-slate-800 dark:text-slate-200 text-xs">{{
+                                    resultadoBusqueda.posterior.desc }}</span>
                             </li>
                         </ul>
                     </div>
                 </div>
 
                 <div>
-                    <h4 class="font-['Barlow_Condensed'] text-[13px] font-bold tracking-widest uppercase text-amber-600 dark:text-amber-500 mb-4 border-b border-amber-500/20 pb-2">Control Georreferenciado</h4>
-                    <div class="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-500/20 rounded-lg p-3 text-xs text-amber-800 dark:text-amber-300 leading-relaxed mb-3">
-                        <strong>Trazas Activas:</strong> El mapa despliega la jurisdicción operativa de las estaciones base.
+                    <h4
+                        class="font-['Barlow_Condensed'] text-[13px] font-bold tracking-widest uppercase text-amber-600 dark:text-amber-500 mb-4 border-b border-amber-500/20 pb-2">
+                        Control Georreferenciado</h4>
+                    <div
+                        class="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-500/20 rounded-lg p-3 text-xs text-amber-800 dark:text-amber-300 leading-relaxed mb-3">
+                        <strong>Trazas Activas:</strong> El mapa despliega la jurisdicción operativa de las estaciones
+                        base.
                     </div>
-                    <div class="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg p-3 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                        Haz clic en el mapa para inicializar un suceso. Selecciona "Quitar" para borrar la coordenada temporal.
+                    <div
+                        class="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg p-3 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Haz clic en el mapa para inicializar un suceso. Selecciona "Quitar" para borrar la coordenada
+                        temporal.
                     </div>
                 </div>
             </div>
@@ -405,18 +556,25 @@ onBeforeUnmount(() => { if (map) { map.remove() } })
         <div class="flex-1 relative">
             <div ref="mapContainer" class="w-full h-full z-[100]"></div>
         </div>
-        
-        <div v-if="mostrarModal" class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
-            <div class="w-full max-w-sm bg-white dark:bg-[#0d1b2a]  border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden relative">
+
+        <div v-if="mostrarModal"
+            class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
+            <div
+                class="w-full max-w-sm bg-white dark:bg-[#0d1b2a]  border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden relative">
                 <div class="bg-gradient-to-r from-amber-500 to-amber-600 h-1"></div>
                 <div class="px-5 py-4 border-b border-slate-100 dark:border-white/5 flex items-center justify-between">
-                    <h3 class="font-['Barlow_Condensed'] text-[18px] font-bold text-slate-900 dark:text-slate-100 tracking-wide m-0">Clasificar Coordenada</h3>
+                    <h3
+                        class="font-['Barlow_Condensed'] text-[18px] font-bold text-slate-900 dark:text-slate-100 tracking-wide m-0">
+                        Clasificar Coordenada</h3>
                 </div>
 
                 <form @submit.prevent="confirmarPunto" class="p-5">
                     <div class="mb-4">
-                        <label class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-1.5">Tipo de Evento</label>
-                        <select v-model="puntoFormulario.tipo" required class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2.5 text-slate-900 dark:text-white text-sm outline-none transition-colors focus:border-amber-500/50">
+                        <label
+                            class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-1.5">Tipo
+                            de Evento</label>
+                        <select v-model="puntoFormulario.tipo" required
+                            class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2.5 text-slate-900 dark:text-white text-sm outline-none transition-colors focus:border-amber-500/50">
                             <option value="" disabled>— Seleccionar clasificación —</option>
                             <option value="accidente_vial">Accidente Vial</option>
                             <option value="animal_ruta">Animal en Ruta</option>
@@ -426,13 +584,19 @@ onBeforeUnmount(() => { if (map) { map.remove() } })
                     </div>
 
                     <div class="mb-5">
-                        <label class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-1.5">Observaciones adicionales</label>
-                        <textarea v-model="puntoFormulario.observaciones" rows="3" placeholder="Detalles de la ubicación o gravedad..." class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2.5 text-slate-900 dark:text-white text-sm outline-none transition-colors focus:border-amber-500/50 resize-none"></textarea>
+                        <label
+                            class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-1.5">Observaciones
+                            adicionales</label>
+                        <textarea v-model="puntoFormulario.observaciones" rows="3"
+                            placeholder="Detalles de la ubicación o gravedad..."
+                            class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2.5 text-slate-900 dark:text-white text-sm outline-none transition-colors focus:border-amber-500/50 resize-none"></textarea>
                     </div>
 
                     <div class="flex gap-3 justify-end pt-2">
-                        <button type="button" @click="cerrarModal" class="px-4 py-2 rounded-lg text-xs font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border-none bg-transparent cursor-pointer font-['Barlow_Condensed'] uppercase tracking-wider">Cancelar</button>
-                        <button type="submit" :disabled="guardando" class="bg-amber-500 text-[#0d1b2a] font-['Barlow_Condensed'] text-xs font-bold tracking-wider uppercase px-5 py-2 rounded-lg border-none cursor-pointer inline-flex items-center transition-all hover:bg-amber-400 disabled:opacity-50">
+                        <button type="button" @click="cerrarModal"
+                            class="px-4 py-2 rounded-lg text-xs font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border-none bg-transparent cursor-pointer font-['Barlow_Condensed'] uppercase tracking-wider">Cancelar</button>
+                        <button type="submit" :disabled="guardando"
+                            class="bg-amber-500 text-[#0d1b2a] font-['Barlow_Condensed'] text-xs font-bold tracking-wider uppercase px-5 py-2 rounded-lg border-none cursor-pointer inline-flex items-center transition-all hover:bg-amber-400 disabled:opacity-50">
                             {{ guardando ? 'Registrando...' : 'Confirmar Punto' }}
                         </button>
                     </div>
