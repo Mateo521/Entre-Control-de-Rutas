@@ -9,54 +9,107 @@ use Illuminate\Support\Facades\Auth;
 
 class IncidentController extends Controller
 {
-
-
     public function index(Request $request)
     {
-        // 1. Iniciamos la consulta base incluyendo la relación con el peaje
+        // Traemos los sucesos. Si el frontend pide los archivados, usamos onlyTrashed()
         $query = Incident::with('toll')->latest();
+        
+        if ($request->boolean('archived')) {
+            $query->onlyTrashed();
+        }
 
-        // 2. Filtro Cruzado: Por ID de Peaje
-        $query->when($request->filled('toll_id'), function ($q) use ($request) {
-            return $q->where('toll_id', $request->toll_id);
-        });
-
-        // 3. Filtro Cruzado: Por Tipo de Suceso (Ej. 'pesaje_excedido')
-        $query->when($request->filled('incident_type'), function ($q) use ($request) {
-            return $q->where('incident_type', $request->incident_type);
-        });
-
-        // 4. Filtro Cruzado: Fecha Desde
-        $query->when($request->filled('date_from'), function ($q) use ($request) {
-            return $q->whereDate('created_at', '>=', $request->date_from);
-        });
-
-        // 5. Filtro Cruzado: Fecha Hasta
-        $query->when($request->filled('date_to'), function ($q) use ($request) {
-            return $q->whereDate('created_at', '<=', $request->date_to);
-        });
-
-        // 6. Ejecutamos la consulta filtrada y retornamos el JSON
         return response()->json($query->get());
     }
+
+    // Nuevo método para obtener un solo registro (para la vista de Edición)
+    public function show($id)
+    {
+        // withTrashed() permite ver el registro aunque esté archivado
+        $incident = Incident::withTrashed()->with('toll')->findOrFail($id);
+        return response()->json($incident);
+    }
+
     public function store(Request $request)
     {
-        // 1. Validamos los datos entrantes
-        $validatedData = $request->validate([
+        $request->validate([
             'toll_id' => 'required|exists:tolls,id',
             'incident_type' => 'required|string',
-            'dynamic_data' => 'nullable|array'
+            'dynamic_data' => 'nullable|string',
+            'media.*' => 'nullable|file|mimes:jpg,jpeg,png,mp4,pdf|max:20480',
         ]);
 
-        // 2. Le inyectamos el ID del usuario que está logueado actualmente
-        $validatedData['user_id'] = Auth::id();
+        $dynamicData = $request->filled('dynamic_data') ? json_decode($request->dynamic_data, true) : [];
+        $mediaPaths = [];
 
-        // 3. Guardamos en PostgreSQL
-        $incident = Incident::create($validatedData);
+        if ($request->hasFile('media')) {
+            foreach ($request->file('media') as $campoNombre => $archivo) {
+                $path = $archivo->store('sucesos', 'public');
+                $mediaPaths[$campoNombre] = '/storage/' . $path;
+            }
+        }
 
-        return response()->json([
-            'message' => 'Suceso registrado exitosamente',
-            'data' => $incident
-        ], 201);
+        $incident = Incident::create([
+            'toll_id' => $request->toll_id,
+            'incident_type' => $request->incident_type,
+            'user_id' => Auth::id(),
+            'dynamic_data' => $dynamicData,
+            'media_paths' => $mediaPaths
+        ]);
+
+        return response()->json(['message' => 'Suceso registrado exitosamente', 'data' => $incident], 201);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $incident = Incident::findOrFail($id);
+
+        $request->validate([
+            'toll_id' => 'required|exists:tolls,id',
+            'incident_type' => 'required|string',
+            'dynamic_data' => 'nullable|string',
+            'media.*' => 'nullable|file|mimes:jpg,jpeg,png,mp4,pdf|max:20480',
+        ]);
+
+        $dynamicData = $request->filled('dynamic_data') ? json_decode($request->dynamic_data, true) : [];
+        $mediaPaths = $incident->media_paths ?? [];
+
+        // 1. Procesar eliminación de archivos existentes
+        if ($request->filled('archivos_a_eliminar')) {
+            $aEliminar = json_decode($request->archivos_a_eliminar, true);
+            foreach ($aEliminar as $campoNombre) {
+                if (isset($mediaPaths[$campoNombre])) {
+                    // Extraemos la ruta relativa para borrarla del disco
+                    $pathRelativo = str_replace('/storage/', '', $mediaPaths[$campoNombre]);
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($pathRelativo);
+                    // Lo quitamos de la base de datos
+                    unset($mediaPaths[$campoNombre]);
+                }
+            }
+        }
+
+        // 2. Procesar nuevos archivos subidos (sobrescriben si tienen el mismo nombre de campo)
+        if ($request->hasFile('media')) {
+            foreach ($request->file('media') as $campoNombre => $archivo) {
+                $path = $archivo->store('sucesos', 'public');
+                $mediaPaths[$campoNombre] = '/storage/' . $path;
+            }
+        }
+
+        $incident->update([
+            'toll_id' => $request->toll_id,
+            'incident_type' => $request->incident_type,
+            'dynamic_data' => $dynamicData,
+            'media_paths' => $mediaPaths
+        ]);
+
+        return response()->json(['message' => 'Suceso actualizado correctamente', 'data' => $incident]);
+    }
+
+    // Método para Archivar (Soft Delete)
+    public function destroy($id)
+    {
+        $incident = Incident::findOrFail($id);
+        $incident->delete(); // Esto no lo borra, solo llena la columna 'deleted_at'
+        return response()->json(['message' => 'Suceso archivado correctamente']);
     }
 }

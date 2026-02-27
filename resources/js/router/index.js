@@ -51,7 +51,14 @@ const routes = [
                 path: 'mapa',
                 name: 'MapDashboard',
                 component: MapDashboard
-            }
+            },
+            {
+                
+                path: 'sucesos/editar/:id',
+                name: 'IncidentsEdit',
+                component: Incidents
+            },
+
         ]
     }
 ];
