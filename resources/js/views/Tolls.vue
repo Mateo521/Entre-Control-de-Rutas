@@ -103,7 +103,7 @@ onMounted(() => {
         </div>
 
         <div
-            class="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden shadow-sm dark:shadow-none transition-colors">
+            class="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10  overflow-hidden shadow-sm dark:shadow-none transition-colors">
             <div class="overflow-x-auto">
                 <table class="w-full border-collapse">
                     <thead>

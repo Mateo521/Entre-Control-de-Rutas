@@ -1,8 +1,16 @@
 <script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 
 const router = useRouter()
+
+// Estado global de conexión
+const isOnline = ref(navigator.onLine)
+
+const actualizarEstadoRed = () => {
+    isOnline.value = navigator.onLine
+}
 
 const handleLogout = async () => {
     try {
@@ -14,11 +22,35 @@ const handleLogout = async () => {
         router.push('/');
     }
 }
+
+onMounted(() => {
+    // Escuchamos los eventos nativos del navegador
+    window.addEventListener('online', actualizarEstadoRed)
+    window.addEventListener('offline', actualizarEstadoRed)
+})
+
+onUnmounted(() => {
+    window.removeEventListener('online', actualizarEstadoRed)
+    window.removeEventListener('offline', actualizarEstadoRed)
+})
 </script>
 
 <template>
     <div
         class="flex min-h-screen bg-[#f0f4f8] dark:bg-[#0a1628] bg-[linear-gradient(rgba(0,0,0,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.04)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(245,158,11,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(245,158,11,0.04)_1px,transparent_1px)] bg-[size:40px_40px] transition-colors">
+
+        <div v-if="!isOnline"
+            class="fixed top-0 left-0 w-full bg-red-600 text-white text-xs font-bold font-['Barlow_Condensed'] tracking-widest uppercase py-1.5 flex justify-center items-center z-[10000] shadow-md">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                class="mr-2">
+                <path d="M10.58 10.58a2 2 0 0 0 2.83 2.83"></path>
+                <path d="M14 14a3.53 3.53 0 0 0-5-5"></path>
+                <path d="M17.5 17.5a8.5 8.5 0 0 0-11-11"></path>
+                <path d="M21 21a13.5 13.5 0 0 0-18-18"></path>
+                <line x1="2" y1="2" x2="22" y2="22"></line>
+            </svg>
+            Sin conexión al servidor central. Funciones limitadas.
+        </div>
 
         <div
             class="w-[240px] min-h-screen bg-white dark:bg-[#0d1b2a] border-r border-amber-500/20 dark:border-amber-500/10 shrink-0 transition-colors shadow-[2px_0_12px_rgba(0,0,0,0.06)] dark:shadow-none relative">
@@ -49,67 +81,56 @@ const handleLogout = async () => {
 
                 <router-link to="/panel"
                     active-class="border-amber-500 text-amber-600 dark:text-amber-500 bg-amber-500/10"
-                    class="flex items-center gap-2.5 px-5 py-2.5 text-[13.5px] font-medium transition-all no-underline border-l-[3px] border-transparent text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    class="flex items-center gap-2.5 px-5 py-2.5 text-[13.5px] font-medium transition-all no-underline border-l-[3px] border-transparent text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5"><svg
+                        width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round">
                         <rect x="3" y="3" width="7" height="7" />
                         <rect x="14" y="3" width="7" height="7" />
                         <rect x="14" y="14" width="7" height="7" />
                         <rect x="3" y="14" width="7" height="7" />
-                    </svg>
-                    Panel principal
-                </router-link>
+                    </svg>Panel principal</router-link>
 
                 <router-link to="/panel/peajes"
                     active-class="border-amber-500 text-amber-600 dark:text-amber-500 bg-amber-500/10"
-                    class="flex items-center gap-2.5 px-5 py-2.5 text-[13.5px] font-medium transition-all no-underline border-l-[3px] border-transparent text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    class="flex items-center gap-2.5 px-5 py-2.5 text-[13.5px] font-medium transition-all no-underline border-l-[3px] border-transparent text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5"><svg
+                        width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round">
                         <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" />
                         <circle cx="12" cy="10" r="3" />
-                    </svg>
-                    Gestión de Peajes
-                </router-link>
+                    </svg>Gestión de Peajes</router-link>
 
                 <router-link to="/panel/sucesos"
                     active-class="border-amber-500 text-amber-600 dark:text-amber-500 bg-amber-500/10"
-                    class="flex items-center gap-2.5 px-5 py-2.5 text-[13.5px] font-medium transition-all no-underline border-l-[3px] border-transparent text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    class="flex items-center gap-2.5 px-5 py-2.5 text-[13.5px] font-medium transition-all no-underline border-l-[3px] border-transparent text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5"><svg
+                        width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                         <polyline points="14 2 14 8 20 8"></polyline>
                         <line x1="16" y1="13" x2="8" y2="13"></line>
                         <line x1="16" y1="17" x2="8" y2="17"></line>
                         <polyline points="10 9 9 9 8 9"></polyline>
-                    </svg>
-                    Registro de Sucesos
-                </router-link>
+                    </svg>Registro de Sucesos</router-link>
 
                 <router-link to="/panel/busqueda"
                     active-class="border-amber-500 text-amber-600 dark:text-amber-500 bg-amber-500/10"
-                    class="flex items-center gap-2.5 px-5 py-2.5 text-[13.5px] font-medium transition-all no-underline border-l-[3px] border-transparent text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    class="flex items-center gap-2.5 px-5 py-2.5 text-[13.5px] font-medium transition-all no-underline border-l-[3px] border-transparent text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5"><svg
+                        width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round">
                         <circle cx="11" cy="11" r="8"></circle>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                         <line x1="11" y1="8" x2="11" y2="14"></line>
                         <line x1="8" y1="11" x2="14" y2="11"></line>
-                    </svg>
-                    Búsqueda Avanzada
-                </router-link>
+                    </svg>Búsqueda Avanzada</router-link>
 
                 <router-link to="/panel/mapa"
                     active-class="border-amber-500 text-amber-600 dark:text-amber-500 bg-amber-500/10"
-                    class="flex items-center gap-2.5 px-5 py-2.5 text-[13.5px] font-medium transition-all no-underline border-l-[3px] border-transparent text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    class="flex items-center gap-2.5 px-5 py-2.5 text-[13.5px] font-medium transition-all no-underline border-l-[3px] border-transparent text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5"><svg
+                        width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round">
                         <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon>
                         <line x1="9" y1="3" x2="9" y2="21"></line>
                         <line x1="15" y1="3" x2="15" y2="21"></line>
-                    </svg>
-                    Mapa Interactivo
-                </router-link>
-
+                    </svg>Mapa Interactivo</router-link>
 
                 <div
                     class="font-['Barlow_Condensed'] text-[10px] font-bold tracking-[0.15em] uppercase text-slate-400 dark:text-slate-500 px-5 pt-5 pb-1.5 transition-colors mt-2">
@@ -121,8 +142,7 @@ const handleLogout = async () => {
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                         <polyline points="16 17 21 12 16 7"></polyline>
                         <line x1="21" y1="12" x2="9" y2="12"></line>
-                    </svg>
-                    Cerrar sesión
+                    </svg>Cerrar sesión
                 </a>
             </nav>
 
@@ -139,7 +159,7 @@ const handleLogout = async () => {
             </div>
         </div>
 
-        <div class="flex-1 flex flex-col">
+        <div class="flex-1 flex flex-col pt-[24px]">
             <div
                 class="h-14 bg-white/95 dark:bg-[#0d1b2a]/95 border-b border-amber-500/15 dark:border-amber-500/10 backdrop-blur-md flex items-center justify-between px-6 sticky top-0 z-40 transition-colors">
                 <div class="flex items-center gap-3">

@@ -109,6 +109,13 @@ const eliminarArchivoExistente = (nombreCampo) => {
 
 // --- PERSISTENCIA DE DATOS ---
 const guardarSuceso = async () => {
+
+    if (!navigator.onLine) {
+        toast.error('No tienes conexión a internet. Espera recuperar la señal para enviar la evidencia.');
+        return;
+    }
+
+
     guardando.value = true
     try {
         const formData = new FormData()
@@ -173,7 +180,7 @@ onMounted(async () => {
 
         <div class="grid grid-cols-[1fr_360px] gap-6">
             
-            <div class="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden shadow-sm dark:shadow-none transition-colors">
+            <div class="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10  overflow-hidden shadow-sm dark:shadow-none transition-colors">
                 <div class="bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10 px-5 py-3.5 flex items-center justify-between">
                     <span class="font-['Barlow_Condensed'] font-bold text-[17px] text-slate-900 dark:text-slate-100 tracking-wide">
                         {{ esEdicion ? 'Actualizar datos operativos' : 'Nuevo suceso' }}
@@ -206,7 +213,7 @@ onMounted(async () => {
                         </div>
                     </div>
 
-                    <div v-if="camposDinamicosActivos.length > 0" class="mb-6 p-4 rounded-xl border border-amber-500/30 bg-amber-50 dark:bg-amber-500/5">
+                    <div v-if="camposDinamicosActivos.length > 0" class="mb-6 p-4  border border-amber-500/30 bg-amber-50 dark:bg-amber-500/5">
                         <h4 class="font-['Barlow_Condensed'] text-xs font-bold tracking-widest uppercase text-amber-600 dark:text-amber-500 mb-4 flex items-center gap-2">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path></svg>
                             Requerimientos Operativos de la Estación
@@ -242,14 +249,14 @@ onMounted(async () => {
                     </div>
 
                     <div class="flex justify-end pt-4 border-t border-slate-100 dark:border-white/5 mt-6">
-                        <button type="submit" :disabled="guardando" class="bg-amber-500 text-[#0d1b2a] font-['Barlow_Condensed'] text-[13px] font-bold tracking-wider uppercase px-6 py-2.5 rounded-lg border-none cursor-pointer inline-flex items-center transition-all hover:bg-amber-400 disabled:opacity-50">
-                            {{ guardando ? 'Procesando...' : (esEdicion ? 'Actualizar Suceso' : 'Registrar Suceso') }}
-                        </button>
+                        <button type="submit" :disabled="guardando || !navigator.onLine" class="bg-amber-500 text-[#0d1b2a] font-['Barlow_Condensed'] text-[13px] font-bold tracking-wider uppercase px-6 py-2.5 rounded-lg border-none cursor-pointer inline-flex items-center transition-all hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed">
+    {{ !navigator.onLine ? 'Esperando conexión...' : (guardando ? 'Procesando...' : (esEdicion ? 'Actualizar Suceso' : 'Registrar Suceso')) }}
+</button>
                     </div>
                 </form>
             </div>
 
-            <div class="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden shadow-sm dark:shadow-none transition-colors h-fit">
+            <div class="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10  overflow-hidden shadow-sm dark:shadow-none transition-colors h-fit">
                 <div class="p-5 flex gap-3">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" class="shrink-0">
                         <circle cx="12" cy="12" r="10"></circle>

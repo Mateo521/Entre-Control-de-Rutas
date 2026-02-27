@@ -32,7 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 
-
+    Route::get('/dashboard', [\App\Http\Controllers\Api\DashboardController::class, 'index']);
 
     Route::apiResource('incidents', IncidentController::class);
 

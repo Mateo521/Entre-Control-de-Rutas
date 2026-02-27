@@ -155,7 +155,7 @@ onMounted(() => {
             </div>
         </div>
 
-        <div class="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden shadow-sm dark:shadow-none transition-colors">
+        <div class="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10  overflow-hidden shadow-sm dark:shadow-none transition-colors">
             <div class="overflow-x-auto">
                 <table class="w-full border-collapse">
                     <thead>
@@ -245,7 +245,7 @@ onMounted(() => {
         </div>
 
         <div v-if="mostrarModalArchivar" class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/90 backdrop-blur-sm p-4">
-            <div class="w-full max-w-sm bg-white dark:bg-[#0a1628] rounded-xl shadow-2xl overflow-hidden border border-slate-200 dark:border-white/10 text-center p-6">
+            <div class="w-full max-w-sm bg-white dark:bg-[#0a1628]  shadow-2xl overflow-hidden border border-slate-200 dark:border-white/10 text-center p-6">
                 <div class="w-12 h-12 bg-red-100 dark:bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600 dark:text-red-400">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
                 </div>
@@ -313,7 +313,7 @@ onMounted(() => {
                 </div>
 
                 <div class="p-6 bg-slate-100 dark:bg-[#0a1628]">
-                    <div class="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl p-4 shadow-sm">
+                    <div class="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10  p-4 shadow-sm">
                         <div v-for="(valor, clave) in detallesActivos" :key="clave" class="mb-3 last:mb-0 grid grid-cols-[1fr_1.5fr] gap-4 items-center border-b border-slate-100 dark:border-white/5 pb-3 last:border-0 last:pb-0">
                             <span class="text-[12px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest font-['Barlow_Condensed']">{{ clave.replace('_', ' ') }}</span>
                             <span class="text-sm font-medium text-slate-900 dark:text-slate-100 break-words bg-slate-50 dark:bg-black/20 px-3 py-1.5 rounded-md border border-slate-100 dark:border-white/5">
