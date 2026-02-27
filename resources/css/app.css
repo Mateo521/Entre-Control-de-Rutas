@@ -14,7 +14,7 @@
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
-/* Ajustes globales para los componentes nativos de Leaflet */
+ 
 .leaflet-popup-content-wrapper {
     @apply bg-white dark:bg-[#0d1b2a] text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10 rounded-lg shadow-xl;
 }
@@ -25,4 +25,16 @@
 
 .leaflet-container {
     font-family: 'DM Sans', sans-serif;
+}
+
+
+ 
+.dark select option {
+    background-color: #0d1b2a; 
+    color: #f8fafc;  
+}
+
+ 
+html.dark {
+    color-scheme: dark;
 }

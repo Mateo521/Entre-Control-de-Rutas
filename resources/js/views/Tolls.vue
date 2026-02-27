@@ -2,21 +2,21 @@
 import { ref, reactive, onMounted } from 'vue'
 import axios from 'axios'
 
-// Estado de la tabla
+
 const peajes = ref([])
 const cargando = ref(true)
 
-// Estado del Modal
+
 const mostrarModal = ref(false)
 const guardando = ref(false)
 
-// Objeto reactivo para el nuevo peaje
+
 const nuevoPeaje = reactive({
     name: '',
     camposDinámicos: []
 })
 
-// Funciones de la Tabla
+
 const cargarPeajes = async () => {
     cargando.value = true
     try {
@@ -29,7 +29,7 @@ const cargarPeajes = async () => {
     }
 }
 
-// Funciones del Modal y Formulario
+ 
 const abrirModal = () => {
     nuevoPeaje.name = ''
     nuevoPeaje.camposDinámicos = []
@@ -54,7 +54,7 @@ const guardarPeaje = async () => {
     guardando.value = true;
 
     try {
-        // Estructuramos el payload para que coincida con la validación de Laravel
+        
         const payload = {
             name: nuevoPeaje.name,
             dynamic_schema: {
@@ -64,7 +64,7 @@ const guardarPeaje = async () => {
 
         await axios.post('/api/tolls', payload)
 
-        // Si se guarda con éxito, cerramos modal y recargamos la tabla
+       
         cerrarModal()
         cargarPeajes()
 

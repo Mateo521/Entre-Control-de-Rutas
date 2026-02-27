@@ -62,14 +62,14 @@ const renderizarTrazasEstaticas = () => {
     }).addTo(map);
 }
 
-// NUEVA FUNCIÓN: Descargar y renderizar los puntos de la base de datos
+ 
 const cargarPuntosGuardados = async () => {
     try {
         const respuesta = await axios.get('/api/incidents')
         const sucesos = respuesta.data
 
         sucesos.forEach(suceso => {
-            // Filtramos solo aquellos sucesos que tengan latitud y longitud guardadas
+             
             if (suceso.dynamic_data && suceso.dynamic_data.latitud && suceso.dynamic_data.longitud) {
                 
                 const lat = suceso.dynamic_data.latitud
@@ -83,7 +83,7 @@ const cargarPuntosGuardados = async () => {
                     iconSize: [20, 20]
                 })
 
-                // Dibujamos el marcador real desde la base de datos
+                 
                 L.marker([lat, lng], { icon: iconoFijo })
                  .addTo(map)
                  .bindPopup(`
@@ -111,7 +111,7 @@ const initMap = () => {
 
     renderizarTrazasEstaticas()
 
-    // Llamamos a la API después de dibujar el mapa base
+   
     cargarPuntosGuardados()
 
     map.on('click', (e) => {
@@ -196,7 +196,7 @@ const confirmarPunto = async () => {
         marcadorTemporal.setIcon(iconoFijo)
         const tipoFormateado = puntoFormulario.tipo.replace('_', ' ').toUpperCase()
         
-        // Agregamos la fecha actual para que coincida con el estilo de los cargados desde la BD
+        
         const fechaActual = new Date().toLocaleDateString('es-AR')
         
         marcadorTemporal.bindPopup(`

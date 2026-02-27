@@ -13,8 +13,7 @@ class TollController extends Controller
      */
     public function index()
     {
-        // Retorna todos los peajes. Laravel automáticamente convierte 
-        // la colección y la columna JSONB en una respuesta JSON válida.
+      
         return response()->json(Toll::all(), 200);
     }
 
@@ -25,11 +24,10 @@ class TollController extends Controller
     {
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            // Validamos que el esquema dinámico sea un array (JSON válido)
+          
             'dynamic_schema' => 'nullable|array',
             
-            // Ejemplo de validación profunda en JSON:
-            // Aseguramos que si envían campos de inventario, tengan nombre y tipo.
+         
             'dynamic_schema.inventory_fields.*.name' => 'required_with:dynamic_schema.inventory_fields|string',
             'dynamic_schema.inventory_fields.*.type' => 'required_with:dynamic_schema.inventory_fields|string',
         ]);
@@ -91,7 +89,7 @@ class TollController extends Controller
             return response()->json(['message' => 'Peaje no encontrado'], 404);
         }
 
-        $toll->delete(); // Esto llenará la columna deleted_at
+        $toll->delete(); 
 
         return response()->json(['message' => 'Peaje archivado exitosamente'], 200);
     }

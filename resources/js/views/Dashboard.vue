@@ -5,21 +5,20 @@ import { toast } from 'vue3-toastify'
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement } from 'chart.js'
 import { Doughnut, Bar } from 'vue-chartjs'
 
-// Registrar elementos de Chart.js
+ 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement)
 
 const cargando = ref(true)
 const peajes = ref([])
 const kpis = ref({ total_sucesos: 0, sucesos_hoy: 0, total_peajes: 0 })
 const ultimosSucesos = ref([])
-
-// Datos crudos para gráficos
+ 
 const datosTipos = ref([])
 const datosPeajes = ref([])
 
 const cargarDatos = async () => {
     try {
-        // Ejecutamos ambas peticiones en paralelo para mayor velocidad
+       
         const [resDashboard, resTolls] = await Promise.all([
             axios.get('/api/dashboard'),
             axios.get('/api/tolls')
@@ -40,7 +39,7 @@ const cargarDatos = async () => {
     }
 }
 
-// Configuración reactiva del Gráfico de Anillo
+
 const chartDataTipos = computed(() => {
     const labels = datosTipos.value.map(d => d.incident_type.replace('_', ' ').toUpperCase())
     const data = datosTipos.value.map(d => d.total)
@@ -56,7 +55,7 @@ const chartDataTipos = computed(() => {
     }
 })
 
-// Configuración reactiva del Gráfico de Barras
+ 
 const chartDataPeajes = computed(() => {
     const labels = datosPeajes.value.map(d => d.name)
     const data = datosPeajes.value.map(d => d.total)
@@ -72,7 +71,7 @@ const chartDataPeajes = computed(() => {
     }
 })
 
-// Opciones globales para adaptar los gráficos al modo oscuro
+ 
 const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,

@@ -10,7 +10,7 @@ class Incident extends Model
 {
     use HasFactory, SoftDeletes;
 
-    // 1. Le decimos a Laravel qué columnas son seguras para guardar
+  
     protected $fillable = [
         'toll_id',
         'user_id',
@@ -19,7 +19,7 @@ class Incident extends Model
         'media_paths'
     ];
 
-    // 2. Le indicamos que las columnas JSON deben tratarse como Arrays en PHP
+    
     protected function casts(): array
     {
         return [
@@ -32,5 +32,5 @@ class Incident extends Model
     {
         return $this->belongsTo(Toll::class);
     }
-    
+
 }

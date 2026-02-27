@@ -7,12 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-// 1. IMPORTAR LA CLASE DE SANCTUM :
+
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    // 2. AGREGAR 'HasApiTokens' A LA LISTA DE TRAITS:
+    
     use HasApiTokens, HasFactory, Notifiable;
 
     /**

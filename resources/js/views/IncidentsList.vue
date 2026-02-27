@@ -6,24 +6,24 @@ import { toast } from 'vue3-toastify'
 const sucesos = ref([])
 const cargando = ref(true)
 
-// Control de pestañas (Activos vs Archivados)
+
 const verArchivados = ref(false)
 
-// Control del Modal de Archivado
+
 const mostrarModalArchivar = ref(false)
 const sucesoAArchivar = ref(null)
 
-// Variables reactivas para el Portafolio Multimedia
+
 const mostrarGaleria = ref(false)
 const mediosActivos = ref({})
 const sucesoActivo = ref(null)
 
-// Variables reactivas para Detalles Operativos (JSON)
+
 const mostrarDetalles = ref(false)
 const detallesActivos = ref({})
 const sucesoDetalle = ref(null)
 
-// --- FUNCIONES DE CARGA Y PESTAÑAS ---
+
 const cargarSucesos = async () => {
     cargando.value = true
     try {
@@ -44,7 +44,7 @@ const cambiarPestana = (estado) => {
     cargarSucesos()
 }
 
-// --- FUNCIONES DE ARCHIVADO ---
+
 const confirmarArchivado = (suceso) => {
     sucesoAArchivar.value = suceso
     mostrarModalArchivar.value = true
@@ -58,13 +58,13 @@ const ejecutarArchivado = async () => {
         toast.success('Suceso transferido al archivo histórico')
         mostrarModalArchivar.value = false
         sucesoAArchivar.value = null
-        cargarSucesos() // Recargamos para que desaparezca de la tabla actual
+        cargarSucesos()  
     } catch (error) {
         toast.error('No se pudo archivar el registro')
     }
 }
 
-// --- FUNCIONES DE FORMATO ---
+
 const formatearFecha = (fechaString) => {
     if (!fechaString) return '';
     const fecha = new Date(fechaString);
@@ -85,7 +85,7 @@ const traducirTipo = (tipo) => {
     return tipos[tipo] || tipo;
 }
 
-// --- FUNCIONES MULTIMEDIA ---
+
 const abrirGaleria = (suceso) => {
     sucesoActivo.value = suceso
     mediosActivos.value = suceso.media_paths || {}
@@ -108,7 +108,7 @@ const esVideo = (ruta) => {
     return ruta.match(/\.(mp4|webm|ogg)$/i) != null;
 }
 
-// --- FUNCIONES DETALLES OPERATIVOS ---
+
 const abrirDetalles = (suceso) => {
     sucesoDetalle.value = suceso
     detallesActivos.value = suceso.dynamic_data || {}

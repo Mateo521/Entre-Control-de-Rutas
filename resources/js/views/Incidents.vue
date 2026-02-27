@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import axios from 'axios'
 import { toast } from 'vue3-toastify'
 import { useRoute, useRouter } from 'vue-router'
@@ -11,19 +11,24 @@ const peajes = ref([])
 const cargandoPeajes = ref(true)
 const guardando = ref(false)
 
-// Variables de Estado y Edición
+
+const isOnline = ref(navigator.onLine)
+
+const actualizarEstadoRed = () => {
+    isOnline.value = navigator.onLine
+}
+
+ 
 const esEdicion = ref(false)
 const idEdicion = ref(null)
 
 const formulario = ref({ toll_id: '', incident_type: '', dynamic_data: {} })
 const camposDinamicosActivos = ref([])
-
-// Variables Multimedia
-const archivosAdjuntos = ref({}) // Archivos nuevos a subir
-const mediosExistentes = ref({}) // Archivos que ya están en la BD
-const archivosAEliminar = ref([]) // Nombres de campos multimedia a borrar
-
-// --- FUNCIONES DE CARGA ---
+ 
+const archivosAdjuntos = ref({})  
+const mediosExistentes = ref({})  
+const archivosAEliminar = ref([])  
+ 
 const cargarPeajes = async () => {
     try {
         const respuesta = await axios.get('/api/tolls')
@@ -39,21 +44,18 @@ const cargarSucesoParaEditar = async (id) => {
     try {
         const respuesta = await axios.get(`/api/incidents/${id}`)
         const suceso = respuesta.data
-        
-        // 1. Asignamos datos base
+       
         formulario.value.toll_id = suceso.toll_id
         formulario.value.incident_type = suceso.incident_type
-        
-        // 2. Construimos el esquema dinámico de ese peaje específico
+         
         actualizarCamposDinamicos(suceso.toll_id)
-        
-        // 3. Rellenamos con los datos dinámicos guardados (JSON)
+       
         if (suceso.dynamic_data) {
-            // Combinamos las claves vacías con los datos reales
+            
             formulario.value.dynamic_data = { ...formulario.value.dynamic_data, ...suceso.dynamic_data }
         }
 
-        // 4. Cargamos la multimedia existente
+     
         if (suceso.media_paths) {
             mediosExistentes.value = suceso.media_paths
         }
@@ -64,7 +66,7 @@ const cargarSucesoParaEditar = async (id) => {
     }
 }
 
-// --- LÓGICA DE FORMULARIO DINÁMICO ---
+ 
 const actualizarCamposDinamicos = (idPeaje) => {
     if (!idPeaje) {
         camposDinamicosActivos.value = []
@@ -77,8 +79,7 @@ const actualizarCamposDinamicos = (idPeaje) => {
         camposDinamicosActivos.value = []
     }
 }
-
-// Este método SOLO se dispara cuando el usuario interactúa manualmente con el selector de Peaje
+ 
 const alCambiarPeaje = () => {
     archivosAdjuntos.value = {} 
     mediosExistentes.value = {}
@@ -87,7 +88,7 @@ const alCambiarPeaje = () => {
     
     actualizarCamposDinamicos(formulario.value.toll_id)
     
-    // Rellenamos el objeto dynamic_data con claves en blanco según el esquema
+    
     camposDinamicosActivos.value.forEach(campo => {
         if (campo.type !== 'multimedia') {
             formulario.value.dynamic_data[campo.name] = (campo.type === 'booleano') ? false : ''
@@ -95,7 +96,7 @@ const alCambiarPeaje = () => {
     })
 }
 
-// --- LÓGICA MULTIMEDIA ---
+ 
 const procesarArchivo = (event, nombreCampo) => {
     const file = event.target.files[0]
     if (file) archivosAdjuntos.value[nombreCampo] = file
@@ -103,11 +104,11 @@ const procesarArchivo = (event, nombreCampo) => {
 
 const eliminarArchivoExistente = (nombreCampo) => {
     archivosAEliminar.value.push(nombreCampo)
-    // Lo eliminamos de la vista actual
+    
     delete mediosExistentes.value[nombreCampo]
 }
 
-// --- PERSISTENCIA DE DATOS ---
+ 
 const guardarSuceso = async () => {
 
     if (!navigator.onLine) {
@@ -123,7 +124,7 @@ const guardarSuceso = async () => {
         formData.append('incident_type', formulario.value.incident_type)
         formData.append('dynamic_data', JSON.stringify(formulario.value.dynamic_data))
         
-        // Agregamos los archivos nuevos
+       
         Object.keys(archivosAdjuntos.value).forEach(campoNombre => {
             formData.append(`media[${campoNombre}]`, archivosAdjuntos.value[campoNombre])
         })
@@ -131,7 +132,7 @@ const guardarSuceso = async () => {
         if (esEdicion.value) {
             formData.append('_method', 'PUT')
             
-            // Enviamos el listado de archivos que el usuario decidió eliminar
+           
             if (archivosAEliminar.value.length > 0) {
                 formData.append('archivos_a_eliminar', JSON.stringify(archivosAEliminar.value))
             }
@@ -143,7 +144,7 @@ const guardarSuceso = async () => {
             await axios.post('/api/incidents', formData)
             toast.success('Suceso y archivos registrados correctamente')
             formulario.value.incident_type = ''
-            alCambiarPeaje() // Reiniciamos el estado
+            alCambiarPeaje()  
         }
     } catch (error) {
         toast.error('Hubo un error al procesar la solicitud.')
@@ -153,6 +154,11 @@ const guardarSuceso = async () => {
 }
 
 onMounted(async () => {
+
+    window.addEventListener('online', actualizarEstadoRed)
+    window.addEventListener('offline', actualizarEstadoRed)
+
+
     await cargarPeajes()
     
     if (route.params.id) {
@@ -161,6 +167,14 @@ onMounted(async () => {
         cargarSucesoParaEditar(route.params.id)
     }
 })
+
+
+onUnmounted(() => {
+   
+    window.removeEventListener('online', actualizarEstadoRed)
+    window.removeEventListener('offline', actualizarEstadoRed)
+})
+
 </script>
 
 <template>
@@ -249,8 +263,8 @@ onMounted(async () => {
                     </div>
 
                     <div class="flex justify-end pt-4 border-t border-slate-100 dark:border-white/5 mt-6">
-                        <button type="submit" :disabled="guardando || !navigator.onLine" class="bg-amber-500 text-[#0d1b2a] font-['Barlow_Condensed'] text-[13px] font-bold tracking-wider uppercase px-6 py-2.5 rounded-lg border-none cursor-pointer inline-flex items-center transition-all hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed">
-    {{ !navigator.onLine ? 'Esperando conexión...' : (guardando ? 'Procesando...' : (esEdicion ? 'Actualizar Suceso' : 'Registrar Suceso')) }}
+          <button type="submit" :disabled="guardando || !isOnline" class="bg-amber-500 text-[#0d1b2a] font-['Barlow_Condensed'] text-[13px] font-bold tracking-wider uppercase px-6 py-2.5 rounded-lg border-none cursor-pointer inline-flex items-center transition-all hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed">
+    {{ !isOnline ? 'Esperando conexión...' : (guardando ? 'Procesando...' : (esEdicion ? 'Actualizar Suceso' : 'Registrar Suceso')) }}
 </button>
                     </div>
                 </form>

@@ -2,10 +2,15 @@
 import { ref } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
-import { toast } from 'vue3-toastify' // Importación
+import { toast } from 'vue3-toastify'
 
 const router = useRouter()
-// ... resto de las variables
+
+ 
+const email = ref('')
+const password = ref('')
+const cargando = ref(false)
+const errorMensaje = ref('')
 
 const handleLogin = async () => {
     cargando.value = true
@@ -19,21 +24,19 @@ const handleLogin = async () => {
 
         localStorage.setItem('access_token', response.data.access_token)
 
-        // Reemplazamos el alert por un toast de éxito
-        toast.success('Ingreso exitoso al sistema');
+        toast.success('Ingreso exitoso al sistema')
 
         router.push('/panel')
 
     } catch (error) {
         if (error.response) {
             if (error.response.status === 422) {
-                // Reemplazamos el manejo de error local por un toast de advertencia
-                toast.warning('Las credenciales son incorrectas.');
+                toast.warning('Las credenciales son incorrectas.')
             } else {
-                toast.error(error.response.data.message || 'Error interno del servidor.');
+                toast.error(error.response.data.message || 'Error interno del servidor.')
             }
         } else {
-            toast.error('No hay conexión con el backend.');
+            toast.error('No hay conexión con el backend.')
         }
     } finally {
         cargando.value = false

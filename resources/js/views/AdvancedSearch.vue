@@ -80,23 +80,20 @@ const cerrarDetalles = () => {
     sucesoDetalle.value = null
 }
 
-// --- NUEVA FUNCIÓN: Exportar a Excel (CSV) ---
+ 
 const exportarExcel = () => {
     if (resultados.value.length === 0) {
         toast.warning('No hay datos para exportar');
         return;
     }
-
-    // 1. Definir las cabeceras de las columnas
+ 
     let csvContent = "Fecha y Hora,Estacion,Clasificacion,Datos Operativos Adicionales\n";
-
-    // 2. Recorrer los resultados y darles formato
+ 
     resultados.value.forEach(suceso => {
-        const fecha = formatearFecha(suceso.created_at).replace(',', ' -'); // Evitar comas conflictivas
+        const fecha = formatearFecha(suceso.created_at).replace(',', ' -');  
         const estacion = suceso.toll ? suceso.toll.name : 'No definida';
         const tipo = traducirTipo(suceso.incident_type);
-        
-        // Transformar el JSON de datos operativos a una cadena de texto legible
+         
         let datosExtra = "Sin datos";
         if (suceso.dynamic_data && Object.keys(suceso.dynamic_data).length > 0) {
             datosExtra = Object.entries(suceso.dynamic_data)
@@ -107,17 +104,14 @@ const exportarExcel = () => {
                 })
                 .join(' | ');
         }
-
-        // 3. Limpiar y armar la fila (Las comillas dobles aseguran que si hay comas en el texto, Excel no salte de columna)
+ 
         const fila = `"${fecha}","${estacion}","${tipo}","${datosExtra}"\n`;
         csvContent += fila;
     });
-
-    // 4. Crear el archivo Blob con codificación UTF-8 (BOM \ufeff para que Excel lea las tildes correctamente)
+ 
     const blob = new Blob(["\ufeff", csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
-    
-    // 5. Crear un enlace oculto y simular el clic para descargar
+     
     const link = document.createElement("a");
     const fechaDescarga = new Date().toISOString().split('T')[0]; // Ej: 2026-02-26
     link.setAttribute("href", url);
