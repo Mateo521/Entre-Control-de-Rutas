@@ -174,7 +174,7 @@ onUnmounted(() => {
             </div>
         </div>
 
-        <div class="flex-1 flex flex-col pt-[24px]">
+        <div class="flex-1 flex flex-col "> <!-- pt-[24px] -->
             <div
                 class="h-14 bg-white/95 dark:bg-[#0d1b2a]/95 border-b border-amber-500/15 dark:border-amber-500/10 backdrop-blur-md flex items-center justify-between px-6 sticky top-0 z-40 transition-colors">
                 <div class="flex items-center gap-3">

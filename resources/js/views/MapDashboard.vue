@@ -16,6 +16,26 @@ let marcadorTemporal = null
 // NUEVO: Arreglo para guardar el marcador de búsqueda kilométrico y poder borrarlo
 const marcadoresBusqueda = []
 
+
+const satelliteTile = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+const tipoMapa = ref('estandar'); // 'estandar' o 'satelite'
+
+
+// 2. Crear la función unificada para actualizar la capa
+const actualizarCapaMapa = () => {
+    if (tipoMapa.value === 'satelite') {
+        tileLayer.setUrl(satelliteTile);
+    } else {
+        const isDark = document.documentElement.classList.contains('dark');
+        tileLayer.setUrl(isDark ? darkTile : lightTile);
+    }
+};
+
+const alternarTipoMapa = () => {
+    tipoMapa.value = tipoMapa.value === 'estandar' ? 'satelite' : 'estandar';
+    actualizarCapaMapa();
+};
+
 const mostrarModal = ref(false)
 const guardando = ref(false)
 const puntoFormulario = reactive({ lat: null, lng: null, tipo: '', observaciones: '' })
@@ -107,7 +127,7 @@ const trazasVialesGeoJSON = {
                 "nombre": "Ruta Prov. 30",
                 "color": "#8b5cf6",
                 "peajes": [
-                    { nombre: "Peaje Ruta 30", lat: -33.3026376, lng: -66.1093417 , imagen: "/img/peajes/ruta-30.jpeg" },
+                    { nombre: "Peaje Ruta 30", lat: -33.3026376, lng: -66.1093417, imagen: "/img/peajes/ruta-30.jpeg" },
                 ]
             },
             "geometry": {
@@ -129,10 +149,10 @@ const trazasVialesGeoJSON = {
                 "nombre": "Autopista Los Puquios (Ruta Prov. 9)",
                 "color": "#10b981",
                 "peajes": [
-                    { nombre: "Peaje Los Puquios", lat: -33.2714449, lng: -66.1965004 , imagen: "/img/peajes/los-puquios.jpeg" },
+                    { nombre: "Peaje Los Puquios", lat: -33.2714449, lng: -66.1965004, imagen: "/img/peajes/los-puquios.jpeg" },
                 ]
             },
-            
+
             "geometry": {
                 "type": "LineString",
                 "coordinates": [
@@ -146,12 +166,12 @@ const trazasVialesGeoJSON = {
                 "nombre": "Autopista Serranías Puntanas (Ruta Nac. 7)",
                 "color": "#f59e0b",
                 "peajes": [
-                    { nombre: "Peaje La Cumbre", lat: -33.3590784, lng: -66.0670751 , imagen: "/img/peajes/la-cumbre.jpeg" },
-                    { nombre: "Peaje Desaguadero (Isla Oeste)", lat: -33.4117474, lng: -67.1234507 , imagen: "/img/peajes/desaguadero-o.jpeg" },
-                    { nombre: "Peaje Desaguadero (Isla Este)", lat: -33.4128459, lng: -67.1147563 , imagen: "/img/peajes/desaguadero-e.jpeg" },
+                    { nombre: "Peaje La Cumbre", lat: -33.3590784, lng: -66.0670751, imagen: "/img/peajes/la-cumbre.jpeg" },
+                    { nombre: "Peaje Desaguadero (Isla Oeste)", lat: -33.4117474, lng: -67.1234507, imagen: "/img/peajes/desaguadero-o.jpeg" },
+                    { nombre: "Peaje Desaguadero (Isla Este)", lat: -33.4128459, lng: -67.1147563, imagen: "/img/peajes/desaguadero-e.jpeg" },
                 ]
             },
-            
+
             "geometry": {
                 "type": "LineString",
                 "coordinates": [
@@ -263,12 +283,12 @@ const referenciasViales = {
 const renderizarTrazasEstaticas = () => {
     L.geoJSON(trazasVialesGeoJSON, {
         style: (feature) => ({ color: feature.properties.color, weight: 6, opacity: 0.6, lineCap: 'round', lineJoin: 'round' }),
-       
-       
 
 
-       
-       onEachFeature: (feature, layer) => {
+
+
+
+        onEachFeature: (feature, layer) => {
             layer.bindPopup(`<strong class="font-[Barlow_Condensed] text-sm">${feature.properties.nombre}</strong><br>Traza bajo jurisdicción.`);
             if (feature.properties.peajes) {
                 feature.properties.peajes.forEach(peaje => {
@@ -277,22 +297,22 @@ const renderizarTrazasEstaticas = () => {
                         html: `<div class="w-7 h-7 bg-white dark:bg-slate-800 rounded border-2 border-[${feature.properties.color}] shadow-lg flex items-center justify-center relative -left-3.5 -top-3.5"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${feature.properties.color}" stroke-width="2.5"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V7a5 5 0 0110 0v4"></path></svg></div>`,
                         iconSize: [28, 28]
                     });
-                    
-                  
+
+
                     L.marker([peaje.lat, peaje.lng], { icon: iconPeaje })
-                     .addTo(map)
-                     .bindPopup(`
+                        .addTo(map)
+                        .bindPopup(`
                         <div class="mb-2.5 rounded overflow-hidden shadow-sm border border-slate-200 dark:border-slate-700">
                             <img src="${peaje.imagen || ''}" alt="Fachada ${peaje.nombre}" class="w-full h-66 object-cover  transition-transform duration-500" onerror="this.src='https://placehold.co/600x400'" />
                         </div>
                         <strong class="font-[Barlow_Condensed] text-[17px] tracking-wide border-b border-slate-200 dark:border-slate-700 pb-1.5 mb-1.5 block text-slate-800 dark:text-slate-100">${peaje.nombre}</strong>
                         <div class="text-[12px] text-slate-500 dark:text-slate-400">Estación base operativa</div>
                      `, {
-                        
-                         minWidth: 400, 
-                         maxWidth: 440,
-                         className: 'custom-popup-peaje'  
-                     });
+
+                            minWidth: 400,
+                            maxWidth: 440,
+                            className: 'custom-popup-peaje'
+                        });
                 });
             }
         }
@@ -392,12 +412,11 @@ const initMap = () => {
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
             if (mutation.attributeName === 'class') {
-                const currentIsDark = document.documentElement.classList.contains('dark')
-                tileLayer.setUrl(currentIsDark ? darkTile : lightTile)
+                actualizarCapaMapa();
             }
-        })
-    })
-    observer.observe(document.documentElement, { attributes: true })
+        });
+    });
+    observer.observe(document.documentElement, { attributes: true });
 }
 
 // NUEVO: Algoritmo matemático temporal para simular coordenadas de los km
@@ -551,13 +570,13 @@ const confirmarPunto = async () => {
     guardando.value = true;
     try {
         const payload = {
-            toll_id: 1,  
+            toll_id: 1,
             incident_type: puntoFormulario.tipo,
-             
-            dynamic_data: JSON.stringify({ 
-                latitud: puntoFormulario.lat, 
-                longitud: puntoFormulario.lng, 
-                observaciones_mapa: puntoFormulario.observaciones 
+
+            dynamic_data: JSON.stringify({
+                latitud: puntoFormulario.lat,
+                longitud: puntoFormulario.lng,
+                observaciones_mapa: puntoFormulario.observaciones
             })
         }
         await axios.post('/api/incidents', payload)
@@ -713,6 +732,23 @@ onBeforeUnmount(() => { if (map) { map.remove() } })
         <div class="flex-1 relative">
             <div ref="mapContainer" class="w-full h-full z-[100]"></div>
         </div>
+
+        <button @click="alternarTipoMapa"
+            class="absolute top-4 right-4 z-[400] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-3 py-2 rounded-md shadow-md border border-slate-200 dark:border-slate-700 font-['Barlow_Condensed'] text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-2">
+            <svg v-if="tipoMapa === 'estandar'" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
+                </path>
+            </svg>
+            <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            {{ tipoMapa === 'estandar' ? 'Ver Satélite' : 'Ver Mapa Base' }}
+        </button>
+
 
         <div v-if="mostrarModal"
             class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
