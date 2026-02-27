@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount, computed } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { toast } from 'vue3-toastify'
@@ -149,8 +149,8 @@ const trazasVialesGeoJSON = {
                 "color": "#f59e0b",
                 "peajes": [
                     { nombre: "Peaje La Cumbre", lat: -33.3590784, lng: -66.0670751 },
-                    { nombre: "Peaje Desaguadero (Isla Este)", lat: -33.4117474, lng: -67.1234507 },
-                    { nombre: "Peaje Desaguadero (Isla Oeste)", lat: -33.4128459, lng: -67.1147563 }
+                    { nombre: "Peaje Desaguadero (Isla Oeste)", lat: -33.4117474, lng: -67.1234507 },
+                    { nombre: "Peaje Desaguadero (Isla Este)", lat: -33.4128459, lng: -67.1147563 }
                 ]
             },
             // (Mantenemos la geometría que pusimos antes para la Ruta 7)
@@ -428,14 +428,45 @@ const calcularCoordenadaAproximada = (rutaId, kmBuscado) => {
     return [latCalculada, lngCalculada];
 }
 
+
+
+// Propiedad computada que extrae dinámicamente el min y max de la ruta seleccionada
+const limitesRuta = computed(() => {
+    if (!searchRuta.value || !referenciasViales[searchRuta.value]) {
+        return { min: 0, max: 1000 };
+    }
+    const puntos = referenciasViales[searchRuta.value];
+    // Como los arreglos están ordenados cronológicamente, el índice 0 es el inicio y el último es el final
+    const min = puntos[0].km;
+    const max = puntos[puntos.length - 1].km;
+    return { min, max };
+});
+
+
 const buscarKilometro = () => {
+
+
+
     if (!searchRuta.value || searchKm.value === '') {
         toast.warning('Debe ingresar un kilómetro válido.')
         return
     }
 
+
+
+
     const puntos = referenciasViales[searchRuta.value]
     const km = parseFloat(searchKm.value)
+
+    const { min, max } = limitesRuta.value;
+
+    // Validación de seguridad: Previene cálculos fuera del rango geográfico
+    if (km < min || km > max) {
+        toast.warning(`El kilómetro debe estar comprendido entre ${min} y ${max} para esta traza.`);
+        return;
+    }
+
+
 
     // 1. Calcular el texto en el panel lateral (Exacto o Aproximado)
     const exacto = puntos.find(p => p.km === km)
@@ -552,7 +583,8 @@ onBeforeUnmount(() => { if (map) { map.remove() } })
                             <label
                                 class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-1.5">Corredor
                                 Vial</label>
-                            <select v-model="searchRuta" class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500/50">
+                            <select v-model="searchRuta"
+                                class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500/50">
                                 <option value="20">Ruta Provincial 20</option>
                                 <option value="9">Ruta Prov. 9 (Autopista Puquios)</option>
                                 <option value="7">Ruta Nac. 7 (Autopista Serranías)</option>
@@ -560,13 +592,27 @@ onBeforeUnmount(() => { if (map) { map.remove() } })
                             </select>
 
                         </div>
+
+
+
                         <div>
-                            <label
-                                class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-1.5">Kilómetro
-                                (Aprox)</label>
-                            <input v-model="searchKm" type="number" step="0.1" placeholder="Ej: 781.5" required
-                                class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500/50" />
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label
+                                    class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block">Kilómetro
+                                    exacto</label>
+                                <span
+                                    class="text-[9px] font-bold text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-500/10 px-1.5 py-0.5 rounded tracking-widest">
+                                    RANGO: {{ limitesRuta.min }} a {{ limitesRuta.max }}
+                                </span>
+                            </div>
+                            <input v-model="searchKm" type="number" step="0.1" :min="limitesRuta.min"
+                                :max="limitesRuta.max" :placeholder="`Ej: ${limitesRuta.min + 2.5}`" required
+                                class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500/50 transition-colors" />
                         </div>
+
+
+
+
                         <div class="flex gap-2">
                             <button type="button" @click="limpiarBusqueda"
                                 class="w-1/3 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 font-['Barlow_Condensed'] text-xs font-bold tracking-wider uppercase px-2 py-2.5 rounded-lg border border-slate-200 dark:border-white/10 cursor-pointer transition-all">Limpiar</button>
