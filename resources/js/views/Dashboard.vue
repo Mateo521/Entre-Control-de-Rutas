@@ -18,7 +18,6 @@ const datosPeajes = ref([])
 
 const cargarDatos = async () => {
     try {
-       
         const [resDashboard, resTolls] = await Promise.all([
             axios.get('/api/dashboard'),
             axios.get('/api/tolls')
@@ -30,7 +29,8 @@ const cargarDatos = async () => {
         datosPeajes.value = db.charts.peajes
         ultimosSucesos.value = db.ultimos_sucesos
         
-        peajes.value = resTolls.data
+        // LA CORRECCIÓN ESTÁ AQUÍ (Extraemos el array del objeto paginado)
+        peajes.value = resTolls.data.data
 
     } catch (error) {
         toast.error('Error al cargar las métricas del panel')

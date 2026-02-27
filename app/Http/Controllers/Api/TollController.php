@@ -13,8 +13,9 @@ class TollController extends Controller
      */
     public function index()
     {
-      
-        return response()->json(Toll::all(), 200);
+        // En lugar de Toll::all() o Toll::get(), usamos paginate
+        $tolls = Toll::latest()->paginate(15);
+        return response()->json($tolls);
     }
 
     /**
@@ -24,10 +25,10 @@ class TollController extends Controller
     {
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-          
+
             'dynamic_schema' => 'nullable|array',
-            
-         
+
+
             'dynamic_schema.inventory_fields.*.name' => 'required_with:dynamic_schema.inventory_fields|string',
             'dynamic_schema.inventory_fields.*.type' => 'required_with:dynamic_schema.inventory_fields|string',
         ]);
@@ -89,7 +90,7 @@ class TollController extends Controller
             return response()->json(['message' => 'Peaje no encontrado'], 404);
         }
 
-        $toll->delete(); 
+        $toll->delete();
 
         return response()->json(['message' => 'Peaje archivado exitosamente'], 200);
     }

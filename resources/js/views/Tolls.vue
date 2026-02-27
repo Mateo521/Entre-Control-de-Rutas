@@ -18,13 +18,24 @@ const nuevoPeaje = reactive({
     camposDinámicos: []
 })
 
-const cargarPeajes = async () => {
+// Nuevas variables
+const paginaActual = ref(1)
+const ultimaPagina = ref(1)
+const totalRegistros = ref(0)
+
+const cargarPeajes = async (page = 1) => {
     cargando.value = true
     try {
-        const respuesta = await axios.get('/api/tolls')
-        peajes.value = respuesta.data
+        const respuesta = await axios.get('/api/tolls', {
+            params: { page: page }
+        })
+        
+        peajes.value = respuesta.data.data
+        paginaActual.value = respuesta.data.current_page
+        ultimaPagina.value = respuesta.data.last_page
+        totalRegistros.value = respuesta.data.total
     } catch (error) {
-        toast.error("Error al cargar las estaciones de peaje.")
+        toast.error('Error al cargar los peajes')
     } finally {
         cargando.value = false
     }
@@ -167,7 +178,29 @@ onMounted(() => {
                             </td>
                         </tr>
                     </tbody>
+
+                    
                 </table>
+
+                <div v-if="totalRegistros > 0" class="bg-slate-50 dark:bg-[#0d1b2a] border-t border-slate-200 dark:border-white/10 px-5 py-3 flex items-center justify-between">
+            <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                Mostrando página {{ paginaActual }} de {{ ultimaPagina }} ({{ totalRegistros }} registros totales)
+            </span>
+            <div class="flex gap-2">
+                <button 
+                    @click="cargarPeajes(paginaActual - 1)" 
+                    :disabled="paginaActual === 1"
+                    class="px-3 py-1.5 rounded-md text-xs font-bold uppercase font-['Barlow_Condensed'] tracking-wider border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                    Anterior
+                </button>
+                <button 
+                    @click="cargarPeajes(paginaActual + 1)" 
+                    :disabled="paginaActual === ultimaPagina"
+                    class="px-3 py-1.5 rounded-md text-xs font-bold uppercase font-['Barlow_Condensed'] tracking-wider border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                    Siguiente
+                </button>
+            </div>
+        </div>
             </div>
         </div>
 

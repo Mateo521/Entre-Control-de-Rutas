@@ -17,7 +17,9 @@ class ActionController extends Controller
             $query->onlyTrashed();
         }
 
-        return response()->json($query->get());
+        // Reemplazar ->get() por ->paginate(15)
+        // 15 es la cantidad de registros por página.
+        return response()->json($query->paginate(15));
     }
 
     public function show($id)

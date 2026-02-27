@@ -329,7 +329,7 @@ const renderizarTrazasEstaticas = () => {
 const cargarPuntosGuardados = async () => {
     try {
         const respuesta = await axios.get('/api/incidents')
-        const sucesos = respuesta.data
+        const sucesos = respuesta.data.data
 
         sucesos.forEach(suceso => {
             if (suceso.dynamic_data && suceso.dynamic_data.latitud && suceso.dynamic_data.longitud) {

@@ -9,27 +9,47 @@ use Illuminate\Support\Facades\Auth;
 
 class IncidentController extends Controller
 {
-    public function index(Request $request)
+   public function index(Request $request)
     {
-         
         $query = Incident::with('toll')->latest();
+
+        // Filtros del módulo de Búsqueda Avanzada
+        if ($request->filled('toll_id')) {
+            $query->where('toll_id', $request->toll_id);
+        }
         
+        if ($request->filled('incident_type')) {
+            $query->where('incident_type', $request->incident_type);
+        }
+        
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        // Filtros heredados de otras vistas (si los conservas)
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
         if ($request->boolean('archived')) {
             $query->onlyTrashed();
         }
 
-        return response()->json($query->get());
+        return response()->json($query->paginate(15));
     }
 
-     
     public function show($id)
     {
-       
+
         $incident = Incident::withTrashed()->with('toll')->findOrFail($id);
         return response()->json($incident);
     }
 
- public function store(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
             'toll_id' => 'required|exists:tolls,id',
@@ -77,7 +97,7 @@ class IncidentController extends Controller
         ]);
 
         $dynamicData = $request->filled('dynamic_data') ? json_decode($request->dynamic_data, true) : [];
-        
+
         $mediaPaths = $incident->media_paths;
         if (is_string($mediaPaths)) {
             $mediaPaths = json_decode($mediaPaths, true);
@@ -125,21 +145,21 @@ class IncidentController extends Controller
         $incident->incident_type = $request->incident_type;
         $incident->dynamic_data = $dynamicData;
         $incident->media_paths = $mediaPaths;
-        
+
         $incident->save();
 
         return response()->json([
-            'message' => 'Suceso actualizado correctamente', 
+            'message' => 'Suceso actualizado correctamente',
             'data' => $incident
         ]);
     }
 
-    
- 
+
+
     public function destroy($id)
     {
         $incident = Incident::findOrFail($id);
-        $incident->delete();  
+        $incident->delete();
         return response()->json(['message' => 'Suceso archivado correctamente']);
     }
 }

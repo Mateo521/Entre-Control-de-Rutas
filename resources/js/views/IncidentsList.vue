@@ -3,37 +3,52 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { toast } from 'vue3-toastify'
 
+// 1. Variables principales (Faltaban estas declaraciones)
 const sucesos = ref([])
 const cargando = ref(true)
-
-
 const verArchivados = ref(false)
+const filtroEstado = ref('')
 
+// 2. Variables de Paginación (Ya las tenías)
+const paginaActual = ref(1)
+const ultimaPagina = ref(1)
+const totalRegistros = ref(0)
 
-const mostrarModalArchivar = ref(false)
-const sucesoAArchivar = ref(null)
-
-
-const mostrarGaleria = ref(false)
-const mediosActivos = ref({})
-const sucesoActivo = ref(null)
-
-
+// 3. Variables para Modal de Detalles (Ya las tenías)
 const mostrarDetalles = ref(false)
 const detallesActivos = ref({})
 const sucesoDetalle = ref(null)
 
+// 4. Variables para Archivar (Faltaban estas declaraciones)
+const sucesoAArchivar = ref(null)
+const mostrarModalArchivar = ref(false)
 
-const cargarSucesos = async () => {
+// 5. Variables para Galería (Faltaban estas declaraciones)
+const sucesoActivo = ref(null)
+const mediosActivos = ref({})
+const mostrarGaleria = ref(false)
+
+
+const cargarSucesos = async (page = 1) => {
     cargando.value = true
     try {
         const respuesta = await axios.get('/api/incidents', {
-            params: { archived: verArchivados.value ? 1 : 0 }
+            params: {
+                status: filtroEstado.value, // (Si tienes este filtro)
+                archived: verArchivados.value ? 1 : 0,
+                page: page
+            }
         })
-        sucesos.value = respuesta.data
+
+        // Asignación desde .data.data
+        sucesos.value = respuesta.data.data
+
+        // Metadatos de paginación
+        paginaActual.value = respuesta.data.current_page
+        ultimaPagina.value = respuesta.data.last_page
+        totalRegistros.value = respuesta.data.total
     } catch (error) {
-        console.error("Error:", error)
-        toast.error('Error al cargar la lista de sucesos')
+        toast.error('Error al cargar los sucesos')
     } finally {
         cargando.value = false
     }
@@ -41,7 +56,7 @@ const cargarSucesos = async () => {
 
 const cambiarPestana = (estado) => {
     verArchivados.value = estado
-    cargarSucesos()
+    cargarSucesos(1)
 }
 
 
@@ -58,7 +73,7 @@ const ejecutarArchivado = async () => {
         toast.success('Suceso transferido al archivo histórico')
         mostrarModalArchivar.value = false
         sucesoAArchivar.value = null
-        cargarSucesos()
+        cargarSucesos(1)
     } catch (error) {
         toast.error('No se pudo archivar el registro')
     }
@@ -127,7 +142,7 @@ const cerrarDetalles = () => {
 }
 
 onMounted(() => {
-    cargarSucesos()
+    cargarSucesos(1)
 })
 </script>
 
@@ -285,6 +300,27 @@ onMounted(() => {
                         </tr>
                     </tbody>
                 </table>
+
+
+
+                <div v-if="totalRegistros > 0"
+                    class="bg-slate-50 dark:bg-[#0d1b2a] border-t border-slate-200 dark:border-white/10 px-5 py-3 flex items-center justify-between">
+                    <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                        Mostrando página {{ paginaActual }} de {{ ultimaPagina }} ({{ totalRegistros }} registros
+                        totales)
+                    </span>
+                    <div class="flex gap-2">
+                        <button @click="cargarSucesos(paginaActual - 1)" :disabled="paginaActual === 1"
+                            class="px-3 py-1.5 rounded-md text-xs font-bold uppercase font-['Barlow_Condensed'] tracking-wider border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                            Anterior
+                        </button>
+                        <button @click="cargarSucesos(paginaActual + 1)" :disabled="paginaActual === ultimaPagina"
+                            class="px-3 py-1.5 rounded-md text-xs font-bold uppercase font-['Barlow_Condensed'] tracking-wider border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                            Siguiente
+                        </button>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -418,7 +454,7 @@ onMounted(() => {
                             class="mb-3 last:mb-0 grid grid-cols-[1fr_1.5fr] gap-4 items-center border-b border-slate-100 dark:border-white/5 pb-3 last:border-0 last:pb-0">
                             <span
                                 class="text-[12px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest font-['Barlow_Condensed']">{{
-                                clave.replace('_', ' ') }}</span>
+                                    clave.replace('_', ' ') }}</span>
                             <span
                                 class="text-sm font-medium text-slate-900 dark:text-slate-100 break-words bg-slate-50 dark:bg-black/20 px-3 py-1.5 rounded-md border border-slate-100 dark:border-white/5">
                                 {{ typeof valor === 'boolean' ? (valor ? 'Confirmado' : 'Rechazado') : (valor || 'N/A')

@@ -22,18 +22,35 @@ const sucesoDetalle = ref(null)
 const cargarPeajes = async () => {
     try {
         const respuesta = await axios.get('/api/tolls')
-        peajes.value = respuesta.data
+        // AGREGAR .data para acceder al arreglo real dentro de la paginación
+        peajes.value = respuesta.data.data 
     } catch (error) {
         toast.error('Error al cargar las estaciones')
     }
 }
 
-const ejecutarBusqueda = async () => {
+// Agrega estas variables debajo de tus ref() existentes
+const paginaActual = ref(1)
+const ultimaPagina = ref(1)
+const totalRegistros = ref(0)
+
+// Modifica ejecutarBusqueda para recibir la página (por defecto 1)
+const ejecutarBusqueda = async (page = 1) => {
     cargando.value = true
     busquedaRealizada.value = true
     try {
-        const respuesta = await axios.get('/api/incidents', { params: filtros.value })
-        resultados.value = respuesta.data
+        // Combinamos el objeto de filtros con el número de página actual
+        const parametrosDeBusqueda = { ...filtros.value, page: page }
+        
+        const respuesta = await axios.get('/api/incidents', { params: parametrosDeBusqueda })
+        
+        // Asignamos la propiedad .data de la respuesta paginada
+        resultados.value = respuesta.data.data
+        
+        // Capturamos los metadatos para la navegación
+        paginaActual.value = respuesta.data.current_page
+        ultimaPagina.value = respuesta.data.last_page
+        totalRegistros.value = respuesta.data.total
     } catch (error) {
         toast.error('Error al ejecutar la búsqueda cruzada')
     } finally {
@@ -41,10 +58,13 @@ const ejecutarBusqueda = async () => {
     }
 }
 
+// Opcional: Modifica limpiarFiltros para reiniciar también el contador
 const limpiarFiltros = () => {
     filtros.value = { toll_id: '', incident_type: '', date_from: '', date_to: '' }
     resultados.value = []
     busquedaRealizada.value = false
+    totalRegistros.value = 0
+    paginaActual.value = 1
 }
 
 const formatearFecha = (fechaString) => {
@@ -227,6 +247,29 @@ onMounted(() => {
                         </tr>
                     </tbody>
                 </table>
+
+                <div v-if="totalRegistros > 0" class="bg-slate-50 dark:bg-[#0d1b2a] border-t border-slate-200 dark:border-white/10 px-5 py-3 flex items-center justify-between">
+                <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                    Mostrando página {{ paginaActual }} de {{ ultimaPagina }} ({{ totalRegistros }} registros totales)
+                </span>
+                <div class="flex gap-2">
+                    <button 
+                        type="button"
+                        @click="ejecutarBusqueda(paginaActual - 1)" 
+                        :disabled="paginaActual === 1"
+                        class="px-3 py-1.5 rounded-md text-xs font-bold uppercase font-['Barlow_Condensed'] tracking-wider border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                        Anterior
+                    </button>
+                    <button 
+                        type="button"
+                        @click="ejecutarBusqueda(paginaActual + 1)" 
+                        :disabled="paginaActual === ultimaPagina"
+                        class="px-3 py-1.5 rounded-md text-xs font-bold uppercase font-['Barlow_Condensed'] tracking-wider border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                        Siguiente
+                    </button>
+                </div>
+            </div>
+
             </div>
         </div>
 
