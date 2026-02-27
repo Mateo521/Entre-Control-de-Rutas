@@ -25,8 +25,6 @@ const resultadoBusqueda = ref(null)
 const lightTile = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
 const darkTile = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
 
-// Datos Estáticos de Rutas y Peajes (Coordenadas Reales)
-// Datos Estáticos de Rutas y Peajes (Coordenadas Reales)
 const trazasVialesGeoJSON = {
     "type": "FeatureCollection",
     "features": [
@@ -36,8 +34,8 @@ const trazasVialesGeoJSON = {
                 "nombre": "Autopista Prov. 20",
                 "color": "#3b82f6",
                 "peajes": [
-                    { nombre: "Peaje Cruz de Piedra", lat: -33.2541131, lng: -66.2270219 },
-                    { nombre: "Peaje Perilago", lat: -33.2542911, lng: -66.2124143 }
+                    { nombre: "Peaje Cruz de Piedra", lat: -33.2541131, lng: -66.2270219, imagen: "/img/peajes/cruz-piedra.jpeg" },
+                    { nombre: "Peaje Perilago", lat: -33.2542911, lng: -66.2124143, imagen: "/img/peajes/perilago.jpeg" }
                 ]
             },
             "geometry": {
@@ -109,7 +107,7 @@ const trazasVialesGeoJSON = {
                 "nombre": "Ruta Prov. 30",
                 "color": "#8b5cf6",
                 "peajes": [
-                    { nombre: "Peaje Ruta 30", lat: -33.3026376, lng: -66.1093417 }
+                    { nombre: "Peaje Ruta 30", lat: -33.3026376, lng: -66.1093417 , imagen: "/img/peajes/ruta-30.jpeg" },
                 ]
             },
             "geometry": {
@@ -131,10 +129,10 @@ const trazasVialesGeoJSON = {
                 "nombre": "Autopista Los Puquios (Ruta Prov. 9)",
                 "color": "#10b981",
                 "peajes": [
-                    { nombre: "Peaje Los Puquios", lat: -33.2714449, lng: -66.1965004 }
+                    { nombre: "Peaje Los Puquios", lat: -33.2714449, lng: -66.1965004 , imagen: "/img/peajes/los-puquios.jpeg" },
                 ]
             },
-            // (Mantenemos la geometría que pusimos antes para la Ruta 9)
+            
             "geometry": {
                 "type": "LineString",
                 "coordinates": [
@@ -148,12 +146,12 @@ const trazasVialesGeoJSON = {
                 "nombre": "Autopista Serranías Puntanas (Ruta Nac. 7)",
                 "color": "#f59e0b",
                 "peajes": [
-                    { nombre: "Peaje La Cumbre", lat: -33.3590784, lng: -66.0670751 },
-                    { nombre: "Peaje Desaguadero (Isla Oeste)", lat: -33.4117474, lng: -67.1234507 },
-                    { nombre: "Peaje Desaguadero (Isla Este)", lat: -33.4128459, lng: -67.1147563 }
+                    { nombre: "Peaje La Cumbre", lat: -33.3590784, lng: -66.0670751 , imagen: "/img/peajes/la-cumbre.jpeg" },
+                    { nombre: "Peaje Desaguadero (Isla Oeste)", lat: -33.4117474, lng: -67.1234507 , imagen: "/img/peajes/desaguadero-o.jpeg" },
+                    { nombre: "Peaje Desaguadero (Isla Este)", lat: -33.4128459, lng: -67.1147563 , imagen: "/img/peajes/desaguadero-e.jpeg" },
                 ]
             },
-            // (Mantenemos la geometría que pusimos antes para la Ruta 7)
+            
             "geometry": {
                 "type": "LineString",
                 "coordinates": [
@@ -265,19 +263,46 @@ const referenciasViales = {
 const renderizarTrazasEstaticas = () => {
     L.geoJSON(trazasVialesGeoJSON, {
         style: (feature) => ({ color: feature.properties.color, weight: 6, opacity: 0.6, lineCap: 'round', lineJoin: 'round' }),
-        onEachFeature: (feature, layer) => {
+       
+       
+
+
+       
+       onEachFeature: (feature, layer) => {
             layer.bindPopup(`<strong class="font-[Barlow_Condensed] text-sm">${feature.properties.nombre}</strong><br>Traza bajo jurisdicción.`);
             if (feature.properties.peajes) {
                 feature.properties.peajes.forEach(peaje => {
                     const iconPeaje = L.divIcon({
                         className: 'bg-transparent border-none',
-                        html: `<div class="w-7 h-7 bg-white dark:bg-slate-800 rounded-lg border-2 border-[${feature.properties.color}] shadow-lg flex items-center justify-center relative -left-3.5 -top-3.5"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${feature.properties.color}" stroke-width="2.5"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V7a5 5 0 0110 0v4"></path></svg></div>`,
+                        html: `<div class="w-7 h-7 bg-white dark:bg-slate-800 rounded border-2 border-[${feature.properties.color}] shadow-lg flex items-center justify-center relative -left-3.5 -top-3.5"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${feature.properties.color}" stroke-width="2.5"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V7a5 5 0 0110 0v4"></path></svg></div>`,
                         iconSize: [28, 28]
                     });
-                    L.marker([peaje.lat, peaje.lng], { icon: iconPeaje }).addTo(map).bindPopup(`<strong class="font-[Barlow_Condensed] text-sm tracking-wide border-b border-slate-200 dark:border-slate-700 pb-1 mb-1 block">${peaje.nombre}</strong><div class="text-[11px] text-slate-500">Estación base operativa</div>`);
+                    
+                  
+                    L.marker([peaje.lat, peaje.lng], { icon: iconPeaje })
+                     .addTo(map)
+                     .bindPopup(`
+                        <div class="mb-2.5 rounded overflow-hidden shadow-sm border border-slate-200 dark:border-slate-700">
+                            <img src="${peaje.imagen || ''}" alt="Fachada ${peaje.nombre}" class="w-full h-66 object-cover  transition-transform duration-500" onerror="this.src='https://placehold.co/600x400'" />
+                        </div>
+                        <strong class="font-[Barlow_Condensed] text-[17px] tracking-wide border-b border-slate-200 dark:border-slate-700 pb-1.5 mb-1.5 block text-slate-800 dark:text-slate-100">${peaje.nombre}</strong>
+                        <div class="text-[12px] text-slate-500 dark:text-slate-400">Estación base operativa</div>
+                     `, {
+                        
+                         minWidth: 400, 
+                         maxWidth: 440,
+                         className: 'custom-popup-peaje'  
+                     });
                 });
             }
         }
+
+
+
+
+
+
+
     }).addTo(map);
 }
 
@@ -526,9 +551,14 @@ const confirmarPunto = async () => {
     guardando.value = true;
     try {
         const payload = {
-            toll_id: 1,
+            toll_id: 1,  
             incident_type: puntoFormulario.tipo,
-            dynamic_data: { latitud: puntoFormulario.lat, longitud: puntoFormulario.lng, observaciones_mapa: puntoFormulario.observaciones }
+             
+            dynamic_data: JSON.stringify({ 
+                latitud: puntoFormulario.lat, 
+                longitud: puntoFormulario.lng, 
+                observaciones_mapa: puntoFormulario.observaciones 
+            })
         }
         await axios.post('/api/incidents', payload)
         toast.success('Punto georreferenciado guardado en el sistema.')
@@ -584,7 +614,7 @@ onBeforeUnmount(() => { if (map) { map.remove() } })
                                 class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-1.5">Corredor
                                 Vial</label>
                             <select v-model="searchRuta"
-                                class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500/50">
+                                class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded px-3 py-2 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500/50">
                                 <option value="20">Ruta Provincial 20</option>
                                 <option value="9">Ruta Prov. 9 (Autopista Puquios)</option>
                                 <option value="7">Ruta Nac. 7 (Autopista Serranías)</option>
@@ -607,7 +637,7 @@ onBeforeUnmount(() => { if (map) { map.remove() } })
                             </div>
                             <input v-model="searchKm" type="number" step="0.1" :min="limitesRuta.min"
                                 :max="limitesRuta.max" :placeholder="`Ej: ${limitesRuta.min + 2.5}`" required
-                                class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500/50 transition-colors" />
+                                class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded px-3 py-2 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500/50 transition-colors" />
                         </div>
 
 
@@ -615,16 +645,16 @@ onBeforeUnmount(() => { if (map) { map.remove() } })
 
                         <div class="flex gap-2">
                             <button type="button" @click="limpiarBusqueda"
-                                class="w-1/3 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 font-['Barlow_Condensed'] text-xs font-bold tracking-wider uppercase px-2 py-2.5 rounded-lg border border-slate-200 dark:border-white/10 cursor-pointer transition-all">Limpiar</button>
+                                class="w-1/3 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 font-['Barlow_Condensed'] text-xs font-bold tracking-wider uppercase px-2 py-2.5 rounded border border-slate-200 dark:border-white/10 cursor-pointer transition-all">Limpiar</button>
                             <button type="submit"
-                                class="w-2/3 bg-slate-800 dark:bg-white/10 text-white hover:bg-slate-700 dark:hover:bg-white/20 font-['Barlow_Condensed'] text-xs font-bold tracking-wider uppercase px-4 py-2.5 rounded-lg border-none cursor-pointer transition-all">Localizar
+                                class="w-2/3 bg-slate-800 dark:bg-white/10 text-white hover:bg-slate-700 dark:hover:bg-white/20 font-['Barlow_Condensed'] text-xs font-bold tracking-wider uppercase px-4 py-2.5 rounded border-none cursor-pointer transition-all">Localizar
                                 Punto</button>
                         </div>
                     </form>
                 </div>
 
                 <div v-if="resultadoBusqueda"
-                    class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded-xl p-4 shadow-sm transition-colors mb-6">
+                    class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded p-4 shadow-sm transition-colors mb-6">
                     <h4
                         class="font-['Barlow_Condensed'] text-[13px] font-bold text-blue-800 dark:text-blue-400 uppercase tracking-widest mb-3 border-b border-blue-200 dark:border-blue-800/50 pb-2">
                         Resultado Espacial</h4>
@@ -667,12 +697,12 @@ onBeforeUnmount(() => { if (map) { map.remove() } })
                         class="font-['Barlow_Condensed'] text-[13px] font-bold tracking-widest uppercase text-amber-600 dark:text-amber-500 mb-4 border-b border-amber-500/20 pb-2">
                         Control Georreferenciado</h4>
                     <div
-                        class="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-500/20 rounded-lg p-3 text-xs text-amber-800 dark:text-amber-300 leading-relaxed mb-3">
+                        class="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-500/20 rounded p-3 text-xs text-amber-800 dark:text-amber-300 leading-relaxed mb-3">
                         <strong>Trazas Activas:</strong> El mapa despliega la jurisdicción operativa de las estaciones
                         base.
                     </div>
                     <div
-                        class="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg p-3 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                        class="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded p-3 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                         Haz clic en el mapa para inicializar un suceso. Selecciona "Quitar" para borrar la coordenada
                         temporal.
                     </div>
@@ -701,7 +731,7 @@ onBeforeUnmount(() => { if (map) { map.remove() } })
                             class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-1.5">Tipo
                             de Evento</label>
                         <select v-model="puntoFormulario.tipo" required
-                            class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2.5 text-slate-900 dark:text-white text-sm outline-none transition-colors focus:border-amber-500/50">
+                            class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded px-3 py-2.5 text-slate-900 dark:text-white text-sm outline-none transition-colors focus:border-amber-500/50">
                             <option value="" disabled>— Seleccionar clasificación —</option>
                             <option value="accidente_vial">Accidente Vial</option>
                             <option value="animal_ruta">Animal en Ruta</option>
@@ -716,14 +746,14 @@ onBeforeUnmount(() => { if (map) { map.remove() } })
                             adicionales</label>
                         <textarea v-model="puntoFormulario.observaciones" rows="3"
                             placeholder="Detalles de la ubicación o gravedad..."
-                            class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2.5 text-slate-900 dark:text-white text-sm outline-none transition-colors focus:border-amber-500/50 resize-none"></textarea>
+                            class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded px-3 py-2.5 text-slate-900 dark:text-white text-sm outline-none transition-colors focus:border-amber-500/50 resize-none"></textarea>
                     </div>
 
                     <div class="flex gap-3 justify-end pt-2">
                         <button type="button" @click="cerrarModal"
-                            class="px-4 py-2 rounded-lg text-xs font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border-none bg-transparent cursor-pointer font-['Barlow_Condensed'] uppercase tracking-wider">Cancelar</button>
+                            class="px-4 py-2 rounded text-xs font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border-none bg-transparent cursor-pointer font-['Barlow_Condensed'] uppercase tracking-wider">Cancelar</button>
                         <button type="submit" :disabled="guardando"
-                            class="bg-amber-500 text-[#0d1b2a] font-['Barlow_Condensed'] text-xs font-bold tracking-wider uppercase px-5 py-2 rounded-lg border-none cursor-pointer inline-flex items-center transition-all hover:bg-amber-400 disabled:opacity-50">
+                            class="bg-amber-500 text-[#0d1b2a] font-['Barlow_Condensed'] text-xs font-bold tracking-wider uppercase px-5 py-2 rounded border-none cursor-pointer inline-flex items-center transition-all hover:bg-amber-400 disabled:opacity-50">
                             {{ guardando ? 'Registrando...' : 'Confirmar Punto' }}
                         </button>
                     </div>

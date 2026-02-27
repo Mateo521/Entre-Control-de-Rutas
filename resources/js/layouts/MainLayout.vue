@@ -187,12 +187,174 @@ onUnmounted(() => {
                 </div>
             </div>
 
-            <div :class="[
-                'flex-1 overflow-y-auto',
-                $route.name !== 'MapDashboard' ? 'p-6' : ''
-            ]">
-                <router-view></router-view>
+
+
+
+
+
+
+            <div class="flex-1 overflow-y-auto flex flex-col bg-slate-100 dark:bg-[#0a1628]">
+
+                <div :class="[
+                    'flex-1 overflow-y-auto',
+                    $route.name !== 'MapDashboard' ? 'p-6' : ''
+                ]">
+                    <router-view></router-view>
+                </div>
+
+                <div class="px-6 pb-6 mt-auto">
+                    <div class="pt-5 border-t border-slate-200 dark:border-white/10">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4
+                                class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.15em] uppercase text-slate-500 dark:text-slate-400 m-0">
+                                Infraestructura Operativa - Estaciones Base
+                            </h4>
+                            <span
+                                class="text-[10px] text-slate-400 dark:text-slate-500 font-['Barlow_Condensed'] tracking-widest uppercase">
+                                Ente Control de Rutas
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+
+
+
+
+                            <div
+                                class="group relative rounded-lg overflow-hidden border border-slate-200 dark:border-white/10 shadow-sm bg-slate-200 dark:bg-slate-800 aspect-video">
+                                <img :src="'/img/peajes/la-cumbre.jpeg'"
+                                    onerror="this.src='https://placehold.co/600x400?text=La+Cumbre'"
+                                    class="w-full h-full object-cover  transition-transform duration-500" />
+                                <!-- group-hover:scale-110 -->
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-2.5">
+                                    <div>
+                                        <div
+                                            class="text-white font-['Barlow_Condensed'] text-[12px] font-bold tracking-wide leading-tight">
+                                            La Cumbre</div>
+                                        <div
+                                            class="text-amber-400 text-[9px] font-bold tracking-widest uppercase mt-0.5">
+                                            Ruta Nac. 7</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                class="group relative rounded-lg overflow-hidden border border-slate-200 dark:border-white/10 shadow-sm bg-slate-200 dark:bg-slate-800 aspect-video">
+                                <img :src="'/img/peajes/desaguadero-e.jpeg'"
+                                    onerror="this.src='https://placehold.co/600x400?text=Desaguadero+E.'"
+                                    class="w-full h-full object-cover  transition-transform duration-500" />
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-2.5">
+                                    <div>
+                                        <div
+                                            class="text-white font-['Barlow_Condensed'] text-[12px] font-bold tracking-wide leading-tight">
+                                            Desaguadero E.</div>
+                                        <div
+                                            class="text-amber-400 text-[9px] font-bold tracking-widest uppercase mt-0.5">
+                                            Ruta Nac. 7</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                class="group relative rounded-lg overflow-hidden border border-slate-200 dark:border-white/10 shadow-sm bg-slate-200 dark:bg-slate-800 aspect-video">
+                                <img :src="'/img/peajes/desaguadero-o.jpeg'"
+                                    onerror="this.src='https://placehold.co/600x400?text=Desaguadero+O.'"
+                                    class="w-full h-full object-cover  transition-transform duration-500" />
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-2.5">
+                                    <div>
+                                        <div
+                                            class="text-white font-['Barlow_Condensed'] text-[12px] font-bold tracking-wide leading-tight">
+                                            Desaguadero O.</div>
+                                        <div
+                                            class="text-amber-400 text-[9px] font-bold tracking-widest uppercase mt-0.5">
+                                            Ruta Nac. 7</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                class="group relative rounded-lg overflow-hidden border border-slate-200 dark:border-white/10 shadow-sm bg-slate-200 dark:bg-slate-800 aspect-video">
+                                <img :src="'/img/peajes/los-puquios.jpeg'"
+                                    onerror="this.src='https://placehold.co/600x400?text=Los+Puquios'"
+                                    class="w-full h-full object-cover  transition-transform duration-500" />
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-t from-emerald-900/90 via-black/20 to-transparent flex items-end p-2.5">
+                                    <div>
+                                        <div
+                                            class="text-white font-['Barlow_Condensed'] text-[12px] font-bold tracking-wide leading-tight">
+                                            Los Puquios</div>
+                                        <div
+                                            class="text-emerald-400 text-[9px] font-bold tracking-widest uppercase mt-0.5">
+                                            Ruta Prov. 9</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                class="group relative rounded-lg overflow-hidden border border-slate-200 dark:border-white/10 shadow-sm bg-slate-200 dark:bg-slate-800 aspect-video">
+                                <img :src="'/img/peajes/cruz-piedra.jpeg'"
+                                    onerror="this.src='https://placehold.co/600x400?text=Cruz+de+Piedra'"
+                                    class="w-full h-full object-cover  transition-transform duration-500" />
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-t from-blue-900/90 via-black/20 to-transparent flex items-end p-2.5">
+                                    <div>
+                                        <div
+                                            class="text-white font-['Barlow_Condensed'] text-[12px] font-bold tracking-wide leading-tight">
+                                            Cruz de Piedra</div>
+                                        <div
+                                            class="text-blue-400 text-[9px] font-bold tracking-widest uppercase mt-0.5">
+                                            Ruta Prov. 20</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                class="group relative rounded-lg overflow-hidden border border-slate-200 dark:border-white/10 shadow-sm bg-slate-200 dark:bg-slate-800 aspect-video">
+                                <img :src="'/img/peajes/perilago.jpeg'"
+                                    onerror="this.src='https://placehold.co/600x400?text=Perilago'"
+                                    class="w-full h-full object-cover  transition-transform duration-500" />
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-t from-blue-900/90 via-black/20 to-transparent flex items-end p-2.5">
+                                    <div>
+                                        <div
+                                            class="text-white font-['Barlow_Condensed'] text-[12px] font-bold tracking-wide leading-tight">
+                                            Perilago</div>
+                                        <div
+                                            class="text-blue-400 text-[9px] font-bold tracking-widest uppercase mt-0.5">
+                                            Ruta Prov. 20</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                class="group relative rounded-lg overflow-hidden border border-slate-200 dark:border-white/10 shadow-sm bg-slate-200 dark:bg-slate-800 aspect-video">
+                                <img :src="'/img/peajes/ruta-30.jpeg'"
+                                    onerror="this.src='https://placehold.co/600x400?text=Ruta+30'"
+                                    class="w-full h-full object-cover  transition-transform duration-500" />
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-t from-purple-900/90 via-black/20 to-transparent flex items-end p-2.5">
+                                    <div>
+                                        <div
+                                            class="text-white font-['Barlow_Condensed'] text-[12px] font-bold tracking-wide leading-tight">
+                                            Ruta 30</div>
+                                        <div
+                                            class="text-purple-400 text-[9px] font-bold tracking-widest uppercase mt-0.5">
+                                            Ruta Prov. 30</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
             </div>
+
+
+
         </div>
     </div>
 </template>

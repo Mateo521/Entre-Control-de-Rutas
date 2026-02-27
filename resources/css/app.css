@@ -16,7 +16,7 @@
 
  
 .leaflet-popup-content-wrapper {
-    @apply bg-white dark:bg-[#0d1b2a] text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10 rounded-lg shadow-xl;
+    @apply bg-white dark:bg-[#0d1b2a] text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10 !rounded shadow-xl;
 }
 
 .leaflet-popup-tip {
@@ -37,4 +37,26 @@
  
 html.dark {
     color-scheme: dark;
+}
+
+
+.custom-popup-peaje .leaflet-popup-content {
+    margin: 12px !important;
+}
+
+.custom-popup-peaje .leaflet-popup-content-wrapper {
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: background-color 0.3s ease;
+}
+
+html.dark .custom-popup-peaje .leaflet-popup-content-wrapper,
+html.dark .custom-popup-peaje .leaflet-popup-tip {
+    background-color: #0f172a !important; /* Tailwind slate-900 */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+html.dark .custom-popup-peaje .leaflet-popup-tip {
+    border-top: none;
+    border-left: none;
 }
