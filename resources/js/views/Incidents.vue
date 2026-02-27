@@ -20,9 +20,9 @@ const idEdicion = ref(null)
 const formulario = ref({ toll_id: '', incident_type: '', dynamic_data: {} })
 const camposDinamicosActivos = ref([])
 
-// Variables Multimedia Múltiple
-const archivosAdjuntos = ref({}) // { campo: [File1, File2] }
-const mediosExistentes = ref({}) // { campo: ['url1', 'url2'] }
+
+const archivosAdjuntos = ref({}) //  campo: [File1, File2] }
+const mediosExistentes = ref({}) //  campo: ['url1', 'u rl2' ] } 
 const archivosAEliminar = ref({}) // { campo: ['url1'] }
 
 const cargarPeajes = async () => {
@@ -50,7 +50,7 @@ const cargarSucesoParaEditar = async (id) => {
         }
 
         if (suceso.media_paths) {
-            // Normalizamos strings antiguos a arrays para evitar errores en UI
+          
             let mediosNormalizados = {}
             for (let key in suceso.media_paths) {
                 mediosNormalizados[key] = Array.isArray(suceso.media_paths[key])
@@ -91,14 +91,14 @@ const alCambiarPeaje = () => {
     })
 }
 
-// --- LÓGICA MULTIMEDIA ACTUALIZADA ---
+
 const procesarArchivo = (event, nombreCampo) => {
     const files = Array.from(event.target.files)
     if (!archivosAdjuntos.value[nombreCampo]) {
         archivosAdjuntos.value[nombreCampo] = []
     }
     archivosAdjuntos.value[nombreCampo].push(...files)
-    event.target.value = '' // Resetea el input para permitir volver a seleccionar
+    event.target.value = '' 
 }
 
 const quitarArchivoNuevo = (nombreCampo, index) => {
@@ -126,7 +126,7 @@ const guardarSuceso = async () => {
         formData.append('incident_type', formulario.value.incident_type)
         formData.append('dynamic_data', JSON.stringify(formulario.value.dynamic_data))
 
-        // Iteramos los arrays de archivos nuevos
+      
         Object.keys(archivosAdjuntos.value).forEach(campoNombre => {
             archivosAdjuntos.value[campoNombre].forEach(file => {
                 formData.append(`media[${campoNombre}][]`, file)

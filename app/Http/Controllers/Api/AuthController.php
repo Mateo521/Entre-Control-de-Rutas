@@ -10,9 +10,7 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    /**
-     * Valida credenciales y emite un token de texto plano.
-     */
+ 
     public function login(Request $request)
     {
       

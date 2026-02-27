@@ -16,8 +16,8 @@ return new class extends Migration
         $table->foreignId('toll_id')->constrained('tolls');
         $table->foreignId('user_id')->constrained('users');
         $table->string('incident_type');
-        $table->jsonb('dynamic_data')->nullable(); // Respuestas al formulario dinámico
-        $table->json('media_paths')->nullable(); // Rutas de las fotos/videos
+        $table->jsonb('dynamic_data')->nullable();  
+        $table->json('media_paths')->nullable();  
         $table->timestamps();
         $table->softDeletes();
     });

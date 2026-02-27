@@ -13,7 +13,7 @@ class IncidentController extends Controller
     {
         $query = Incident::with('toll')->latest();
 
-        // Filtros del módulo de Búsqueda Avanzada
+      
         if ($request->filled('toll_id')) {
             $query->where('toll_id', $request->toll_id);
         }
@@ -30,7 +30,7 @@ class IncidentController extends Controller
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
-        // Filtros heredados de otras vistas (si los conservas)
+      
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
@@ -61,7 +61,7 @@ class IncidentController extends Controller
         $dynamicData = $request->filled('dynamic_data') ? json_decode($request->dynamic_data, true) : [];
         $mediaPaths = [];
 
-        // CORRECCIÓN: Extraemos los archivos directamente sin usar hasFile()
+   
         $archivosMedia = $request->file('media');
 
         if (!empty($archivosMedia) && is_array($archivosMedia)) {
@@ -126,7 +126,7 @@ class IncidentController extends Controller
             }
         }
 
-        // CORRECCIÓN: Extraemos los archivos directamente sin usar hasFile()
+      
         $archivosMedia = $request->file('media');
 
         if (!empty($archivosMedia) && is_array($archivosMedia)) {

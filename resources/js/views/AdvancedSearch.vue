@@ -22,32 +22,30 @@ const sucesoDetalle = ref(null)
 const cargarPeajes = async () => {
     try {
         const respuesta = await axios.get('/api/tolls')
-        // AGREGAR .data para acceder al arreglo real dentro de la paginación
+        
         peajes.value = respuesta.data.data 
     } catch (error) {
         toast.error('Error al cargar las estaciones')
     }
 }
-
-// Agrega estas variables debajo de tus ref() existentes
+ 
 const paginaActual = ref(1)
 const ultimaPagina = ref(1)
 const totalRegistros = ref(0)
-
-// Modifica ejecutarBusqueda para recibir la página (por defecto 1)
+ 
 const ejecutarBusqueda = async (page = 1) => {
     cargando.value = true
     busquedaRealizada.value = true
     try {
-        // Combinamos el objeto de filtros con el número de página actual
+         
         const parametrosDeBusqueda = { ...filtros.value, page: page }
         
         const respuesta = await axios.get('/api/incidents', { params: parametrosDeBusqueda })
         
-        // Asignamos la propiedad .data de la respuesta paginada
+        
         resultados.value = respuesta.data.data
         
-        // Capturamos los metadatos para la navegación
+        
         paginaActual.value = respuesta.data.current_page
         ultimaPagina.value = respuesta.data.last_page
         totalRegistros.value = respuesta.data.total
@@ -58,7 +56,7 @@ const ejecutarBusqueda = async (page = 1) => {
     }
 }
 
-// Opcional: Modifica limpiarFiltros para reiniciar también el contador
+ 
 const limpiarFiltros = () => {
     filtros.value = { toll_id: '', incident_type: '', date_from: '', date_to: '' }
     resultados.value = []
@@ -133,7 +131,7 @@ const exportarExcel = () => {
     const url = URL.createObjectURL(blob);
      
     const link = document.createElement("a");
-    const fechaDescarga = new Date().toISOString().split('T')[0]; // Ej: 2026-02-26
+    const fechaDescarga = new Date().toISOString().split('T')[0]; // Ejj: 2026-02-26
     link.setAttribute("href", url);
     link.setAttribute("download", `Auditoria_Rutas_${fechaDescarga}.csv`);
     document.body.appendChild(link);

@@ -11,8 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('actions', function (Blueprint $table) {
-            // Agregamos la columna después del toll_id. 
-            // Le damos un valor por defecto por si hiciste alguna prueba previa y no rompa la BD.
+ 
             $table->string('category')->after('toll_id')->default('Mantenimiento Vial');
         });
     }

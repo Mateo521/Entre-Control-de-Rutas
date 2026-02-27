@@ -13,15 +13,15 @@ return new class extends Migration
     {
         Schema::create('actions', function (Blueprint $table) {
             $table->id();
-            // toll_id es nullable porque hay acciones que son de toda la "Región Centro" y no de un peaje en particular
+          
             $table->foreignId('toll_id')->nullable()->constrained('tolls')->nullOnDelete();
             
-            $table->string('title'); // Ej: "Creación de cuadrilla de bacheo"
-            $table->text('description'); // El texto largo del informe
-            $table->json('media_paths')->nullable(); // Portafolio de evidencia (imágenes del trabajo)
+            $table->string('title');  
+            $table->text('description'); 
+            $table->json('media_paths')->nullable();  
             
             $table->timestamps();
-            $table->softDeletes(); // Borrado lógico (Archivado)
+            $table->softDeletes();  
         });
     }
 

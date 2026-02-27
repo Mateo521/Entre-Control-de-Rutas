@@ -5,7 +5,7 @@ import axios from 'axios'
 
 const router = useRouter()
 
-// Estado global de conexión
+
 const isOnline = ref(navigator.onLine)
 
 const actualizarEstadoRed = () => {
@@ -24,7 +24,7 @@ const handleLogout = async () => {
 }
 
 onMounted(() => {
-    // Escuchamos los eventos nativos del navegador
+
     window.addEventListener('online', actualizarEstadoRed)
     window.addEventListener('offline', actualizarEstadoRed)
 })

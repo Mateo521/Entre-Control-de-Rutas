@@ -9,7 +9,7 @@ const cargando = ref(true)
 const mostrarModal = ref(false)
 const guardando = ref(false)
 
-// Variables para controlar si es creación o edición
+ 
 const esEdicion = ref(false)
 const idEdicion = ref(null)
 
@@ -18,7 +18,7 @@ const nuevoPeaje = reactive({
     camposDinámicos: []
 })
 
-// Nuevas variables
+ 
 const paginaActual = ref(1)
 const ultimaPagina = ref(1)
 const totalRegistros = ref(0)
@@ -40,21 +40,20 @@ const cargarPeajes = async (page = 1) => {
         cargando.value = false
     }
 }
-
-// Modificamos abrirModal para que reciba un peaje opcional
+ 
 const abrirModal = (peaje = null) => {
     if (peaje && peaje.id) {
-        // MODO EDICIÓN
+      
         esEdicion.value = true
         idEdicion.value = peaje.id
         nuevoPeaje.name = peaje.name
         
-        // Hacemos una copia profunda (JSON.parse) para no modificar la tabla en tiempo real antes de guardar
+        
         nuevoPeaje.camposDinámicos = peaje.dynamic_schema && peaje.dynamic_schema.inventory_fields 
             ? JSON.parse(JSON.stringify(peaje.dynamic_schema.inventory_fields)) 
             : []
     } else {
-        // MODO CREACIÓN
+        
         esEdicion.value = false
         idEdicion.value = null
         nuevoPeaje.name = ''
@@ -90,11 +89,11 @@ const guardarPeaje = async () => {
         }
 
         if (esEdicion.value) {
-            // Petición PUT para actualizar
+           
             await axios.put(`/api/tolls/${idEdicion.value}`, payload)
             toast.success('Esquema de peaje actualizado correctamente.')
         } else {
-            // Petición POST para crear
+          
             await axios.post('/api/tolls', payload)
             toast.success('Peaje registrado exitosamente.')
         }

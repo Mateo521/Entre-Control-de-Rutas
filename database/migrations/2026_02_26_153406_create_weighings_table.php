@@ -16,7 +16,7 @@ return new class extends Migration
         $table->foreignId('toll_id')->constrained('tolls');
         $table->string('license_plate');
         $table->string('driver_dni')->nullable();
-        $table->decimal('weight_kg', 10, 2); // Hasta 99 millones de kg con 2 decimales
+        $table->decimal('weight_kg', 10, 2);  
         $table->timestamps();
         $table->softDeletes();
     });

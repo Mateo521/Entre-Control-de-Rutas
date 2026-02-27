@@ -16,19 +16,19 @@ const routes = [
         meta: { requiresGuest: true }
     },
     {
-        // El layout es la ruta principal /panel
+       
         path: '/panel',
         component: MainLayout,
         meta: { requiresAuth: true },
-        // Sus "hijos" se inyectarán en la etiqueta <router-view> del layout
+       
         children: [
             {
-                path: '', // Coincide con /panel exactamente
+                path: '',  
                 name: 'Dashboard',
                 component: Dashboard
             },
             {
-                path: 'peajes', // Coincide con /panel/peajes
+                path: 'peajes',  
                 name: 'Tolls',
                 component: Tolls
             },

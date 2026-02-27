@@ -12,13 +12,12 @@ class Action extends Model
 
   protected $fillable = [
         'toll_id',
-        'category', // <--- NUEVA COLUMNA
+        'category',  
         'title',
         'description',
         'media_paths'
     ];
 
-    // Forzamos a Laravel a transformar el JSON de la BD en un Array de PHP automáticamente
     protected $casts = [
         'media_paths' => 'array',
     ];

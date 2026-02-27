@@ -3,27 +3,27 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { toast } from 'vue3-toastify'
 
-// 1. Variables principales (Faltaban estas declaraciones)
+
 const sucesos = ref([])
 const cargando = ref(true)
 const verArchivados = ref(false)
 const filtroEstado = ref('')
 
-// 2. Variables de Paginación (Ya las tenías)
+
 const paginaActual = ref(1)
 const ultimaPagina = ref(1)
 const totalRegistros = ref(0)
 
-// 3. Variables para Modal de Detalles (Ya las tenías)
+
 const mostrarDetalles = ref(false)
 const detallesActivos = ref({})
 const sucesoDetalle = ref(null)
 
-// 4. Variables para Archivar (Faltaban estas declaraciones)
+
 const sucesoAArchivar = ref(null)
 const mostrarModalArchivar = ref(false)
 
-// 5. Variables para Galería (Faltaban estas declaraciones)
+
 const sucesoActivo = ref(null)
 const mediosActivos = ref({})
 const mostrarGaleria = ref(false)
@@ -34,16 +34,16 @@ const cargarSucesos = async (page = 1) => {
     try {
         const respuesta = await axios.get('/api/incidents', {
             params: {
-                status: filtroEstado.value, // (Si tienes este filtro)
+                status: filtroEstado.value, 
                 archived: verArchivados.value ? 1 : 0,
                 page: page
             }
         })
 
-        // Asignación desde .data.data
+    
         sucesos.value = respuesta.data.data
 
-        // Metadatos de paginación
+     
         paginaActual.value = respuesta.data.current_page
         ultimaPagina.value = respuesta.data.last_page
         totalRegistros.value = respuesta.data.total
@@ -104,7 +104,7 @@ const traducirTipo = (tipo) => {
 const abrirGaleria = (suceso) => {
     sucesoActivo.value = suceso
     let medios = suceso.media_paths || {}
-    // Normalizar a arrays para el v-for del template
+ 
     for (let key in medios) {
         if (!Array.isArray(medios[key])) medios[key] = [medios[key]];
     }

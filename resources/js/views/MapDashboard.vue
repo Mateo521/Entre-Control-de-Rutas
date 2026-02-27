@@ -13,7 +13,7 @@ const searchRuta = ref('20')
 const searchKm = ref('')
 let marcadorTemporal = null
 
-// NUEVO: Arreglo para guardar el marcador de búsqueda kilométrico y poder borrarlo
+ 
 const marcadoresBusqueda = []
 
 
@@ -21,7 +21,7 @@ const satelliteTile = 'https://server.arcgisonline.com/ArcGIS/rest/services/Worl
 const tipoMapa = ref('estandar'); // 'estandar' o 'satelite'
 
 
-// 2. Crear la función unificada para actualizar la capa
+
 const actualizarCapaMapa = () => {
     if (tipoMapa.value === 'satelite') {
         tileLayer.setUrl(satelliteTile);
@@ -419,12 +419,12 @@ const initMap = () => {
     observer.observe(document.documentElement, { attributes: true });
 }
 
-// NUEVO: Algoritmo matemático temporal para simular coordenadas de los km
+ 
 const calcularCoordenadaAproximada = (rutaId, kmBuscado) => {
-    // Obtenemos los puntos de la ruta seleccionada que SÍ tienen lat y lng registrados
+    
     const puntosConCoordenadas = referenciasViales[rutaId].filter(p => p.lat && p.lng);
 
-    // Si la ruta aún no tiene coordenadas reales, aplicamos la matemática de respaldo anterior
+    
     if (puntosConCoordenadas.length === 0) {
         let lat = -33.30, lng = -66.33;
         if (rutaId === '9') { lat = -33.27 + (kmBuscado * 0.006); lng = -66.20 + (kmBuscado * 0.004); }
@@ -432,25 +432,25 @@ const calcularCoordenadaAproximada = (rutaId, kmBuscado) => {
         return [lat, lng];
     }
 
-    // Ordenamos los puntos de menor a mayor kilometraje para asegurar el flujo de la ruta
+   
     puntosConCoordenadas.sort((a, b) => a.km - b.km);
 
-    // 1. Si el Km buscado es exacto a un punto registrado
+    
     const exacto = puntosConCoordenadas.find(p => p.km === kmBuscado);
     if (exacto) return [exacto.lat, exacto.lng];
 
-    // 2. Si el Km buscado es menor al primer punto registrado (Extrapolación inicial)
+  
     if (kmBuscado < puntosConCoordenadas[0].km) {
-        return [puntosConCoordenadas[0].lat, puntosConCoordenadas[0].lng]; // Lo anclamos al inicio
+        return [puntosConCoordenadas[0].lat, puntosConCoordenadas[0].lng];  
     }
 
-    // 3. Si el Km buscado es mayor al último punto registrado (Extrapolación final)
+    
     const ultimoPunto = puntosConCoordenadas[puntosConCoordenadas.length - 1];
     if (kmBuscado > ultimoPunto.km) {
-        return [ultimoPunto.lat, ultimoPunto.lng]; // Lo anclamos al final
+        return [ultimoPunto.lat, ultimoPunto.lng];  
     }
 
-    // 4. Interpolación Lineal: Encontrar entre qué dos puntos está el Km buscado
+     
     let puntoA = puntosConCoordenadas[0];
     let puntoB = puntosConCoordenadas[1];
 
@@ -462,10 +462,10 @@ const calcularCoordenadaAproximada = (rutaId, kmBuscado) => {
         }
     }
 
-    // Fórmula matemática para calcular el porcentaje de distancia entre Punto A y Punto B
+   
     const porcentajeRecorrido = (kmBuscado - puntoA.km) / (puntoB.km - puntoA.km);
 
-    // Aplicar ese porcentaje a las latitudes y longitudes
+    
     const latCalculada = puntoA.lat + ((puntoB.lat - puntoA.lat) * porcentajeRecorrido);
     const lngCalculada = puntoA.lng + ((puntoB.lng - puntoA.lng) * porcentajeRecorrido);
 
@@ -474,13 +474,13 @@ const calcularCoordenadaAproximada = (rutaId, kmBuscado) => {
 
 
 
-// Propiedad computada que extrae dinámicamente el min y max de la ruta seleccionada
+ 
 const limitesRuta = computed(() => {
     if (!searchRuta.value || !referenciasViales[searchRuta.value]) {
         return { min: 0, max: 1000 };
     }
     const puntos = referenciasViales[searchRuta.value];
-    // Como los arreglos están ordenados cronológicamente, el índice 0 es el inicio y el último es el final
+ 
     const min = puntos[0].km;
     const max = puntos[puntos.length - 1].km;
     return { min, max };
@@ -504,7 +504,7 @@ const buscarKilometro = () => {
 
     const { min, max } = limitesRuta.value;
 
-    // Validación de seguridad: Previene cálculos fuera del rango geográfico
+  
     if (km < min || km > max) {
         toast.warning(`El kilómetro debe estar comprendido entre ${min} y ${max} para esta traza.`);
         return;
@@ -512,7 +512,7 @@ const buscarKilometro = () => {
 
 
 
-    // 1. Calcular el texto en el panel lateral (Exacto o Aproximado)
+    
     const exacto = puntos.find(p => p.km === km)
     if (exacto) {
         resultadoBusqueda.value = { tipo: 'exacto', punto: exacto }
@@ -530,11 +530,11 @@ const buscarKilometro = () => {
         }
     }
 
-    // 2. Limpiar marcador anterior del mapa
+  
     marcadoresBusqueda.forEach(m => map.removeLayer(m))
     marcadoresBusqueda.length = 0
 
-    // 3. Simular coordenada y dibujar en el mapa
+ 
     const [mockLat, mockLng] = calcularCoordenadaAproximada(searchRuta.value, km)
 
     const dotKm = L.circleMarker([mockLat, mockLng], {
@@ -551,7 +551,7 @@ const buscarKilometro = () => {
         <div class="text-[10px] text-slate-500 italic">Coordenada temporal pendiente de relevamiento.</div>
     `).openPopup()
 
-    // 4. Volar a la posición
+  
     map.flyTo([mockLat, mockLng], 12, { duration: 1.5 })
 
     marcadoresBusqueda.push(dotKm)
@@ -562,7 +562,7 @@ const limpiarBusqueda = () => {
     resultadoBusqueda.value = null
     marcadoresBusqueda.forEach(m => map.removeLayer(m))
     marcadoresBusqueda.length = 0
-    map.setView([-33.3017, -66.3378], 8) // Volver al centro de la provincia
+    map.setView([-33.3017, -66.3378], 8)  
 }
 
 const confirmarPunto = async () => {

@@ -10,7 +10,7 @@ const verArchivados = ref(false)
 const mostrarModalArchivar = ref(false)
 const accionAArchivar = ref(null)
 
-// Variables para Portafolio Multimedia
+
 const mostrarGaleria = ref(false)
 const mediosActivos = ref([])
 const accionActiva = ref(null)
@@ -22,7 +22,6 @@ const totalRegistros = ref(0);
 
 
 
-// Variables para el Modal de Lectura (Descripción)
 const mostrarDetalles = ref(false)
 const accionDetalle = ref(null)
 
@@ -32,14 +31,14 @@ const cargarAcciones = async (page = 1) => {
         const respuesta = await axios.get('/api/actions', {
             params: {
                 archived: verArchivados.value ? 1 : 0,
-                page: page // Enviamos el número de página solicitado
+                page: page  
             }
         });
 
-        // La estructura de Laravel Paginator requiere acceder a .data.data
+  
         acciones.value = respuesta.data.data;
 
-        // Guardamos los metadatos para armar los botones
+      
         paginaActual.value = respuesta.data.current_page;
         ultimaPagina.value = respuesta.data.last_page;
         totalRegistros.value = respuesta.data.total;
@@ -81,7 +80,7 @@ const formatearFecha = (fechaString) => {
     return new Date(fechaString).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
-// Modal de Descripción
+
 const abrirDetalles = (accion) => {
     accionDetalle.value = accion
     mostrarDetalles.value = true
@@ -91,7 +90,7 @@ const cerrarDetalles = () => {
     accionDetalle.value = null
 }
 
-// Modal Multimedia
+
 const abrirGaleria = (accion) => {
     accionActiva.value = accion
     mediosActivos.value = accion.media_paths || []

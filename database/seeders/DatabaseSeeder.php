@@ -10,13 +10,13 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Crea el usuario administrador por defecto
+     
         User::updateOrCreate(
-            ['email' => 'admin@enterutas.gov.ar'], // Busca por este email
+            ['email' => 'admin@enterutas.gov.ar'],  
             [
                 'name' => 'Administrador Principal',
-                'password' => Hash::make('Admin1234!'), // Contraseña encriptada
-                // 'role' => 'admin' // Descomenta esta línea si agregaste la columna 'role' en tu migración de users
+                'password' => Hash::make('Admin1234!'),  
+                
             ]
         );
     }

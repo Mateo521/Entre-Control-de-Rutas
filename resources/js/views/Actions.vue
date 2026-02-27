@@ -17,17 +17,11 @@ const actualizarEstadoRed = () => { isOnline.value = navigator.onLine }
 const esEdicion = ref(false)
 const idEdicion = ref(null)
 
-// Agrega category vacío
+
 const formulario = ref({ toll_id: '', category: '', title: '', description: '' })
 
 
-
-
-
-
-
-
-// Variables para Portafolio (Arreglos planos, sin claves dinámicas)
+ 
 const archivosAdjuntos = ref([])
 const mediosExistentes = ref([])
 const archivosAEliminar = ref([])
@@ -61,12 +55,11 @@ const cargarAccionParaEditar = async (id) => {
         router.push('/panel/acciones')
     }
 }
-
-// Lógica de archivos múltiples
+ 
 const procesarArchivo = (event) => {
     const files = Array.from(event.target.files)
     archivosAdjuntos.value.push(...files)
-    event.target.value = '' // Limpiar el input nativo
+    event.target.value = ''  
 }
 
 const quitarArchivoNuevo = (index) => {
@@ -88,7 +81,6 @@ const guardarAccion = async () => {
     try {
         const formData = new FormData()
 
-        // Si toll_id está vacío, no lo enviamos (así Laravel lo guarda como null para "Región Centro")
         if (formulario.value.toll_id) {
             formData.append('toll_id', formulario.value.toll_id)
         }
@@ -96,7 +88,6 @@ const guardarAccion = async () => {
         formData.append('title', formulario.value.title)
         formData.append('description', formulario.value.description)
 
-        // Adjuntamos todos los archivos nuevos bajo la misma llave "media[]"
         archivosAdjuntos.value.forEach(file => {
             formData.append('media[]', file)
         })
@@ -113,7 +104,6 @@ const guardarAccion = async () => {
             await axios.post('/api/actions', formData)
             toast.success('Acción operativa registrada exitosamente')
 
-            // Limpiar formulario tras crear
             formulario.value.title = ''
             formulario.value.description = ''
             archivosAdjuntos.value = []

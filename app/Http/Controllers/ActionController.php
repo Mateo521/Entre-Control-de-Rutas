@@ -17,8 +17,7 @@ class ActionController extends Controller
             $query->onlyTrashed();
         }
 
-        // Reemplazar ->get() por ->paginate(15)
-        // 15 es la cantidad de registros por página.
+
         return response()->json($query->paginate(15));
     }
 
@@ -73,7 +72,7 @@ class ActionController extends Controller
 
         $mediaPaths = $action->media_paths ?? [];
 
-        // Procesar eliminación de archivos
+     
         if ($request->filled('archivos_a_eliminar')) {
             $aEliminar = json_decode($request->archivos_a_eliminar, true);
             foreach ($aEliminar as $ruta) {
@@ -83,7 +82,7 @@ class ActionController extends Controller
             }
         }
 
-        // Procesar nuevos archivos
+      
         $archivosMedia = $request->file('media');
         if (!empty($archivosMedia) && is_array($archivosMedia)) {
             foreach ($archivosMedia as $archivo) {

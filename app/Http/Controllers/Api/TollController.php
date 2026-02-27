@@ -8,19 +8,15 @@ use Illuminate\Http\Request;
 
 class TollController extends Controller
 {
-    /**
-     * Lista todos los peajes activos.
-     */
+
     public function index()
     {
-        // En lugar de Toll::all() o Toll::get(), usamos paginate
+       
         $tolls = Toll::latest()->paginate(15);
         return response()->json($tolls);
     }
 
-    /**
-     * Crea un nuevo peaje y define su esquema de datos dinámico.
-     */
+
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -41,9 +37,7 @@ class TollController extends Controller
         ], 201);
     }
 
-    /**
-     * Muestra la información de un peaje específico.
-     */
+
     public function show($id)
     {
         $toll = Toll::find($id);
@@ -55,9 +49,7 @@ class TollController extends Controller
         return response()->json($toll, 200);
     }
 
-    /**
-     * Actualiza la información o el esquema dinámico de un peaje.
-     */
+
     public function update(Request $request, $id)
     {
         $toll = Toll::find($id);
@@ -79,9 +71,7 @@ class TollController extends Controller
         ], 200);
     }
 
-    /**
-     * Archiva un peaje (Soft Delete). No lo elimina de la base de datos.
-     */
+
     public function destroy($id)
     {
         $toll = Toll::find($id);

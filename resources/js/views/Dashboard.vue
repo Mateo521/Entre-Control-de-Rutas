@@ -29,7 +29,7 @@ const cargarDatos = async () => {
         datosPeajes.value = db.charts.peajes
         ultimosSucesos.value = db.ultimos_sucesos
         
-        // LA CORRECCIÓN ESTÁ AQUÍ (Extraemos el array del objeto paginado)
+      
         peajes.value = resTolls.data.data
 
     } catch (error) {

@@ -15,7 +15,7 @@ return new class extends Migration
         $table->id();
         $table->foreignId('user_id')->constrained('users');
         $table->foreignId('toll_id')->constrained('tolls');
-        $table->string('task_type'); // ej: limpieza, mantenimiento, rescate
+        $table->string('task_type');  
         $table->dateTime('start_time');
         $table->dateTime('end_time')->nullable();
         $table->timestamps();
