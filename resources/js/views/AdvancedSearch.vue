@@ -149,7 +149,7 @@ onMounted(() => {
 <template>
     <div>
         <div class="mb-6">
-            <h2 class="font-['Barlow_Condensed'] text-[28px] font-extrabold text-slate-900 dark:text-slate-100 m-0 mb-0.5 tracking-wide">Búsqueda Avanzada</h2>
+            <h2 class="font-['Barlow_Condensed'] text-[28px] font-extrabold text-slate-900 dark:text-slate-100 m-0 mb-0.5 tracking-wide">Búsqueda avanzada</h2>
             <p class="text-[13px] text-slate-500 dark:text-slate-400 m-0">Filtros cruzados para auditoría de pesajes y sucesos</p>
         </div>
 

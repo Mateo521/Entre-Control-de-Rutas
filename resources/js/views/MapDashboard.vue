@@ -842,6 +842,8 @@ const obtenerKmDesdeCoordenadas = (rutaId, lat, lng) => {
     return (distanciaMinima < 0.008) ? mejorKm.toFixed(1) : null;
 };
 
+const panelHerramientasAbierto = ref(false)
+
 
 const confirmarPunto = async () => {
     if (!puntoFormulario.tipo) return;
@@ -905,165 +907,142 @@ watch(() => route.query.focus, (nuevoFoco) => {
 onBeforeUnmount(() => { if (map) { map.remove() } })
 
 </script>
-
 <template>
-    <div class="relative w-full h-[calc(100vh-56px)] flex">
+    <div class="relative w-full h-[calc(100vh-56px)] flex overflow-hidden">
 
-        <div
-            class="w-80 bg-white dark:bg-[#0d1b2a] border-r border-slate-200 dark:border-white/10 z-[400] flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.05)] transition-colors">
-            <div class="p-5 border-b border-slate-100 dark:border-white/5">
-                <h3
-                    class="font-['Barlow_Condensed'] text-[22px] font-extrabold text-slate-900 dark:text-slate-100 m-0 leading-none">
-                    Herramientas SIG</h3>
-                <p class="text-[12px] text-slate-500 dark:text-slate-400 mt-1">Sistema de información geográfica</p>
+        <div v-if="panelHerramientasAbierto" 
+             @click="panelHerramientasAbierto = false"
+             class="absolute inset-0 bg-black/60 backdrop-blur-sm z-[1001] md:hidden transition-opacity">
+        </div>
+
+        <div :class="[
+            'w-80 bg-white dark:bg-[#0d1b2a] border-r border-slate-200 dark:border-white/10 z-[1002] flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.05)] transition-transform duration-300 ease-in-out',
+            'absolute inset-y-0 left-0 md:relative md:translate-x-0',
+            panelHerramientasAbierto ? 'translate-x-0' : '-translate-x-full'
+        ]">
+            <div class="p-5 border-b border-slate-100 dark:border-white/5 flex items-start justify-between">
+                <div>
+                    <h3 class="font-['Barlow_Condensed'] text-[22px] font-extrabold text-slate-900 dark:text-slate-100 m-0 leading-none">
+                        Herramientas SIG
+                    </h3>
+                    <p class="text-[12px] text-slate-500 dark:text-slate-400 mt-1 m-0">Sistema de información geográfica</p>
+                </div>
+                <button @click="panelHerramientasAbierto = false" class="md:hidden text-slate-400 hover:text-amber-500 bg-transparent border-none p-1 cursor-pointer">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
             </div>
 
             <div class="p-5 flex-1 overflow-y-auto">
                 <div class="mb-6">
-                    <h4
-                        class="font-['Barlow_Condensed'] text-[13px] font-bold tracking-widest uppercase text-amber-600 dark:text-amber-500 mb-4 border-b border-amber-500/20 pb-2">
-                        Localizador por progresiva</h4>
+                    <h4 class="font-['Barlow_Condensed'] text-[13px] font-bold tracking-widest uppercase text-amber-600 dark:text-amber-500 mb-4 border-b border-amber-500/20 pb-2">
+                        Localizador por progresiva
+                    </h4>
+                    
                     <form @submit.prevent="buscarKilometro" class="space-y-4">
                         <div>
-                            <label
-                                class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-1.5">Corredor
-                                Vial</label>
-                            <select v-model="searchRuta"
-                                class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded px-3 py-2 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500/50">
+                            <label class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-1.5">Corredor Vial</label>
+                            <select v-model="searchRuta" class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded px-3 py-2 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500/50">
                                 <option value="20">Ruta Provincial 20</option>
                                 <option value="9">Ruta Prov. 9 (Autopista Puquios)</option>
                                 <option value="7">Ruta Nac. 7 (Autopista Serranías Puntanas)</option>
                                 <option value="30">Ruta Provincial 30</option>
                             </select>
-
                         </div>
-
-
 
                         <div>
                             <div class="flex items-center justify-between mb-1.5">
-                                <label
-                                    class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block">Kilómetro
-                                    exacto</label>
-                                <span
-                                    class="text-[9px] font-bold text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-500/10 px-1.5 py-0.5 rounded tracking-widest">
+                                <label class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block">Kilómetro exacto</label>
+                                <span class="text-[9px] font-bold text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-500/10 px-1.5 py-0.5 rounded tracking-widest">
                                     RANGO: {{ limitesRuta.min }} a {{ limitesRuta.max }}
                                 </span>
                             </div>
-                            <input v-model="searchKm" type="number" step="0.1" :min="limitesRuta.min"
-                                :max="limitesRuta.max" :placeholder="`Ej: ${limitesRuta.min + 2.5}`" required
-                                class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded px-3 py-2 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500/50 transition-colors" />
+                            <input v-model="searchKm" type="number" step="0.1" :min="limitesRuta.min" :max="limitesRuta.max" :placeholder="`Ej: ${limitesRuta.min + 2.5}`" required class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded px-3 py-2 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500/50 transition-colors" />
                         </div>
 
-
-
-
                         <div class="flex gap-2">
-                            <button type="button" @click="limpiarBusqueda"
-                                class="w-1/3 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 font-['Barlow_Condensed'] text-xs font-bold tracking-wider uppercase px-2 py-2.5 rounded border border-slate-200 dark:border-white/10 cursor-pointer transition-all">Limpiar</button>
-                            <button type="submit"
-                                class="w-2/3 bg-slate-800 dark:bg-white/10 text-white hover:bg-slate-700 dark:hover:bg-white/20 font-['Barlow_Condensed'] text-xs font-bold tracking-wider uppercase px-4 py-2.5 rounded border-none cursor-pointer transition-all">Localizar
-                                Punto</button>
+                            <button type="button" @click="limpiarBusqueda" class="w-1/3 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 font-['Barlow_Condensed'] text-xs font-bold tracking-wider uppercase px-2 py-2.5 rounded border border-slate-200 dark:border-white/10 cursor-pointer transition-all">Limpiar</button>
+                            <button type="submit" class="w-2/3 bg-slate-800 dark:bg-white/10 text-white hover:bg-slate-700 dark:hover:bg-white/20 font-['Barlow_Condensed'] text-xs font-bold tracking-wider uppercase px-4 py-2.5 rounded border-none cursor-pointer transition-all">Localizar Punto</button>
                         </div>
                     </form>
                 </div>
 
-                <div v-if="resultadoBusqueda"
-                    class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded p-4 shadow-sm transition-colors mb-6">
-                    <h4
-                        class="font-['Barlow_Condensed'] text-[13px] font-bold text-blue-800 dark:text-blue-400 uppercase tracking-widest mb-3 border-b border-blue-200 dark:border-blue-800/50 pb-2">
-                        Resultado</h4>
+                <div v-if="resultadoBusqueda" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded p-4 shadow-sm transition-colors mb-6">
+                    <h4 class="font-['Barlow_Condensed'] text-[13px] font-bold text-blue-800 dark:text-blue-400 uppercase tracking-widest mb-3 border-b border-blue-200 dark:border-blue-800/50 pb-2">Resultado</h4>
 
                     <div v-if="resultadoBusqueda.tipo === 'exacto'" class="text-sm">
-                        <div class="text-slate-600 dark:text-slate-300 mb-1 text-[11px] uppercase tracking-widest">
-                            Coincidencia en Km {{ resultadoBusqueda.punto.km }}:</div>
-                        <strong class="text-blue-900 dark:text-blue-300 block text-sm font-['DM_Sans']">{{
-                            resultadoBusqueda.punto.desc }}</strong>
+                        <div class="text-slate-600 dark:text-slate-300 mb-1 text-[11px] uppercase tracking-widest">Coincidencia en Km {{ resultadoBusqueda.punto.km }}:</div>
+                        <strong class="text-blue-900 dark:text-blue-300 block text-sm font-['DM_Sans']">{{ resultadoBusqueda.punto.desc }}</strong>
                     </div>
 
                     <div v-else class="text-sm">
-                        <div class="text-slate-600 dark:text-slate-300 mb-3 leading-relaxed text-xs">
-                            El Km {{ searchKm }} se encuentra en el tramo comprendido entre:
-                        </div>
+                        <div class="text-slate-600 dark:text-slate-300 mb-3 leading-relaxed text-xs">El Km {{ searchKm }} se encuentra en el tramo comprendido entre:</div>
                         <ul class="list-none p-0 m-0 space-y-3 relative">
                             <li class="flex items-start gap-2 relative z-10">
-                                <span
-                                    class="bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm">Km
-                                    {{ resultadoBusqueda.anterior.km }}</span>
-                                <span class="font-semibold text-slate-800 dark:text-slate-200 text-xs">{{
-                                    resultadoBusqueda.anterior.desc }}</span>
+                                <span class="bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm">Km {{ resultadoBusqueda.anterior.km }}</span>
+                                <span class="font-semibold text-slate-800 dark:text-slate-200 text-xs">{{ resultadoBusqueda.anterior.desc }}</span>
                             </li>
-                            <li
-                                class="pl-4 border-l-2 border-dashed border-blue-300 dark:border-blue-700/50 py-1.5 text-[10px] text-blue-600 dark:text-blue-400 font-bold tracking-widest uppercase ml-3">
-                                Punto reportado</li>
+                            <li class="pl-4 border-l-2 border-dashed border-blue-300 dark:border-blue-700/50 py-1.5 text-[10px] text-blue-600 dark:text-blue-400 font-bold tracking-widest uppercase ml-3">Punto reportado</li>
                             <li class="flex items-start gap-2 relative z-10">
-                                <span
-                                    class="bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm">Km
-                                    {{ resultadoBusqueda.posterior.km }}</span>
-                                <span class="font-semibold text-slate-800 dark:text-slate-200 text-xs">{{
-                                    resultadoBusqueda.posterior.desc }}</span>
+                                <span class="bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm">Km {{ resultadoBusqueda.posterior.km }}</span>
+                                <span class="font-semibold text-slate-800 dark:text-slate-200 text-xs">{{ resultadoBusqueda.posterior.desc }}</span>
                             </li>
                         </ul>
                     </div>
                 </div>
 
                 <div>
-                    <h4
-                        class="font-['Barlow_Condensed'] text-[13px] font-bold tracking-widest uppercase text-amber-600 dark:text-amber-500 mb-4 border-b border-amber-500/20 pb-2">
-                        Control georreferenciado</h4>
-                    <div
-                        class="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-500/20 rounded p-3 text-xs text-amber-800 dark:text-amber-300 leading-relaxed mb-3">
-                        <strong>Trazas activas:</strong> El mapa despliega la jurisdicción operativa de las estaciones
-                        base.
+                    <h4 class="font-['Barlow_Condensed'] text-[13px] font-bold tracking-widest uppercase text-amber-600 dark:text-amber-500 mb-4 border-b border-amber-500/20 pb-2">Control georreferenciado</h4>
+                    <div class="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-500/20 rounded p-3 text-xs text-amber-800 dark:text-amber-300 leading-relaxed mb-3">
+                        <strong>Trazas activas:</strong> El mapa despliega la jurisdicción operativa de las estaciones base.
                     </div>
-                    <div
-                        class="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded p-3 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                        Hacé clic en el mapa para iniciar un suceso. Seleccioná "Quitar" para borrar la coordenada
-                        temporal.
+                    <div class="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded p-3 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Hacé clic en el mapa para iniciar un suceso. Seleccioná "Quitar" para borrar la coordenada temporal.
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="flex-1 relative">
+        <div class="flex-1 relative w-full h-full">
+            
+            <button @click="panelHerramientasAbierto = true"
+                class="md:hidden absolute top-4 left-4 z-[400] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 p-2.5 rounded-md shadow-md border border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center justify-center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    <line x1="11" y1="8" x2="11" y2="14"></line>
+                    <line x1="8" y1="11" x2="14" y2="11"></line>
+                </svg>
+            </button>
+
+            <button @click="alternarTipoMapa"
+                class="absolute top-4 right-4 z-[400] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-3 py-2 rounded-md shadow-md border border-slate-200 dark:border-slate-700 font-['Barlow_Condensed'] text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-2">
+                <svg v-if="tipoMapa === 'estandar'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+                <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                <span class="hidden sm:inline">{{ tipoMapa === 'estandar' ? 'Ver Satélite' : 'Ver Mapa Base' }}</span>
+                <span class="sm:hidden">{{ tipoMapa === 'estandar' ? 'Satélite' : 'Base' }}</span>
+            </button>
+
             <div ref="mapContainer" class="w-full h-full z-[100]"></div>
         </div>
 
-        <button @click="alternarTipoMapa"
-            class="absolute top-4 right-4 z-[400] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-3 py-2 rounded-md shadow-md border border-slate-200 dark:border-slate-700 font-['Barlow_Condensed'] text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-2">
-            <svg v-if="tipoMapa === 'estandar'" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="2" y1="12" x2="22" y2="12"></line>
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
-                </path>
-            </svg>
-            <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"></path>
-                <circle cx="12" cy="10" r="3"></circle>
-            </svg>
-            {{ tipoMapa === 'estandar' ? 'Ver Satélite' : 'Ver Mapa Base' }}
-        </button>
-
-
-        <div v-if="mostrarModal"
-            class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
-            <div
-                class="w-full max-w-sm bg-white dark:bg-[#0d1b2a]  border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden relative">
+        <div v-if="mostrarModal" class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity px-4">
+            <div class="w-full max-w-sm bg-white dark:bg-[#0d1b2a] border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden relative">
                 <div class="bg-gradient-to-r from-amber-500 to-amber-600 h-1"></div>
                 <div class="px-5 py-4 border-b border-slate-100 dark:border-white/5 flex items-center justify-between">
-                    <h3
-                        class="font-['Barlow_Condensed'] text-[18px] font-bold text-slate-900 dark:text-slate-100 tracking-wide m-0">
-                        Clasificar coordenada</h3>
+                    <h3 class="font-['Barlow_Condensed'] text-[18px] font-bold text-slate-900 dark:text-slate-100 tracking-wide m-0">Clasificar coordenada</h3>
                 </div>
 
                 <form @submit.prevent="confirmarPunto" class="p-5">
                     <div class="mb-4">
-                        <label
-                            class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-1.5">Tipo
-                            de Evento</label>
-                        <select v-model="puntoFormulario.tipo" required
-                            class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded px-3 py-2.5 text-slate-900 dark:text-white text-sm outline-none transition-colors focus:border-amber-500/50">
+                        <label class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-1.5">Tipo de Evento</label>
+                        <select v-model="puntoFormulario.tipo" required class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded px-3 py-2.5 text-slate-900 dark:text-white text-sm outline-none transition-colors focus:border-amber-500/50">
                             <option value="" disabled>— Seleccionar clasificación —</option>
                             <option value="accidente_vial">Accidente vial</option>
                             <option value="animal_ruta">Animal en ruta</option>
@@ -1073,19 +1052,13 @@ onBeforeUnmount(() => { if (map) { map.remove() } })
                     </div>
 
                     <div class="mb-5">
-                        <label
-                            class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-1.5">Observaciones
-                            adicionales</label>
-                        <textarea v-model="puntoFormulario.observaciones" rows="3"
-                            placeholder="Detalles de la ubicación o gravedad..."
-                            class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded px-3 py-2.5 text-slate-900 dark:text-white text-sm outline-none transition-colors focus:border-amber-500/50 resize-none"></textarea>
+                        <label class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-1.5">Observaciones adicionales</label>
+                        <textarea v-model="puntoFormulario.observaciones" rows="3" placeholder="Detalles de la ubicación o gravedad..." class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded px-3 py-2.5 text-slate-900 dark:text-white text-sm outline-none transition-colors focus:border-amber-500/50 resize-none"></textarea>
                     </div>
 
                     <div class="flex gap-3 justify-end pt-2">
-                        <button type="button" @click="cerrarModal"
-                            class="px-4 py-2 rounded text-xs font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border-none bg-transparent cursor-pointer font-['Barlow_Condensed'] uppercase tracking-wider">Cancelar</button>
-                        <button type="submit" :disabled="guardando"
-                            class="bg-amber-500 text-[#0d1b2a] font-['Barlow_Condensed'] text-xs font-bold tracking-wider uppercase px-5 py-2 rounded border-none cursor-pointer inline-flex items-center transition-all hover:bg-amber-400 disabled:opacity-50">
+                        <button type="button" @click="cerrarModal" class="px-4 py-2 rounded text-xs font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border-none bg-transparent cursor-pointer font-['Barlow_Condensed'] uppercase tracking-wider">Cancelar</button>
+                        <button type="submit" :disabled="guardando" class="bg-amber-500 text-[#0d1b2a] font-['Barlow_Condensed'] text-xs font-bold tracking-wider uppercase px-5 py-2 rounded border-none cursor-pointer inline-flex items-center transition-all hover:bg-amber-400 disabled:opacity-50">
                             {{ guardando ? 'Registrando...' : 'Confirmar Punto' }}
                         </button>
                     </div>
