@@ -48,6 +48,48 @@ const resultadoBusqueda = ref(null)
 const lightTile = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
 const darkTile = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
 
+
+// Algoritmo de Chaikin
+const suavizarCoordenadas = (coordenadasCrudas, iteraciones = 3) => {
+    if (coordenadasCrudas.length <= 2) return coordenadasCrudas;
+
+    let lineaSuavizada = [...coordenadasCrudas];
+
+    for (let i = 0; i < iteraciones; i++) {
+        const nuevaLinea = [];
+
+
+        nuevaLinea.push(lineaSuavizada[0]);
+
+        for (let j = 0; j < lineaSuavizada.length - 1; j++) {
+            const p0 = lineaSuavizada[j];
+            const p1 = lineaSuavizada[j + 1];
+
+
+            const q = [
+                0.75 * p0[0] + 0.25 * p1[0], // Longitud
+                0.75 * p0[1] + 0.25 * p1[1]  // Latitud
+            ];
+
+            const r = [
+                0.25 * p0[0] + 0.75 * p1[0],
+                0.25 * p0[1] + 0.75 * p1[1]
+            ];
+
+            nuevaLinea.push(q);
+            nuevaLinea.push(r);
+        }
+
+
+        nuevaLinea.push(lineaSuavizada[lineaSuavizada.length - 1]);
+
+
+        lineaSuavizada = nuevaLinea;
+    }
+
+    return lineaSuavizada;
+}
+
 const trazasVialesGeoJSON = {
     "type": "FeatureCollection",
     "features": [
@@ -70,6 +112,10 @@ const trazasVialesGeoJSON = {
                     [-66.2870306, -33.2946200],
                     [-66.2799964, -33.2969535],
                     [-66.2772227, -33.2972261],
+                    [-66.27677, -33.29721],
+                    [-66.27268, -33.29616],
+
+                    [-66.27062, -33.29552],
                     [-66.2685864, -33.2945745], // Km 7 (Estrega)
                     [-66.2637178, -33.2920447],
                     [-66.2545769, -33.2878294],
@@ -80,17 +126,32 @@ const trazasVialesGeoJSON = {
                     [-66.2308586, -33.2648545],
                     [-66.2297909, -33.2638394], // Km 12 (Rotonda C.P.)
                     [-66.2272913, -33.2587553],
+                    [-66.22708, -33.25423],
+                    [-66.22684, -33.25293],
                     [-66.2260722, -33.2519519], // Peaje Cruz de Piedra
+                    [-66.22341, -33.25135],
                     [-66.2211567, -33.2516617],
                     [-66.2175249, -33.2534633],
+                    [-66.21576, -33.25400],
                     [-66.2147619, -33.2547688],
-                    [-66.2130353, -33.2545778],
+                    [-66.21425, -33.25499],
+                    [-66.21308, -33.25452],
                     [-66.2124120, -33.2542878], // Km 15 (Peaje Perilago)
+                    [-66.21232, -33.25387],
+                    [-66.21237, -33.25334],
+                    [-66.21283, -33.25278],
+                    [-66.21322, -33.25153],
                     [-66.2130937, -33.2513059],
+                    [-66.21229, -33.25090],
                     [-66.2085661, -33.2518942],
+                    [-66.20208, -33.25400],
                     [-66.2012797, -33.2542032],
+                    [-66.19923, -33.25376],
+                    [-66.19671, -33.25370],
                     [-66.1955336, -33.2533267],
+                    [-66.19418, -33.25155],
                     [-66.1935003, -33.2512997],
+                    [-66.19263, -33.25150],
                     [-66.1915335, -33.2509587], // Km 17 (La Hoya)
                     [-66.1899151, -33.2512703],
                     [-66.1878093, -33.2529043],
@@ -99,11 +160,17 @@ const trazasVialesGeoJSON = {
                     [-66.1751547, -33.2530479], // Km 19 (Rotonda Virgen)
                     [-66.1758317, -33.2560138],
                     [-66.1748790, -33.2588567],
+                    [-66.17225, -33.26137],
+
                     [-66.1698524, -33.2624330], // Km 20 (Puente Puquios)
                     [-66.1683674, -33.2627598],
+                    [-66.16550, -33.26404],
                     [-66.1640798, -33.2657315],
                     [-66.1623082, -33.2707589],
+                    [-66.16144, -33.27335],
                     [-66.1587576, -33.2752965],
+                    [-66.15613, -33.27542],
+
                     [-66.1410199, -33.2721132],
                     [-66.1307046, -33.2710583],
                     [-66.1078299, -33.2698150], // Km 27 (Cruce Rp30)
@@ -139,7 +206,10 @@ const trazasVialesGeoJSON = {
                 "type": "LineString",
                 "coordinates": [
                     [-66.1080016, -33.2697162], // Empalme R20
+                    [-66.10278, -33.27679],
                     [-66.1026610, -33.2769976],
+                    [-66.10267, -33.27726],
+                    [-66.10360, -33.28127],
                     [-66.1093506, -33.3026396], // Km 13.8 (Peaje R30)
                     [-66.1144070, -33.3205677], // Km 16
                     [-66.1189336, -33.3371463], // Km 18
@@ -161,7 +231,7 @@ const trazasVialesGeoJSON = {
             "geometry": {
                 "type": "LineString",
                 "coordinates": [
-                    [-66.2596378, -33.3039744], [-66.2575399, -33.3028488], [-66.2517099, -33.2994305], [-66.2474000, -33.2936754], [-66.2447753, -33.2917852], [-66.2429016, -33.2899865], [-66.2419404, -33.2893605], [-66.2362907, -33.2839886], [-66.2337810, -33.2828107], [-66.2251270, -33.2772967], [-66.2229570, -33.2759428], [-66.2222975, -33.2751606], [-66.2207873, -33.2744490], [-66.2183962, -33.2741117], [-66.2168694, -33.2746321], [-66.2156328, -33.2752692], [-66.2130840, -33.2750318], [-66.2119968, -33.2735457], [-66.2115001, -33.2722249], [-66.2101791, -33.2709984], [-66.2066197, -33.2698770], [-66.2036138, -33.2711648], [-66.2012375, -33.2714657], [-66.2006259, -33.2709067], [-66.1995541, -33.2704274], [-66.1978459, -33.2706217], [-66.1964652, -33.2714234], [-66.1940288, -33.2727363], [-66.1921863, -33.2725770], [-66.1887023, -33.2732907], [-66.1842140, -33.2741965], [-66.1808986, -33.2751313], [-66.1795281, -33.2740136], [-66.1791507, -33.2711448], [-66.1760090, -33.2687124], [-66.1723870, -33.2635906], [-66.1698745, -33.2624352], [-66.1645067, -33.2594697], [-66.1621810, -33.2563572], [-66.1619721, -33.2499929], [-66.1608910, -33.2477104], [-66.1459108, -33.2300955], [-66.1244046, -33.1983400], [-66.1051560, -33.1787679], [-66.0887422, -33.1661177], [-66.0812551, -33.1619531], [-66.0770048, -33.1565807], [-66.0795276, -33.1600436], [-66.0715501, -33.1496383], [-66.0642264, -33.1410146], [-66.0624963, -33.1325323], [-66.0609568, -33.1248799], [-66.0610843, -33.1219898], [-66.0611008, -33.1213422], [-66.0604079, -33.1201798], [-66.0605107, -33.1196585], [-66.0613285, -33.1178613], [-66.0614705, -33.1171848], [-66.0635141, -33.1149876], [-66.0646486, -33.1091054], [-66.0643479, -33.1074080], [-66.0631890, -33.1061113], [-66.0605432, -33.1038122], [-66.0585147, -33.1028936], [-66.0601888, -33.0998769], [-66.0622379, -33.0979415], [-66.0626355, -33.0953862], [-66.0645675, -33.0923955], [-66.0668802, -33.0909919], [-66.0664104, -33.0883178], [-66.0680077, -33.0855129], [-66.0691788, -33.0786977], [-66.0680049, -33.0749733], [-66.0674971, -33.0710576], [-66.0678734, -33.0670907], [-66.0699767, -33.0627368], [-66.0684753, -33.0581652], [-66.0690266, -33.0546500], [-66.0697089, -33.0442515], [-66.0706904, -33.0422382], [-66.0702730, -33.0406413], [-66.0681261, -33.0386863], [-66.0674159, -33.0388527], [-66.0669757, -33.0406402], [-66.0658968, -33.0402920], [-66.0662384, -33.0389074], [-66.0678967, -33.0352404], [-66.0707888, -33.0311968], [-66.0704734, -33.0264113], [-66.0698387, -33.0234716], [-66.0688351, -33.0189983], [-66.0679975, -33.0168873], [-66.0657242, -33.0158962], [-66.0666696, -33.0111517], [-66.0663599, -33.0078240], [-66.0620328, -33.0065199], [-66.0606878, -33.0000713], [-66.0639746, -32.9943818], [-66.0734201, -32.9885078], [-66.0724823, -32.9836892], [-66.0731135, -32.9834894], [-66.0742801, -32.9847916], [-66.0751414, -32.9840707], [-66.0732224, -32.9814666], [-66.0720435, -32.9756389], [-66.0751253, -32.9712397], [-66.0747327, -32.9706417], [-66.0713072, -32.9715782], [-66.0725387, -32.9679049], [-66.0732252, -32.9662906], [-66.0727819, -32.9609896], [-66.0711841, -32.9577465], [-66.0710016, -32.9565484], [-66.0722253, -32.9514609], [-66.0759940, -32.9483868], [-66.0749848, -32.9452098], [-66.0774082, -32.9424697], [-66.0789134, -32.9399731], [-66.0818890, -32.9397215], [-66.0835618, -32.9360928], [-66.0865393, -32.9354632], [-66.0858848, -32.9325892], [-66.0844561, -32.9284567], [-66.0865427, -32.9253088], [-66.0863847, -32.9230552], [-66.0875796, -32.9205065], [-66.0851702, -32.9127853], [-66.0872063, -32.9113057], [-66.0951406, -32.9089215], [-66.1007895, -32.9059158], [-66.1034052, -32.9032476], [-66.1131051, -32.8961549], [-66.1132357, -32.8891798], [-66.1134376, -32.8821211], [-66.1148482, -32.8737703], [-66.1141178, -32.8673710], [-66.1119368, -32.8597243], [-66.1099224, -32.8544387], [-66.1099802, -32.8523368], [-66.1067542, -32.8515273], [-66.1057992, -32.8461203], [-66.1063789, -32.8396561], [-66.0991251, -32.8271710], [-66.0991765, -32.8249498], [-66.0992505, -32.8232993], [-66.0959797, -32.8194888], [-66.0957608, -32.8185007]
+                    [-66.2596378, -33.3039744], [-66.2575399, -33.3028488], [-66.2517099, -33.2994305], [-66.2474000, -33.2936754], [-66.2447753, -33.2917852], [-66.2429016, -33.2899865], [-66.2419404, -33.2893605], [-66.2362907, -33.2839886], [-66.2337810, -33.2828107], [-66.2251270, -33.2772967], [-66.2229570, -33.2759428], [-66.2222975, -33.2751606], [-66.2207873, -33.2744490], [-66.2183962, -33.2741117], [-66.2168694, -33.2746321], [-66.2156328, -33.2752692], [-66.2130840, -33.2750318], [-66.2119968, -33.2735457], [-66.2115001, -33.2722249], [-66.2101791, -33.2709984], [-66.2066197, -33.2698770], [-66.2036138, -33.2711648], [-66.2012375, -33.2714657], [-66.2006259, -33.2709067], [-66.1995541, -33.2704274], [-66.1978459, -33.2706217], [-66.1964652, -33.2714234], [-66.1940288, -33.2727363], [-66.1921863, -33.2725770], [-66.1887023, -33.2732907], [-66.1842140, -33.2741965], [-66.1808986, -33.2751313], [-66.1795281, -33.2740136], [-66.1791507, -33.2711448], [-66.1760090, -33.2687124], [-66.1723870, -33.2635906], [-66.1698745, -33.2624352], [-66.1645067, -33.2594697], [-66.1621810, -33.2563572], [-66.1619721, -33.2499929], [-66.1608910, -33.2477104], [-66.1459108, -33.2300955], [-66.1244046, -33.1983400], [-66.1051560, -33.1787679], [-66.0887422, -33.1661177], [-66.0812551, -33.1619531], [-66.0770048, -33.1565807], [-66.0795276, -33.1600436], [-66.0715501, -33.1496383], [-66.0642264, -33.1410146], [-66.0624963, -33.1325323], [-66.0609568, -33.1248799], [-66.0610843, -33.1219898], [-66.0611008, -33.1213422], [-66.0604079, -33.1201798], [-66.0605107, -33.1196585], [-66.0613285, -33.1178613], [-66.0614705, -33.1171848], [-66.0635141, -33.1149876], [-66.0646486, -33.1091054], [-66.0643479, -33.1074080], [-66.0631890, -33.1061113], [-66.0605432, -33.1038122], [-66.0585147, -33.1028936], [-66.0601888, -33.0998769], [-66.0622379, -33.0979415], [-66.0626355, -33.0953862], [-66.0645675, -33.0923955], [-66.06580, -33.09079], [-66.0664104, -33.0883178], [-66.0680077, -33.0855129], [-66.0691788, -33.0786977], [-66.0680049, -33.0749733], [-66.0674971, -33.0710576], [-66.0678734, -33.0670907], [-66.0699767, -33.0627368], [-66.0684753, -33.0581652], [-66.0690266, -33.0546500], [-66.0697089, -33.0442515], [-66.0706904, -33.0422382], [-66.0702730, -33.0406413], [-66.0681261, -33.0386863], [-66.0674159, -33.0388527], [-66.0669757, -33.0406402], [-66.0658968, -33.0402920], [-66.0662384, -33.0389074], [-66.0678967, -33.0352404], [-66.0707888, -33.0311968], [-66.0704734, -33.0264113], [-66.0698387, -33.0234716], [-66.0688351, -33.0189983], [-66.0679975, -33.0168873], [-66.0657242, -33.0158962], [-66.0666696, -33.0111517], [-66.0663599, -33.0078240], [-66.0620328, -33.0065199], [-66.0606878, -33.0000713], [-66.0639746, -32.9943818], [-66.0734201, -32.9885078], [-66.0724823, -32.9836892], [-66.0731135, -32.9834894], [-66.0742801, -32.9847916], [-66.0751414, -32.9840707], [-66.0732224, -32.9814666], [-66.0720435, -32.9756389], [-66.0751253, -32.9712397], [-66.0747327, -32.9706417], [-66.0713072, -32.9715782], [-66.0725387, -32.9679049], [-66.0732252, -32.9662906], [-66.0727819, -32.9609896], [-66.0711841, -32.9577465], [-66.0710016, -32.9565484], [-66.0722253, -32.9514609], [-66.0759940, -32.9483868], [-66.0749848, -32.9452098], [-66.0774082, -32.9424697], [-66.0789134, -32.9399731], [-66.0818890, -32.9397215], [-66.0835618, -32.9360928], [-66.0865393, -32.9354632], [-66.0858848, -32.9325892], [-66.0844561, -32.9284567], [-66.0865427, -32.9253088], [-66.0863847, -32.9230552], [-66.0875796, -32.9205065], [-66.0851702, -32.9127853], [-66.0872063, -32.9113057], [-66.0951406, -32.9089215], [-66.1007895, -32.9059158], [-66.1034052, -32.9032476], [-66.1131051, -32.8961549], [-66.1132357, -32.8891798], [-66.1134376, -32.8821211], [-66.1148482, -32.8737703], [-66.1141178, -32.8673710], [-66.1119368, -32.8597243], [-66.1099224, -32.8544387], [-66.1099802, -32.8523368], [-66.1067542, -32.8515273], [-66.1057992, -32.8461203], [-66.1063789, -32.8396561], [-66.0991251, -32.8271710], [-66.0991765, -32.8249498], [-66.0992505, -32.8232993], [-66.0959797, -32.8194888], [-66.0957608, -32.8185007]
                 ]
             }
         },
@@ -320,23 +390,72 @@ const enfocarPeaje = (nombrePeaje) => {
 }
 
 
+// DEBUGGGINNNGG
+const renderizarPuntosDeControl = () => {
+    trazasVialesGeoJSON.features.forEach(feature => {
+        if (feature.geometry && feature.geometry.type === 'LineString') {
+            const rutaNombre = feature.properties.nombre;
+
+            feature.geometry.coordinates.forEach((coord, index) => {
+
+                const lng = coord[0];
+                const lat = coord[1];
+
+                const dot = L.circleMarker([lat, lng], {
+                    radius: 4,
+                    fillColor: "#ef4444", // Rojo brillante
+                    color: "#ffffff",     // Borde blanco
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 1
+                }).addTo(map);
+
+
+                dot.bindPopup(`
+                    <div class="font-['Barlow_Condensed'] text-sm tracking-wide">
+                        <div class="text-red-500 font-bold uppercase mb-1">Vértice Real</div>
+                        <strong>${rutaNombre}</strong><br>
+                        Índice en el arreglo: <span class="text-amber-600 font-black text-lg">${index}</span><br>
+                        <div class="text-xs text-slate-500 mt-2 font-mono">
+                            [${lng}, ${lat}]
+                        </div>
+                    </div>
+                `);
+            });
+        }
+    });
+}
+
+
 const renderizarTrazasEstaticas = () => {
-    L.geoJSON(trazasVialesGeoJSON, {
+
+    const geoJsonSuavizado = JSON.parse(JSON.stringify(trazasVialesGeoJSON));
+
+
+    geoJsonSuavizado.features.forEach(feature => {
+        if (feature.geometry && feature.geometry.type === 'LineString') {
+            feature.geometry.coordinates = suavizarCoordenadas(feature.geometry.coordinates, 3);
+        }
+    });
+
+
+    L.geoJSON(geoJsonSuavizado, {
         style: (feature) => ({ color: feature.properties.color, weight: 8, opacity: 0.6, lineCap: 'round', lineJoin: 'round' }),
-
-
-
-
 
         onEachFeature: (feature, layer) => {
 
 
+            layer.on('mouseover', () => {
+                layer.setStyle({ opacity: 0.9, weight: 10 });
+                L.DomUtil.addClass(layer._path, 'cursor-pointer');
+            });
+            layer.on('mouseout', () => {
+                layer.setStyle({ opacity: 0.6, weight: 8 });
+            });
 
 
             layer.on('click', (e) => {
-
                 L.DomEvent.stopPropagation(e);
-
 
                 let rutaId = feature.properties.id;
                 if (!rutaId && feature.properties.nombre) {
@@ -347,40 +466,33 @@ const renderizarTrazasEstaticas = () => {
                 const km = obtenerKmDesdeCoordenadas(rutaId, e.latlng.lat, e.latlng.lng);
 
                 const popupHtml = `
-    <div class="font-['Barlow_Condensed'] min-w-[200px] p-1 transition-colors">
-        <div class="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em] mb-1 font-bold">
-            Referencia Vial
-        </div>
-        
-        <strong class="text-base uppercase text-slate-800 dark:text-slate-100 block leading-tight tracking-wide">
-            ${feature.properties.nombre}
-        </strong>
-        
-        <div class="mt-3 p-3 bg-amber-500/5 dark:bg-amber-500/10 border border-slate-200 dark:border-amber-500/20 rounded-lg flex items-center justify-between shadow-sm">
-            <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                Ubicación
-            </span>
-            <span class="font-black text-xl text-amber-600 dark:text-amber-400">
-                ${km ? 'KM ' + km : 'Fuera de rango'}
-            </span>
-        </div>
-        
-        <div class="mt-2 text-[12px] text-slate-200 dark:text-slate-600 italic text-right">
-            Detección automática por coordenadas
-        </div>
-    </div>
-`;
+                    <div class="font-['Barlow_Condensed'] min-w-[200px] p-1 transition-colors">
+                        <div class="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em] mb-1 font-bold">
+                            Referencia Vial
+                        </div>
+                        <strong class="text-base uppercase text-slate-800 dark:text-slate-100 block leading-tight tracking-wide">
+                            ${feature.properties.nombre}
+                        </strong>
+                        <div class="mt-3 p-3 bg-amber-500/5 dark:bg-amber-500/10 border border-slate-200 dark:border-amber-500/20 rounded-lg flex items-center justify-between shadow-sm">
+                            <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                                Ubicación
+                            </span>
+                            <span class="font-black text-xl text-amber-600 dark:text-amber-400">
+                                ${km ? 'KM ' + km : 'Fuera de rango'}
+                            </span>
+                        </div>
+                        <div class="mt-2 text-[12px] text-slate-400 dark:text-slate-500 italic text-right">
+                            Detección automática por coordenadas
+                        </div>
+                    </div>
+                `;
 
                 L.popup().setLatLng(e.latlng).setContent(popupHtml).openOn(map);
             });
 
 
-
-
-
             if (feature.properties.peajes) {
                 feature.properties.peajes.forEach(peajeGeo => {
-
 
                     const peajeDB = peajes.value.find(p => {
                         const nombreDB = p.name.toLowerCase();
@@ -394,17 +506,13 @@ const renderizarTrazasEstaticas = () => {
 
                             if (geoOeste && dbOeste) return true;
                             if (geoEste && dbEste) return true;
-                            
-                           
-                            return false; 
+
+                            return false;
                         }
 
-                     
                         if (nombreDB.includes(nombreGeo) || nombreGeo.includes(nombreDB)) return true;
-
                         return false;
                     });
-
 
                     const imagenDinamica = (peajeDB && peajeDB.image_path)
                         ? peajeDB.image_path
@@ -419,50 +527,38 @@ const renderizarTrazasEstaticas = () => {
                     const marcadorPeaje = L.marker([peajeGeo.lat, peajeGeo.lng], { icon: iconPeaje })
                         .addTo(map)
                         .bindPopup(`
-    <div class="bg-white dark:bg-[#0d1b2a] p-1 rounded-lg shadow-xl border border-slate-200 dark:border-white/10 transition-colors">
-        <div class="mb-3 rounded overflow-hidden border border-slate-100 dark:border-slate-800">
-            <img src="${imagenDinamica}" 
-                 alt="Fachada ${peajeGeo.nombre}" 
-                 class="w-full h-60 object-cover transition-transform duration-500" 
-                 onerror="this.src='https://placehold.co/600x400?text=Error+al+cargar'" />
-        </div>
-<div class="p-2">
-        <strong class="font-['Barlow_Condensed'] text-[18px] tracking-wide border-b border-slate-100 dark:border-white/5 pb-2 mb-2 block text-slate-800 dark:text-slate-100 uppercase">
-            ${peajeDB ? peajeDB.name : peajeGeo.nombre}
-        </strong>
-        
-        <div class="flex items-center gap-2 ">
-            <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-            <div class="text-[12px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                Operativo
-            </div>
-        </div>
-        </div>
-    </div>
-`, {
+                            <div class="bg-white dark:bg-[#0d1b2a] p-1 rounded-lg shadow-xl border border-slate-200 dark:border-white/10 transition-colors">
+                                <div class="mb-3 rounded overflow-hidden border border-slate-100 dark:border-slate-800">
+                                    <img src="${imagenDinamica}" 
+                                         alt="Fachada ${peajeGeo.nombre}" 
+                                         class="w-full h-60 object-cover transition-transform duration-500" 
+                                         onerror="this.src='https://placehold.co/600x400?text=Error+al+cargar'" />
+                                </div>
+                                <div class="p-2">
+                                    <strong class="font-['Barlow_Condensed'] text-[18px] tracking-wide border-b border-slate-100 dark:border-white/5 pb-2 mb-2 block text-slate-800 dark:text-slate-100 uppercase">
+                                        ${peajeDB ? peajeDB.name : peajeGeo.nombre}
+                                    </strong>
+                                    
+                                    <div class="flex items-center gap-2 ">
+                                        <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                                        <div class="text-[12px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                                            Operativo
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `, {
                             minWidth: 320,
                             maxWidth: 350,
                             className: 'custom-popup-peaje'
                         });
 
-
-
                     if (peajeDB) marcadoresPeajesGenerados[peajeDB.name.toLowerCase()] = marcadorPeaje;
                     marcadoresPeajesGenerados[peajeGeo.nombre.toLowerCase()] = marcadorPeaje;
-
-
-
 
                 });
             }
         }
-
-
-
-
-
-
-
     }).addTo(map);
 }
 
@@ -509,6 +605,8 @@ const initMap = () => {
     L.control.zoom({ position: 'bottomright' }).addTo(map)
 
     renderizarTrazasEstaticas()
+    renderizarPuntosDeControl() //debugg
+
     cargarPuntosGuardados()
 
     map.on('click', (e) => {

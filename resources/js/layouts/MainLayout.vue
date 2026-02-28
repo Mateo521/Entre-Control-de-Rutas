@@ -309,7 +309,7 @@ onUnmounted(() => {
                             class="absolute -top-10 left-1/2 -translate-x-1/2 h-10 px-8 bg-white/95 dark:bg-[#0d1b2a]/95 backdrop-blur-md border border-b-0 border-amber-500/30 rounded-t-xl flex items-center justify-center gap-2 cursor-pointer transition-colors hover:bg-amber-500/10 shadow-[0_-4px_10px_rgba(0,0,0,0.1)]">
                             <span
                                 class="font-['Barlow_Condensed'] text-[12px] font-bold tracking-[0.15em] uppercase text-amber-600 dark:text-amber-500">
-                                {{ footerDesplegado ? 'Ocultar Estaciones' : 'Ver Estaciones' }}
+                                {{ footerDesplegado ? 'Ocultar peajes' : 'Ver peajes' }}
                             </span>
                             <svg :class="footerDesplegado ? '' : 'rotate-180'"
                                 class="w-4 h-4 text-amber-500 transition-transform duration-300" viewBox="0 0 24 24"
