@@ -28,7 +28,7 @@ const archivosAEliminar = ref({}) // { campo: ['url1'] }
 const cargarPeajes = async () => {
     try {
         const respuesta = await axios.get('/api/tolls')
-        peajes.value = respuesta.data
+        peajes.value = respuesta.data.data
     } catch (error) {
         toast.error('Error al cargar estaciones')
     } finally {
@@ -50,7 +50,7 @@ const cargarSucesoParaEditar = async (id) => {
         }
 
         if (suceso.media_paths) {
-          
+
             let mediosNormalizados = {}
             for (let key in suceso.media_paths) {
                 mediosNormalizados[key] = Array.isArray(suceso.media_paths[key])
@@ -98,7 +98,7 @@ const procesarArchivo = (event, nombreCampo) => {
         archivosAdjuntos.value[nombreCampo] = []
     }
     archivosAdjuntos.value[nombreCampo].push(...files)
-    event.target.value = '' 
+    event.target.value = ''
 }
 
 const quitarArchivoNuevo = (nombreCampo, index) => {
@@ -126,7 +126,7 @@ const guardarSuceso = async () => {
         formData.append('incident_type', formulario.value.incident_type)
         formData.append('dynamic_data', JSON.stringify(formulario.value.dynamic_data))
 
-      
+
         Object.keys(archivosAdjuntos.value).forEach(campoNombre => {
             archivosAdjuntos.value[campoNombre].forEach(file => {
                 formData.append(`media[${campoNombre}][]`, file)
@@ -244,8 +244,9 @@ onUnmounted(() => {
                         <div class="grid grid-cols-2 gap-4">
                             <div v-for="(campo, index) in camposDinamicosActivos" :key="index">
                                 <span
-                                    class="font-['DM_Sans'] text-xs font-medium text-slate-600 dark:text-slate-300 block mb-1.5">{{
-                                    campo.name }}</span>
+                                    class="font-['DM_Sans'] text-xs font-medium text-slate-600 dark:text-slate-300 block mb-1.5 uppercase tracking-wider">
+                                    {{ campo.label || campo.name.replace(/_/g, ' ') }}
+                                </span>
 
                                 <input v-if="campo.type === 'texto'" v-model="formulario.dynamic_data[campo.name]"
                                     type="text"
@@ -289,7 +290,7 @@ onUnmounted(() => {
                                             class="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-md px-3 py-2 flex items-center justify-between shadow-sm">
                                             <span
                                                 class="text-[11px] font-medium text-amber-700 dark:text-amber-400 truncate pr-2 max-w-[200px]">{{
-                                                archivo.name }}</span>
+                                                    archivo.name }}</span>
                                             <button type="button" @click="quitarArchivoNuevo(campo.name, i)"
                                                 class="text-[10px] font-bold uppercase tracking-wider text-red-500 hover:text-red-700 cursor-pointer bg-transparent border-none">Quitar</button>
                                         </div>

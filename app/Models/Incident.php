@@ -16,7 +16,8 @@ class Incident extends Model
         'user_id',
         'incident_type',
         'dynamic_data',
-        'media_paths'
+        'media_paths',
+        'status',
     ];
 
     

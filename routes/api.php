@@ -38,4 +38,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('actions', \App\Http\Controllers\ActionController::class);
 
+    Route::post('/tolls/{id}/image', [App\Http\Controllers\Api\TollController::class, 'uploadImage']);
+
 });

@@ -6,14 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Models\Incident;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class IncidentController extends Controller
 {
-   public function index(Request $request)
+    public function index(Request $request)
     {
         $query = Incident::with('toll')->latest();
 
-      
         if ($request->filled('toll_id')) {
             $query->where('toll_id', $request->toll_id);
         }
@@ -30,7 +33,6 @@ class IncidentController extends Controller
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
-      
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
@@ -44,7 +46,6 @@ class IncidentController extends Controller
 
     public function show($id)
     {
-
         $incident = Incident::withTrashed()->with('toll')->findOrFail($id);
         return response()->json($incident);
     }
@@ -55,21 +56,45 @@ class IncidentController extends Controller
             'toll_id' => 'required|exists:tolls,id',
             'incident_type' => 'required|string',
             'dynamic_data' => 'nullable|string',
-            'media.*.*' => 'nullable|file|mimes:jpg,jpeg,png,mp4,pdf|max:20480',
+            'media.*.*' => 'nullable|file|mimes:jpg,jpeg,png,webp,mp4,pdf|max:20480',
         ]);
 
         $dynamicData = $request->filled('dynamic_data') ? json_decode($request->dynamic_data, true) : [];
         $mediaPaths = [];
 
-   
         $archivosMedia = $request->file('media');
 
         if (!empty($archivosMedia) && is_array($archivosMedia)) {
             foreach ($archivosMedia as $campoNombre => $archivos) {
                 $mediaPaths[$campoNombre] = [];
+                
                 foreach ($archivos as $archivo) {
-                    $path = $archivo->store('sucesos', 'public');
-                    $mediaPaths[$campoNombre][] = '/storage/' . $path;
+                    $extension = strtolower($archivo->getClientOriginalExtension());
+                    
+                    // Si es una imagen, la comprimimos
+                    if (in_array($extension, ['jpg', 'jpeg', 'png', 'webp'])) {
+                        $filename = Str::random(40) . '.jpg';
+                        $destinationPath = storage_path('app/public/sucesos');
+
+                        // Crear directorio si no existe
+                        if (!file_exists($destinationPath)) {
+                            mkdir($destinationPath, 0755, true);
+                        }
+
+                        // Comprimir a 1024px máximo (ideal para evidencia) y 75% calidad
+                        $manager = new ImageManager(new Driver());
+                        $manager->read($archivo)
+                                ->scaleDown(width: 1024)
+                                ->toJpeg(quality: 75)
+                                ->save($destinationPath . '/' . $filename);
+
+                        $mediaPaths[$campoNombre][] = '/storage/sucesos/' . $filename;
+                    } 
+                    // Si es PDF o MP4, lo guardamos normal
+                    else {
+                        $path = $archivo->store('sucesos', 'public');
+                        $mediaPaths[$campoNombre][] = '/storage/' . $path;
+                    }
                 }
             }
         }
@@ -77,7 +102,7 @@ class IncidentController extends Controller
         $incident = Incident::create([
             'toll_id' => $request->toll_id,
             'incident_type' => $request->incident_type,
-            'user_id' => Auth::id(),
+            'user_id' => Auth::id() ?: 1, // Fallback por si no hay sesión activa en API
             'dynamic_data' => $dynamicData,
             'media_paths' => $mediaPaths
         ]);
@@ -93,7 +118,7 @@ class IncidentController extends Controller
             'toll_id' => 'required|exists:tolls,id',
             'incident_type' => 'required|string',
             'dynamic_data' => 'nullable|string',
-            'media.*.*' => 'nullable|file|mimes:jpg,jpeg,png,mp4,pdf|max:20480',
+            'media.*.*' => 'nullable|file|mimes:jpg,jpeg,png,webp,mp4,pdf|max:20480',
         ]);
 
         $dynamicData = $request->filled('dynamic_data') ? json_decode($request->dynamic_data, true) : [];
@@ -110,13 +135,14 @@ class IncidentController extends Controller
             }
         }
 
+        // --- Lógica de borrado de archivos existentes ---
         if ($request->filled('archivos_a_eliminar')) {
             $aEliminar = json_decode($request->archivos_a_eliminar, true);
             foreach ($aEliminar as $campoNombre => $rutasParaBorrar) {
                 if (isset($mediaPaths[$campoNombre])) {
                     foreach ($rutasParaBorrar as $ruta) {
                         $pathRelativo = str_replace('/storage/', '', $ruta);
-                        \Illuminate\Support\Facades\Storage::disk('public')->delete($pathRelativo);
+                        Storage::disk('public')->delete($pathRelativo);
                         $mediaPaths[$campoNombre] = array_values(array_filter($mediaPaths[$campoNombre], fn($p) => $p !== $ruta));
                     }
                     if (empty($mediaPaths[$campoNombre])) {
@@ -126,7 +152,7 @@ class IncidentController extends Controller
             }
         }
 
-      
+        // --- Lógica de compresión para archivos NUEVOS en la edición ---
         $archivosMedia = $request->file('media');
 
         if (!empty($archivosMedia) && is_array($archivosMedia)) {
@@ -134,9 +160,29 @@ class IncidentController extends Controller
                 if (!isset($mediaPaths[$campoNombre])) {
                     $mediaPaths[$campoNombre] = [];
                 }
+                
                 foreach ($archivos as $archivo) {
-                    $path = $archivo->store('sucesos', 'public');
-                    $mediaPaths[$campoNombre][] = '/storage/' . $path;
+                    $extension = strtolower($archivo->getClientOriginalExtension());
+                    
+                    if (in_array($extension, ['jpg', 'jpeg', 'png', 'webp'])) {
+                        $filename = Str::random(40) . '.jpg';
+                        $destinationPath = storage_path('app/public/sucesos');
+
+                        if (!file_exists($destinationPath)) {
+                            mkdir($destinationPath, 0755, true);
+                        }
+
+                        $manager = new ImageManager(new Driver());
+                        $manager->read($archivo)
+                                ->scaleDown(width: 1024)
+                                ->toJpeg(quality: 75)
+                                ->save($destinationPath . '/' . $filename);
+
+                        $mediaPaths[$campoNombre][] = '/storage/sucesos/' . $filename;
+                    } else {
+                        $path = $archivo->store('sucesos', 'public');
+                        $mediaPaths[$campoNombre][] = '/storage/' . $path;
+                    }
                 }
             }
         }
@@ -153,8 +199,6 @@ class IncidentController extends Controller
             'data' => $incident
         ]);
     }
-
-
 
     public function destroy($id)
     {

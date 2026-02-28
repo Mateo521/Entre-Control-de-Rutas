@@ -29,7 +29,7 @@ const archivosAEliminar = ref([])
 const cargarPeajes = async () => {
     try {
         const respuesta = await axios.get('/api/tolls')
-        peajes.value = respuesta.data
+        peajes.value = respuesta.data.data
     } catch (error) {
         toast.error('Error al cargar la lista de ubicaciones')
     } finally {
