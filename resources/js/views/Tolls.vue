@@ -17,7 +17,7 @@ const nuevoPeaje = reactive({
     camposDinámicos: []
 })
 
-// Variables para la Fotografía de Fachada
+ 
 const fotoSeleccionada = ref(null)
 const previewFoto = ref(null)
 const fileInput = ref(null)
@@ -45,7 +45,7 @@ const cargarPeajes = async (page = 1) => {
 }
 
 const abrirModal = (peaje = null) => {
-    // Reseteamos las fotos cada vez que se abre el modal
+     
     fotoSeleccionada.value = null
     previewFoto.value = null
 
@@ -54,15 +54,15 @@ const abrirModal = (peaje = null) => {
         idEdicion.value = peaje.id
         nuevoPeaje.name = peaje.name
 
-        // Mapeamos los campos para asegurarnos de que la vista siempre tenga la propiedad 'label'
+        
         nuevoPeaje.camposDinámicos = peaje.dynamic_schema && peaje.dynamic_schema.inventory_fields
             ? peaje.dynamic_schema.inventory_fields.map(c => ({
                 ...c,
-                label: c.label || c.name.replace(/_/g, ' ') // Fallback si no tenía label
+                label: c.label || c.name.replace(/_/g, ' ')  
             }))
             : []
         
-        // Si el peaje ya tenía una imagen comprimida en la BD, la mostramos
+        
         if (peaje.image_path) {
             previewFoto.value = peaje.image_path
         }
@@ -82,7 +82,7 @@ const cerrarModal = () => {
 }
 
 const agregarCampo = () => {
-    // Ahora iniciamos con 'label' vacío para la interfaz humana
+ 
     nuevoPeaje.camposDinámicos.push({ label: '', name: '', type: 'texto' })
 }
 
@@ -90,12 +90,12 @@ const quitarCampo = (index) => {
     nuevoPeaje.camposDinámicos.splice(index, 1)
 }
 
-// Nueva función para capturar el archivo de imagen
+ 
 const seleccionarFoto = (event) => {
     const file = event.target.files[0]
     if (file) {
         fotoSeleccionada.value = file
-        previewFoto.value = URL.createObjectURL(file) // Creamos URL temporal para previsualizar
+        previewFoto.value = URL.createObjectURL(file)  
     }
 }
 
@@ -105,8 +105,7 @@ const guardarPeaje = async () => {
     guardando.value = true;
 
     try {
-        // Formateamos los campos: Convertimos el 'label' (Ej: "Estado de Barreras") 
-        // a un 'name' técnico (Ej: "estado_barreras") para la Base de Datos.
+  
         const camposFormateados = nuevoPeaje.camposDinámicos.map(c => {
             const internalName = c.name || (c.label ? c.label.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '') : 'campo');
             return {
@@ -125,18 +124,18 @@ const guardarPeaje = async () => {
 
         let peajeIdOperado = null;
 
-        // 1. Guardar o Actualizar los datos de texto y JSON
+        
         if (esEdicion.value) {
             await axios.put(`/api/tolls/${idEdicion.value}`, payload)
             peajeIdOperado = idEdicion.value;
             toast.success('Configuración de peaje actualizada.')
         } else {
             const respuestaPost = await axios.post('/api/tolls', payload)
-            peajeIdOperado = respuestaPost.data.data.id; // Capturamos el nuevo ID devuelto por Laravel
-            toast.success('Peaje registrado exitosamente.')
+            peajeIdOperado = respuestaPost.data.data.id;  
+            toast.success('Peaje registrado.')
         }
 
-        // 2. Si el usuario seleccionó una foto, la enviamos al motor de compresión
+       
         if (fotoSeleccionada.value && peajeIdOperado) {
             const formData = new FormData();
             formData.append('image', fotoSeleccionada.value);
@@ -144,14 +143,14 @@ const guardarPeaje = async () => {
             await axios.post(`/api/tolls/${peajeIdOperado}/image`, formData, {
                 headers: { 
                     'Content-Type': 'multipart/form-data',
-                    'Accept': 'application/json' // <-- ESTO PREVIENE EL ERROR GET
+                    'Accept': 'application/json'  
                 }
             });
-            toast.success('Fotografía de fachada comprimida y guardada.');
+            toast.success('Foto de fachada guardada.');
         }
 
         cerrarModal()
-        cargarPeajes(paginaActual.value) // Recargamos manteniendo la página
+        cargarPeajes(paginaActual.value)  
 
     } catch (error) {
         console.error("Error al guardar:", error)
@@ -312,7 +311,7 @@ onMounted(() => {
                     
                     <div class="mb-5">
                         <label class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-1.5">
-                            Fotografía de Fachada (Opcional)
+                            foto de fachada (opcional)
                         </label>
                         <div class="relative w-full h-36 rounded-lg border-2 border-dashed border-slate-300 dark:border-white/20 bg-slate-50 dark:bg-white/5 overflow-hidden flex items-center justify-center group hover:border-amber-500/50 transition-colors cursor-pointer" @click="$refs.fileInput.click()">
                             <img v-if="previewFoto" :src="previewFoto" class="w-full h-full object-cover absolute inset-0 z-0 group-hover:opacity-50 transition-opacity" />
@@ -324,7 +323,7 @@ onMounted(() => {
                             </div>
 
                             <div v-if="previewFoto" class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                                <span class="text-white text-xs font-bold uppercase tracking-wider bg-black/60 px-3 py-1.5 rounded shadow-lg">Cambiar Fotografía</span>
+                                <span class="text-white text-xs font-bold uppercase tracking-wider bg-black/60 px-3 py-1.5 rounded shadow-lg">Cambiar foto</span>
                             </div>
 
                             <input ref="fileInput" type="file" accept="image/jpeg, image/png, image/webp" class="hidden" @change="seleccionarFoto" />
@@ -366,7 +365,7 @@ onMounted(() => {
                                     <option value="texto">Texto</option>
                                     <option value="numero">Número</option>
                                     <option value="booleano">Sí/No</option>
-                                    <option value="multimedia">Archivo / Fotografía</option>
+                                    <option value="multimedia">Archivo / fotos</option>
                                 </select>
                                 <button type="button" @click="quitarCampo(index)"
                                     class="text-red-400 hover:text-red-600 p-1 cursor-pointer bg-transparent border-none">

@@ -138,7 +138,7 @@ const exportarExcel = () => {
     link.click();
     document.body.removeChild(link);
     
-    toast.success('Reporte descargado exitosamente');
+    toast.success('Reporte descargado');
 }
 
 onMounted(() => {
@@ -238,7 +238,7 @@ onMounted(() => {
                                         @click="abrirDetalles(suceso)"
                                         class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-bold tracking-wider uppercase bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-500/30 transition-colors border-none cursor-pointer">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                                    Ver detalles ({{ Object.keys(suceso.dynamic_data).length }})
+                                    Ver más ({{ Object.keys(suceso.dynamic_data).length }})
                                 </button>
                                 <span v-else class="text-[12px] text-slate-400 italic">Sin datos</span>
                             </td>
@@ -292,7 +292,7 @@ onMounted(() => {
                     </div>
                 </div>
                 <div class="px-6 py-4 bg-slate-50 dark:bg-[#0d1b2a] border-t border-slate-200 dark:border-white/10 flex justify-end">
-                    <button @click="cerrarDetalles" class="px-5 py-2 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors border-none bg-slate-200/50 dark:bg-white/5 cursor-pointer font-['Barlow_Condensed'] uppercase tracking-wider">Cerrar panel</button>
+                    <button @click="cerrarDetalles" class="px-5 py-2 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors border-none bg-slate-200/50 dark:bg-white/5 cursor-pointer font-['Barlow_Condensed'] uppercase tracking-wider">Cerrar</button>
                 </div>
             </div>
         </div>

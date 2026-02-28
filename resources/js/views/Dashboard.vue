@@ -40,6 +40,9 @@ const cargarDatos = async () => {
 }
 
 
+ 
+
+
 const chartDataTipos = computed(() => {
     const labels = datosTipos.value.map(d => d.incident_type.replace('_', ' ').toUpperCase())
     const data = datosTipos.value.map(d => d.total)
@@ -108,32 +111,32 @@ onMounted(() => {
             Panel Principal
         </h2>
         
-        <div class="grid grid-cols-4 gap-5 mb-6">
-            <div class="bg-white dark:bg-[#0d1b2a] border border-slate-200 dark:border-white/10 shadow-sm  p-5 relative overflow-hidden transition-colors">
+        <div class="grid grid-cols-3 gap-5 mb-6">
+            <!--div class="bg-white dark:bg-[#0d1b2a] border border-slate-200 dark:border-white/10 shadow-sm  p-5 relative overflow-hidden transition-colors">
                 <div class="absolute inset-y-0 left-0 w-[3px] bg-amber-500"></div>
-                <div class="text-[11px] text-slate-500 tracking-[0.08em] font-bold font-['Barlow_Condensed'] uppercase mb-2">Estaciones Activas</div>
+                <div class="text-[11px] text-slate-500 tracking-[0.08em] font-bold font-['Barlow_Condensed'] uppercase mb-2">Estaciones activas</div>
                 <div class="font-['Barlow_Condensed'] text-[38px] font-extrabold text-slate-900 dark:text-slate-100 leading-none">{{ kpis.total_peajes }}</div>
-            </div>
+            </div-->
             <div class="bg-white dark:bg-[#0d1b2a] border border-slate-200 dark:border-white/10 shadow-sm  p-5 relative overflow-hidden transition-colors">
                 <div class="absolute inset-y-0 left-0 w-[3px] bg-blue-500"></div>
-                <div class="text-[11px] text-slate-500 tracking-[0.08em] font-bold font-['Barlow_Condensed'] uppercase mb-2">Sucesos Hoy</div>
+                <div class="text-[11px] text-slate-500 tracking-[0.08em] font-bold font-['Barlow_Condensed'] uppercase mb-2">Sucesos hoy</div>
                 <div class="font-['Barlow_Condensed'] text-[38px] font-extrabold text-slate-900 dark:text-slate-100 leading-none">{{ kpis.sucesos_hoy }}</div>
             </div>
             <div class="bg-white dark:bg-[#0d1b2a] border border-slate-200 dark:border-white/10 shadow-sm  p-5 relative overflow-hidden transition-colors">
                 <div class="absolute inset-y-0 left-0 w-[3px] bg-emerald-500"></div>
-                <div class="text-[11px] text-slate-500 tracking-[0.08em] font-bold font-['Barlow_Condensed'] uppercase mb-2">Total Histórico</div>
+                <div class="text-[11px] text-slate-500 tracking-[0.08em] font-bold font-['Barlow_Condensed'] uppercase mb-2">Total histórico</div>
                 <div class="font-['Barlow_Condensed'] text-[38px] font-extrabold text-slate-900 dark:text-slate-100 leading-none">{{ kpis.total_sucesos }}</div>
             </div>
             <div class="bg-white dark:bg-[#0d1b2a] border border-slate-200 dark:border-white/10 shadow-sm  p-5 relative overflow-hidden transition-colors">
                 <div class="absolute inset-y-0 left-0 w-[3px] bg-slate-400"></div>
-                <div class="text-[11px] text-slate-500 tracking-[0.08em] font-bold font-['Barlow_Condensed'] uppercase mb-2">Estado del Sistema</div>
+                <div class="text-[11px] text-slate-500 tracking-[0.08em] font-bold font-['Barlow_Condensed'] uppercase mb-2">Estado del sistema</div>
                 <div class="font-['Barlow_Condensed'] text-[24px] font-extrabold text-emerald-600 dark:text-emerald-400 leading-none mt-2">OPERATIVO</div>
             </div>
         </div>
 
         <div class="grid grid-cols-[1fr_2fr] gap-6 mb-6">
             <div class="bg-white dark:bg-[#0d1b2a] border border-slate-200 dark:border-white/10  p-5 shadow-sm transition-colors">
-                <h3 class="font-['Barlow_Condensed'] text-[15px] font-bold text-slate-800 dark:text-slate-200 uppercase tracking-widest mb-4 border-b border-slate-100 dark:border-white/5 pb-2">Clasificación de Sucesos</h3>
+                <h3 class="font-['Barlow_Condensed'] text-[15px] font-bold text-slate-800 dark:text-slate-200 uppercase tracking-widest mb-4 border-b border-slate-100 dark:border-white/5 pb-2">Clasificación de sucesos</h3>
                 <div class="h-[220px] relative">
                     <Doughnut v-if="datosTipos.length > 0" :data="chartDataTipos" :options="chartOptions" />
                     <div v-else class="absolute inset-0 flex items-center justify-center text-xs text-slate-500 italic">No hay datos suficientes</div>
@@ -141,7 +144,7 @@ onMounted(() => {
             </div>
 
             <div class="bg-white dark:bg-[#0d1b2a] border border-slate-200 dark:border-white/10  p-5 shadow-sm transition-colors">
-                <h3 class="font-['Barlow_Condensed'] text-[15px] font-bold text-slate-800 dark:text-slate-200 uppercase tracking-widest mb-4 border-b border-slate-100 dark:border-white/5 pb-2">Carga Operativa por Estación (Top 5)</h3>
+                <h3 class="font-['Barlow_Condensed'] text-[15px] font-bold text-slate-800 dark:text-slate-200 uppercase tracking-widest mb-4 border-b border-slate-100 dark:border-white/5 pb-2">Carga operativa por estación (últimos 5)</h3>
                 <div class="h-[220px] relative">
                     <Bar v-if="datosPeajes.length > 0" :data="chartDataPeajes" :options="barChartOptions" />
                     <div v-else class="absolute inset-0 flex items-center justify-center text-xs text-slate-500 italic">No hay datos suficientes</div>
@@ -153,7 +156,7 @@ onMounted(() => {
             
             <div class="bg-white dark:bg-[#0d1b2a] border border-slate-200 dark:border-white/10  shadow-sm overflow-hidden transition-colors">
                 <div class="bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10 px-5 py-3 flex items-center justify-between">
-                    <span class="font-['Barlow_Condensed'] font-bold text-[15px] text-slate-900 dark:text-slate-100 uppercase tracking-widest">Auditoría Reciente</span>
+                    <span class="font-['Barlow_Condensed'] font-bold text-[15px] text-slate-900 dark:text-slate-100 uppercase tracking-widest">Auditoría reciente</span>
                     <router-link to="/panel/sucesos" class="text-[11px] font-bold text-amber-600 dark:text-amber-500 hover:text-amber-700 uppercase tracking-wider no-underline">Ver historial</router-link>
                 </div>
                 <div class="overflow-x-auto">

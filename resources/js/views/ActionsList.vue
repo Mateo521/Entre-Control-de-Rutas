@@ -323,8 +323,8 @@ onMounted(() => {
                     </svg></div>
                 <h3 class="font-['Barlow_Condensed'] text-[20px] font-bold text-slate-900 dark:text-slate-100 mb-2">
                     ¿Archivar reporte?</h3>
-                <p class="text-sm text-slate-500 mb-6">El registro de mantenimiento será movido al histórico de Solo
-                    Lectura.</p>
+                <p class="text-sm text-slate-500 mb-6">El registro de mantenimiento va a ser movido al histórico de solo
+                    lectura.</p>
                 <div class="flex gap-3 justify-center">
                     <button @click="mostrarModalArchivar = false"
                         class="px-5 py-2 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border-none cursor-pointer font-['Barlow_Condensed'] uppercase">Cancelar</button>

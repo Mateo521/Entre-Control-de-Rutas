@@ -13,7 +13,7 @@ const searchRuta = ref('20')
 const searchKm = ref('')
 let marcadorTemporal = null
 
- 
+
 const marcadoresBusqueda = []
 
 
@@ -51,6 +51,7 @@ const trazasVialesGeoJSON = {
         {
             "type": "Feature",
             "properties": {
+                "id": "20",
                 "nombre": "Autopista Prov. 20",
                 "color": "#3b82f6",
                 "peajes": [
@@ -124,6 +125,7 @@ const trazasVialesGeoJSON = {
         {
             "type": "Feature",
             "properties": {
+                "id": "30",
                 "nombre": "Ruta Prov. 30",
                 "color": "#8b5cf6",
                 "peajes": [
@@ -163,6 +165,7 @@ const trazasVialesGeoJSON = {
         {
             "type": "Feature",
             "properties": {
+                "id": "7",
                 "nombre": "Autopista Serranías Puntanas (Ruta Nac. 7)",
                 "color": "#f59e0b",
                 "peajes": [
@@ -280,35 +283,120 @@ const referenciasViales = {
 
 }
 
+
+const peajes = ref([])
+
+
+const cargarPeajesBase = async () => {
+    try {
+        const respuesta = await axios.get('/api/tolls', {
+            params: { per_page: 50 }
+        })
+        peajes.value = respuesta.data.data
+    } catch (error) {
+        console.error('Error al cargar peajes para el mapa:', error)
+    }
+}
+
+
 const renderizarTrazasEstaticas = () => {
     L.geoJSON(trazasVialesGeoJSON, {
-        style: (feature) => ({ color: feature.properties.color, weight: 6, opacity: 0.6, lineCap: 'round', lineJoin: 'round' }),
+        style: (feature) => ({ color: feature.properties.color, weight: 8, opacity: 0.6, lineCap: 'round', lineJoin: 'round' }),
 
 
 
 
 
         onEachFeature: (feature, layer) => {
-            layer.bindPopup(`<strong class="font-[Barlow_Condensed] text-sm">${feature.properties.nombre}</strong><br>Traza bajo jurisdicción.`);
+
+
+
+
+            layer.on('click', (e) => {
+
+                L.DomEvent.stopPropagation(e);
+
+
+                let rutaId = feature.properties.id;
+                if (!rutaId && feature.properties.nombre) {
+                    const coincidencia = feature.properties.nombre.match(/\d+/);
+                    rutaId = coincidencia ? coincidencia[0] : null;
+                }
+
+                const km = obtenerKmDesdeCoordenadas(rutaId, e.latlng.lat, e.latlng.lng);
+
+                const popupHtml = `
+    <div class="font-['Barlow_Condensed'] min-w-[200px] p-1 transition-colors">
+        <div class="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em] mb-1 font-bold">
+            Referencia Vial
+        </div>
+        
+        <strong class="text-base uppercase text-slate-800 dark:text-slate-100 block leading-tight tracking-wide">
+            ${feature.properties.nombre}
+        </strong>
+        
+        <div class="mt-3 p-3 bg-amber-500/5 dark:bg-amber-500/10 border border-slate-200 dark:border-amber-500/20 rounded-lg flex items-center justify-between shadow-sm">
+            <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                Ubicación
+            </span>
+            <span class="font-black text-xl text-amber-600 dark:text-amber-400">
+                ${km ? 'KM ' + km : 'Fuera de rango'}
+            </span>
+        </div>
+        
+        <div class="mt-2 text-[12px] text-slate-200 dark:text-slate-600 italic text-right">
+            Detección automática por coordenadas
+        </div>
+    </div>
+`;
+
+                L.popup().setLatLng(e.latlng).setContent(popupHtml).openOn(map);
+            });
+
+
+
+
+
             if (feature.properties.peajes) {
-                feature.properties.peajes.forEach(peaje => {
+                feature.properties.peajes.forEach(peajeGeo => {
+
+
+                    const peajeDB = peajes.value.find(p => {
+                        const nombreDB = p.name.toLowerCase();
+                        const nombreGeo = peajeGeo.nombre.toLowerCase();
+
+
+                        if (nombreDB.includes(nombreGeo) || nombreGeo.includes(nombreDB)) return true;
+                        if (nombreGeo.includes('desaguadero') && nombreDB.includes('desaguadero')) {
+                            if (nombreGeo.includes('este') && nombreDB.includes('este')) return true;
+                            if (nombreGeo.includes('oeste') && nombreDB.includes('oeste')) return true;
+                        }
+
+                        return false;
+                    });
+
+
+                    const imagenDinamica = (peajeDB && peajeDB.image_path)
+                        ? peajeDB.image_path
+                        : `https://placehold.co/600x400?text=${encodeURIComponent(peajeGeo.nombre)}`;
+
                     const iconPeaje = L.divIcon({
                         className: 'bg-transparent border-none',
                         html: `<div class="w-7 h-7 bg-white dark:bg-slate-800 rounded border-2 border-[${feature.properties.color}] shadow-lg flex items-center justify-center relative -left-3.5 -top-3.5"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${feature.properties.color}" stroke-width="2.5"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V7a5 5 0 0110 0v4"></path></svg></div>`,
                         iconSize: [28, 28]
                     });
 
-
-                    L.marker([peaje.lat, peaje.lng], { icon: iconPeaje })
+                    L.marker([peajeGeo.lat, peajeGeo.lng], { icon: iconPeaje })
                         .addTo(map)
                         .bindPopup(`
-                        <div class="mb-2.5 rounded overflow-hidden shadow-sm border border-slate-200 dark:border-slate-700">
-                            <img src="${peaje.imagen || ''}" alt="Fachada ${peaje.nombre}" class="w-full h-66 object-cover  transition-transform duration-500" onerror="this.src='https://placehold.co/600x400'" />
-                        </div>
-                        <strong class="font-[Barlow_Condensed] text-[17px] tracking-wide border-b border-slate-200 dark:border-slate-700 pb-1.5 mb-1.5 block text-slate-800 dark:text-slate-100">${peaje.nombre}</strong>
-                        <div class="text-[12px] text-slate-500 dark:text-slate-400">Estación base operativa</div>
-                     `, {
-
+                <div class="mb-2.5 rounded overflow-hidden shadow-sm border border-slate-200 dark:border-slate-700">
+                    <img src="${imagenDinamica}" alt="Fachada ${peajeGeo.nombre}" class="w-full h-66 object-cover transition-transform duration-500" onerror="this.src='https://placehold.co/600x400?text=Error'" />
+                </div>
+                <strong class="font-[Barlow_Condensed] text-[17px] tracking-wide border-b border-slate-200 dark:border-slate-700 pb-1.5 mb-1.5 block text-slate-800 dark:text-slate-100">
+                    ${peajeDB ? peajeDB.name : peajeGeo.nombre}
+                </strong>
+                <div class="text-[12px] text-slate-500 dark:text-slate-400">Estación base operativa</div>
+                `, {
                             minWidth: 400,
                             maxWidth: 440,
                             className: 'custom-popup-peaje'
@@ -419,12 +507,12 @@ const initMap = () => {
     observer.observe(document.documentElement, { attributes: true });
 }
 
- 
+
 const calcularCoordenadaAproximada = (rutaId, kmBuscado) => {
-    
+
     const puntosConCoordenadas = referenciasViales[rutaId].filter(p => p.lat && p.lng);
 
-    
+
     if (puntosConCoordenadas.length === 0) {
         let lat = -33.30, lng = -66.33;
         if (rutaId === '9') { lat = -33.27 + (kmBuscado * 0.006); lng = -66.20 + (kmBuscado * 0.004); }
@@ -432,25 +520,25 @@ const calcularCoordenadaAproximada = (rutaId, kmBuscado) => {
         return [lat, lng];
     }
 
-   
+
     puntosConCoordenadas.sort((a, b) => a.km - b.km);
 
-    
+
     const exacto = puntosConCoordenadas.find(p => p.km === kmBuscado);
     if (exacto) return [exacto.lat, exacto.lng];
 
-  
+
     if (kmBuscado < puntosConCoordenadas[0].km) {
-        return [puntosConCoordenadas[0].lat, puntosConCoordenadas[0].lng];  
+        return [puntosConCoordenadas[0].lat, puntosConCoordenadas[0].lng];
     }
 
-    
+
     const ultimoPunto = puntosConCoordenadas[puntosConCoordenadas.length - 1];
     if (kmBuscado > ultimoPunto.km) {
-        return [ultimoPunto.lat, ultimoPunto.lng];  
+        return [ultimoPunto.lat, ultimoPunto.lng];
     }
 
-     
+
     let puntoA = puntosConCoordenadas[0];
     let puntoB = puntosConCoordenadas[1];
 
@@ -462,10 +550,10 @@ const calcularCoordenadaAproximada = (rutaId, kmBuscado) => {
         }
     }
 
-   
+
     const porcentajeRecorrido = (kmBuscado - puntoA.km) / (puntoB.km - puntoA.km);
 
-    
+
     const latCalculada = puntoA.lat + ((puntoB.lat - puntoA.lat) * porcentajeRecorrido);
     const lngCalculada = puntoA.lng + ((puntoB.lng - puntoA.lng) * porcentajeRecorrido);
 
@@ -474,13 +562,13 @@ const calcularCoordenadaAproximada = (rutaId, kmBuscado) => {
 
 
 
- 
+
 const limitesRuta = computed(() => {
     if (!searchRuta.value || !referenciasViales[searchRuta.value]) {
         return { min: 0, max: 1000 };
     }
     const puntos = referenciasViales[searchRuta.value];
- 
+
     const min = puntos[0].km;
     const max = puntos[puntos.length - 1].km;
     return { min, max };
@@ -504,7 +592,7 @@ const buscarKilometro = () => {
 
     const { min, max } = limitesRuta.value;
 
-  
+
     if (km < min || km > max) {
         toast.warning(`El kilómetro debe estar comprendido entre ${min} y ${max} para esta traza.`);
         return;
@@ -512,7 +600,7 @@ const buscarKilometro = () => {
 
 
 
-    
+
     const exacto = puntos.find(p => p.km === km)
     if (exacto) {
         resultadoBusqueda.value = { tipo: 'exacto', punto: exacto }
@@ -530,11 +618,11 @@ const buscarKilometro = () => {
         }
     }
 
-  
+
     marcadoresBusqueda.forEach(m => map.removeLayer(m))
     marcadoresBusqueda.length = 0
 
- 
+
     const [mockLat, mockLng] = calcularCoordenadaAproximada(searchRuta.value, km)
 
     const dotKm = L.circleMarker([mockLat, mockLng], {
@@ -551,7 +639,7 @@ const buscarKilometro = () => {
         <div class="text-[10px] text-slate-500 italic">Coordenada temporal pendiente de relevamiento.</div>
     `).openPopup()
 
-  
+
     map.flyTo([mockLat, mockLng], 12, { duration: 1.5 })
 
     marcadoresBusqueda.push(dotKm)
@@ -562,8 +650,51 @@ const limpiarBusqueda = () => {
     resultadoBusqueda.value = null
     marcadoresBusqueda.forEach(m => map.removeLayer(m))
     marcadoresBusqueda.length = 0
-    map.setView([-33.3017, -66.3378], 8)  
+    map.setView([-33.3017, -66.3378], 8)
 }
+
+
+const obtenerKmDesdeCoordenadas = (rutaId, lat, lng) => {
+    // 1. Validar que la ruta exista en tus referenciasViales
+    const puntos = referenciasViales[rutaId];
+    if (!puntos || puntos.length < 2) {
+        console.warn(`ID de ruta "${rutaId}" no encontrado en referenciasViales.`);
+        return null;
+    }
+
+    let mejorKm = null;
+    let distanciaMinima = Infinity;
+
+    // 2. Recorrer los tramos (segmentos) de la ruta
+    for (let i = 0; i < puntos.length - 1; i++) {
+        const p1 = puntos[i];
+        const p2 = puntos[i + 1];
+
+        // Matemáticas de proyección: Calculamos dónde cae el clic en la línea entre p1 y p2
+        const dx = p2.lng - p1.lng;
+        const dy = p2.lat - p1.lat;
+        if (dx === 0 && dy === 0) continue;
+
+        let t = ((lng - p1.lng) * dx + (lat - p1.lat) * dy) / (dx * dx + dy * dy);
+        t = Math.max(0, Math.min(1, t)); // Nos aseguramos de estar dentro del tramo
+
+        // Coordenada proyectada
+        const proyLat = p1.lat + t * dy;
+        const proyLng = p1.lng + t * dx;
+
+        // Distancia real entre el clic y la carretera
+        const dist = Math.sqrt(Math.pow(lat - proyLat, 2) + Math.pow(lng - proyLng, 2));
+
+        if (dist < distanciaMinima) {
+            distanciaMinima = dist;
+            mejorKm = p1.km + t * (p2.km - p1.km);
+        }
+    }
+
+    // Si el clic está a más de ~800 metros de la ruta, lo ignoramos (evita errores en cruces)
+    return (distanciaMinima < 0.008) ? mejorKm.toFixed(1) : null;
+};
+
 
 const confirmarPunto = async () => {
     if (!puntoFormulario.tipo) return;
@@ -580,7 +711,7 @@ const confirmarPunto = async () => {
             })
         }
         await axios.post('/api/incidents', payload)
-        toast.success('Punto georreferenciado guardado en el sistema.')
+        toast.success('Punto georreferenciado guardado.')
 
         const iconoFijo = L.divIcon({
             className: 'bg-transparent border-none',
@@ -606,8 +737,12 @@ const confirmarPunto = async () => {
 }
 
 const cerrarModal = () => { mostrarModal.value = false }
-onMounted(() => { initMap() })
+onMounted(async () => {
+    await cargarPeajesBase();
+    initMap();
+})
 onBeforeUnmount(() => { if (map) { map.remove() } })
+
 </script>
 
 <template>
@@ -619,14 +754,14 @@ onBeforeUnmount(() => { if (map) { map.remove() } })
                 <h3
                     class="font-['Barlow_Condensed'] text-[22px] font-extrabold text-slate-900 dark:text-slate-100 m-0 leading-none">
                     Herramientas SIG</h3>
-                <p class="text-[12px] text-slate-500 dark:text-slate-400 mt-1">Sistema de Información Geográfica</p>
+                <p class="text-[12px] text-slate-500 dark:text-slate-400 mt-1">Sistema de información geográfica</p>
             </div>
 
             <div class="p-5 flex-1 overflow-y-auto">
                 <div class="mb-6">
                     <h4
                         class="font-['Barlow_Condensed'] text-[13px] font-bold tracking-widest uppercase text-amber-600 dark:text-amber-500 mb-4 border-b border-amber-500/20 pb-2">
-                        Localizador por Progresiva</h4>
+                        Localizador por progresiva</h4>
                     <form @submit.prevent="buscarKilometro" class="space-y-4">
                         <div>
                             <label
@@ -636,7 +771,7 @@ onBeforeUnmount(() => { if (map) { map.remove() } })
                                 class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded px-3 py-2 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500/50">
                                 <option value="20">Ruta Provincial 20</option>
                                 <option value="9">Ruta Prov. 9 (Autopista Puquios)</option>
-                                <option value="7">Ruta Nac. 7 (Autopista Serranías)</option>
+                                <option value="7">Ruta Nac. 7 (Autopista Serranías Puntanas)</option>
                                 <option value="30">Ruta Provincial 30</option>
                             </select>
 
@@ -676,7 +811,7 @@ onBeforeUnmount(() => { if (map) { map.remove() } })
                     class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded p-4 shadow-sm transition-colors mb-6">
                     <h4
                         class="font-['Barlow_Condensed'] text-[13px] font-bold text-blue-800 dark:text-blue-400 uppercase tracking-widest mb-3 border-b border-blue-200 dark:border-blue-800/50 pb-2">
-                        Resultado Espacial</h4>
+                        Resultado</h4>
 
                     <div v-if="resultadoBusqueda.tipo === 'exacto'" class="text-sm">
                         <div class="text-slate-600 dark:text-slate-300 mb-1 text-[11px] uppercase tracking-widest">
@@ -699,7 +834,7 @@ onBeforeUnmount(() => { if (map) { map.remove() } })
                             </li>
                             <li
                                 class="pl-4 border-l-2 border-dashed border-blue-300 dark:border-blue-700/50 py-1.5 text-[10px] text-blue-600 dark:text-blue-400 font-bold tracking-widest uppercase ml-3">
-                                Punto Reportado</li>
+                                Punto reportado</li>
                             <li class="flex items-start gap-2 relative z-10">
                                 <span
                                     class="bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm">Km
@@ -714,15 +849,15 @@ onBeforeUnmount(() => { if (map) { map.remove() } })
                 <div>
                     <h4
                         class="font-['Barlow_Condensed'] text-[13px] font-bold tracking-widest uppercase text-amber-600 dark:text-amber-500 mb-4 border-b border-amber-500/20 pb-2">
-                        Control Georreferenciado</h4>
+                        Control georreferenciado</h4>
                     <div
                         class="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-500/20 rounded p-3 text-xs text-amber-800 dark:text-amber-300 leading-relaxed mb-3">
-                        <strong>Trazas Activas:</strong> El mapa despliega la jurisdicción operativa de las estaciones
+                        <strong>Trazas activas:</strong> El mapa despliega la jurisdicción operativa de las estaciones
                         base.
                     </div>
                     <div
                         class="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded p-3 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                        Haz clic en el mapa para inicializar un suceso. Selecciona "Quitar" para borrar la coordenada
+                        Hacé clic en el mapa para iniciar un suceso. Seleccioná "Quitar" para borrar la coordenada
                         temporal.
                     </div>
                 </div>
@@ -758,7 +893,7 @@ onBeforeUnmount(() => { if (map) { map.remove() } })
                 <div class="px-5 py-4 border-b border-slate-100 dark:border-white/5 flex items-center justify-between">
                     <h3
                         class="font-['Barlow_Condensed'] text-[18px] font-bold text-slate-900 dark:text-slate-100 tracking-wide m-0">
-                        Clasificar Coordenada</h3>
+                        Clasificar coordenada</h3>
                 </div>
 
                 <form @submit.prevent="confirmarPunto" class="p-5">
@@ -769,10 +904,10 @@ onBeforeUnmount(() => { if (map) { map.remove() } })
                         <select v-model="puntoFormulario.tipo" required
                             class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded px-3 py-2.5 text-slate-900 dark:text-white text-sm outline-none transition-colors focus:border-amber-500/50">
                             <option value="" disabled>— Seleccionar clasificación —</option>
-                            <option value="accidente_vial">Accidente Vial</option>
-                            <option value="animal_ruta">Animal en Ruta</option>
-                            <option value="corte_ruta">Corte de Ruta / Manifestación</option>
-                            <option value="falla_infraestructura">Falla en Infraestructura</option>
+                            <option value="accidente_vial">Accidente vial</option>
+                            <option value="animal_ruta">Animal en ruta</option>
+                            <option value="corte_ruta">Corte de ruta / Manifestación</option>
+                            <option value="falla_infraestructura">Falla en infraestructura</option>
                         </select>
                     </div>
 

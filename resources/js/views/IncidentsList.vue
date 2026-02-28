@@ -70,7 +70,7 @@ const ejecutarArchivado = async () => {
 
     try {
         await axios.delete(`/api/incidents/${sucesoAArchivar.value.id}`)
-        toast.success('Suceso transferido al archivo histórico')
+        toast.success('Transferido al archivo histórico')
         mostrarModalArchivar.value = false
         sucesoAArchivar.value = null
         cargarSucesos(1)
@@ -196,10 +196,10 @@ onMounted(() => {
                                 Estación</th>
                             <th
                                 class="px-4 py-3 text-left font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400">
-                                Tipo de Suceso</th>
+                                Tipo</th>
                             <th
                                 class="px-4 py-3 text-left font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400">
-                                Datos Operativos</th>
+                                Datos</th>
                             <th
                                 class="px-4 py-3 text-left font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-amber-600 dark:text-amber-500">
                                 Evidencia</th>
@@ -248,7 +248,7 @@ onMounted(() => {
                                         <line x1="12" y1="16" x2="12" y2="12"></line>
                                         <line x1="12" y1="8" x2="12.01" y2="8"></line>
                                     </svg>
-                                    Ver detalles ({{ Object.keys(suceso.dynamic_data).length }})
+                                    Ver más ({{ Object.keys(suceso.dynamic_data).length }})
                                 </button>
                                 <span v-else class="text-[12px] text-slate-400 italic">Sin datos</span>
                             </td>
@@ -338,8 +338,8 @@ onMounted(() => {
                 </div>
                 <h3 class="font-['Barlow_Condensed'] text-[20px] font-bold text-slate-900 dark:text-slate-100 mb-2">
                     ¿Archivar registro?</h3>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">El suceso #{{ sucesoAArchivar?.id }} será
-                    movido a la tabla de archivados. Pasará a estado de Solo Lectura y no podrá ser modificado en el
+                <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">El suceso #{{ sucesoAArchivar?.id }} va a ser
+                    movido a la tabla de archivados. Pasará a estado de solo lectura y no va a poder ser modificado en
                     futuro.</p>
 
                 <div class="flex gap-3 justify-center">
@@ -347,7 +347,7 @@ onMounted(() => {
                         class="px-5 py-2 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors border-none cursor-pointer font-['Barlow_Condensed'] uppercase tracking-wider">Cancelar</button>
                     <button @click="ejecutarArchivado"
                         class="bg-red-500 text-white font-['Barlow_Condensed'] text-xs font-bold tracking-wider uppercase px-5 py-2 rounded-lg border-none cursor-pointer hover:bg-red-600 transition-colors">Confirmar
-                        Archivo</button>
+                        archivado</button>
                 </div>
             </div>
         </div>
@@ -434,7 +434,7 @@ onMounted(() => {
                     <div>
                         <h3
                             class="font-['Barlow_Condensed'] text-[20px] font-extrabold text-slate-900 dark:text-slate-100 tracking-wide m-0">
-                            Requerimientos Operativos</h3>
+                            Requerimientos</h3>
                         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">Auditoría de campos
                             dinámicos</p>
                     </div>
@@ -468,7 +468,7 @@ onMounted(() => {
                     class="px-6 py-4 bg-slate-50 dark:bg-[#0d1b2a] border-t border-slate-200 dark:border-white/10 flex justify-end">
                     <button @click="cerrarDetalles"
                         class="px-5 py-2 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors border-none bg-slate-200/50 dark:bg-white/5 cursor-pointer font-['Barlow_Condensed'] uppercase tracking-wider">Cerrar
-                        panel</button>
+                        </button>
                 </div>
             </div>
         </div>

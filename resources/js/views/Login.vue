@@ -24,7 +24,7 @@ const handleLogin = async () => {
 
         localStorage.setItem('access_token', response.data.access_token)
 
-        toast.success('Ingreso exitoso al sistema')
+        toast.success('Ingreso exitoso')
 
         router.push('/panel')
 
@@ -108,7 +108,7 @@ const handleLogin = async () => {
                             <polyline points="10 17 15 12 10 7" />
                             <line x1="15" y1="12" x2="3" y2="12" />
                         </svg>
-                        Ingresar al sistema
+                        Ingresar
                     </span>
                 </button>
             </form>

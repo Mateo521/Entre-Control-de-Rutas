@@ -139,11 +139,11 @@ const guardarSuceso = async () => {
                 formData.append('archivos_a_eliminar', JSON.stringify(archivosAEliminar.value))
             }
             await axios.post(`/api/incidents/${idEdicion.value}`, formData)
-            toast.success('Registro actualizado y sincronizado')
+            toast.success('Registro actualizado')
             router.push('/panel/sucesos')
         } else {
             await axios.post('/api/incidents', formData)
-            toast.success('Suceso y archivos registrados correctamente')
+            toast.success('Suceso y archivos registrados')
             formulario.value.incident_type = ''
             alCambiarPeaje()
         }
@@ -238,7 +238,7 @@ onUnmounted(() => {
                                 <polyline points="9 11 12 14 22 4"></polyline>
                                 <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path>
                             </svg>
-                            Requerimientos Operativos de la Estación
+                            Requerimientos de la Estación
                         </h4>
 
                         <div class="grid grid-cols-2 gap-4">

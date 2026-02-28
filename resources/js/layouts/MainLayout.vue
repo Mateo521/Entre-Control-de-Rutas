@@ -7,6 +7,7 @@ const router = useRouter()
 
 
 const isOnline = ref(navigator.onLine)
+const peajes = ref([])
 
 const actualizarEstadoRed = () => {
     isOnline.value = navigator.onLine
@@ -23,10 +24,43 @@ const handleLogout = async () => {
     }
 }
 
-onMounted(() => {
 
+const obtenerDatosRuta = (nombre) => {
+    const nombreLower = nombre.toLowerCase();
+    if (nombreLower.includes('cumbre') || nombreLower.includes('desaguadero')) {
+        return { ruta: 'Ruta Nac. 7', colorText: 'text-amber-400', bgGradiente: 'from-amber-900/90' };
+    }
+    if (nombreLower.includes('puquios')) {
+        return { ruta: 'Ruta Prov. 9', colorText: 'text-emerald-400', bgGradiente: 'from-emerald-900/90' };
+    }
+    if (nombreLower.includes('piedra') || nombreLower.includes('perilago')) {
+        return { ruta: 'Ruta Prov. 20', colorText: 'text-blue-400', bgGradiente: 'from-blue-900/90' };
+    }
+    if (nombreLower.includes('30')) {
+        return { ruta: 'Ruta Prov. 30', colorText: 'text-purple-400', bgGradiente: 'from-purple-900/90' };
+    }
+    return { ruta: 'Ruta Provincial', colorText: 'text-slate-400', bgGradiente: 'from-black/80' };
+}
+
+
+const cargarPeajesBase = async () => {
+    try {
+        const respuesta = await axios.get('/api/tolls', {
+            params: { per_page: 50 }
+        })
+
+        peajes.value = respuesta.data.data
+    } catch (error) {
+        console.error('Error al cargar peajes en el layout:', error)
+    }
+}
+
+
+
+onMounted(() => {
     window.addEventListener('online', actualizarEstadoRed)
     window.addEventListener('offline', actualizarEstadoRed)
+    cargarPeajesBase()
 })
 
 onUnmounted(() => {
@@ -97,7 +131,7 @@ onUnmounted(() => {
                         stroke-linecap="round">
                         <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" />
                         <circle cx="12" cy="10" r="3" />
-                    </svg>Gestión de Peajes</router-link>
+                    </svg>Gestión de peajes</router-link>
 
                 <router-link to="/panel/sucesos"
                     active-class="border-amber-500 text-amber-600 dark:text-amber-500 bg-amber-500/10"
@@ -109,7 +143,7 @@ onUnmounted(() => {
                         <line x1="16" y1="13" x2="8" y2="13"></line>
                         <line x1="16" y1="17" x2="8" y2="17"></line>
                         <polyline points="10 9 9 9 8 9"></polyline>
-                    </svg>Registro de Sucesos</router-link>
+                    </svg>Registro de sucesos</router-link>
 
                 <router-link to="/panel/acciones"
                     active-class="border-amber-500 text-amber-600 dark:text-amber-500 bg-amber-500/10"
@@ -120,7 +154,7 @@ onUnmounted(() => {
                             d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z">
                         </path>
                     </svg>
-                    Gestión de Acciones
+                    Gestión de acciones
                 </router-link>
 
 
@@ -133,7 +167,7 @@ onUnmounted(() => {
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                         <line x1="11" y1="8" x2="11" y2="14"></line>
                         <line x1="8" y1="11" x2="14" y2="11"></line>
-                    </svg>Búsqueda Avanzada</router-link>
+                    </svg>Búsqueda avanzada</router-link>
 
                 <router-link to="/panel/mapa"
                     active-class="border-amber-500 text-amber-600 dark:text-amber-500 bg-amber-500/10"
@@ -143,7 +177,7 @@ onUnmounted(() => {
                         <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon>
                         <line x1="9" y1="3" x2="9" y2="21"></line>
                         <line x1="15" y1="3" x2="15" y2="21"></line>
-                    </svg>Mapa Interactivo</router-link>
+                    </svg>Mapa</router-link>
 
 
 
@@ -182,7 +216,7 @@ onUnmounted(() => {
                         class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold tracking-wider uppercase transition-all bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30">
                         <span
                             class="w-1.5 h-1.5 rounded-full inline-block bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
-                        Sistema Operativo
+                        Sistema operativo
                     </span>
                 </div>
             </div>
@@ -207,7 +241,7 @@ onUnmounted(() => {
                         <div class="flex items-center justify-between mb-4">
                             <h4
                                 class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.15em] uppercase text-slate-500 dark:text-slate-400 m-0">
-                                Infraestructura Operativa - Estaciones Base
+                                Infraestructura operativa - Estaciones
                             </h4>
                             <span
                                 class="text-[10px] text-slate-400 dark:text-slate-500 font-['Barlow_Condensed'] tracking-widest uppercase">
@@ -215,139 +249,31 @@ onUnmounted(() => {
                             </span>
                         </div>
 
+
                         <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-
-
-
-
-                            <div
+                            <div v-for="peaje in peajes" :key="peaje.id"
                                 class="group relative rounded-lg overflow-hidden border border-slate-200 dark:border-white/10 shadow-sm bg-slate-200 dark:bg-slate-800 aspect-video">
-                                <img :src="'/img/peajes/la-cumbre.jpeg'"
-                                    onerror="this.src='https://placehold.co/600x400?text=La+Cumbre'"
-                                    class="w-full h-full object-cover  transition-transform duration-500" />
-                                <!-- group-hover:scale-110 -->
+
+                                <img :src="peaje.image_path || `https://placehold.co/400x250/1e293b/f59e0b?text=${peaje.name.split(' ').pop()}`"
+                                    onerror="this.src='https://placehold.co/600x400?text=Cargando...'"
+                                    class="w-full h-full object-cover transition-transform duration-500 " /> <!-- group-hover:scale-105 -->
+
                                 <div
-                                    class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-2.5">
+                                    :class="`absolute inset-0 bg-gradient-to-t ${obtenerDatosRuta(peaje.name).bgGradiente} via-black/20 to-transparent flex items-end p-2.5`">
                                     <div>
                                         <div
-                                            class="text-white font-['Barlow_Condensed'] text-[12px] font-bold tracking-wide leading-tight">
-                                            La Cumbre</div>
+                                            class="text-white font-['Barlow_Condensed'] text-[12px] font-bold tracking-wide leading-tight truncate max-w-[120px]">
+                                            {{ peaje.name.replace('Peaje ', '') }}
+                                        </div>
                                         <div
-                                            class="text-amber-400 text-[9px] font-bold tracking-widest uppercase mt-0.5">
-                                            Ruta Nac. 7</div>
+                                            :class="`${obtenerDatosRuta(peaje.name).colorText} text-[9px] font-bold tracking-widest uppercase mt-0.5`">
+                                            {{ obtenerDatosRuta(peaje.name).ruta }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-
-                            <div
-                                class="group relative rounded-lg overflow-hidden border border-slate-200 dark:border-white/10 shadow-sm bg-slate-200 dark:bg-slate-800 aspect-video">
-                                <img :src="'/img/peajes/desaguadero-e.jpeg'"
-                                    onerror="this.src='https://placehold.co/600x400?text=Desaguadero+E.'"
-                                    class="w-full h-full object-cover  transition-transform duration-500" />
-                                <div
-                                    class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-2.5">
-                                    <div>
-                                        <div
-                                            class="text-white font-['Barlow_Condensed'] text-[12px] font-bold tracking-wide leading-tight">
-                                            Desaguadero E.</div>
-                                        <div
-                                            class="text-amber-400 text-[9px] font-bold tracking-widest uppercase mt-0.5">
-                                            Ruta Nac. 7</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div
-                                class="group relative rounded-lg overflow-hidden border border-slate-200 dark:border-white/10 shadow-sm bg-slate-200 dark:bg-slate-800 aspect-video">
-                                <img :src="'/img/peajes/desaguadero-o.jpeg'"
-                                    onerror="this.src='https://placehold.co/600x400?text=Desaguadero+O.'"
-                                    class="w-full h-full object-cover  transition-transform duration-500" />
-                                <div
-                                    class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-2.5">
-                                    <div>
-                                        <div
-                                            class="text-white font-['Barlow_Condensed'] text-[12px] font-bold tracking-wide leading-tight">
-                                            Desaguadero O.</div>
-                                        <div
-                                            class="text-amber-400 text-[9px] font-bold tracking-widest uppercase mt-0.5">
-                                            Ruta Nac. 7</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div
-                                class="group relative rounded-lg overflow-hidden border border-slate-200 dark:border-white/10 shadow-sm bg-slate-200 dark:bg-slate-800 aspect-video">
-                                <img :src="'/img/peajes/los-puquios.jpeg'"
-                                    onerror="this.src='https://placehold.co/600x400?text=Los+Puquios'"
-                                    class="w-full h-full object-cover  transition-transform duration-500" />
-                                <div
-                                    class="absolute inset-0 bg-gradient-to-t from-emerald-900/90 via-black/20 to-transparent flex items-end p-2.5">
-                                    <div>
-                                        <div
-                                            class="text-white font-['Barlow_Condensed'] text-[12px] font-bold tracking-wide leading-tight">
-                                            Los Puquios</div>
-                                        <div
-                                            class="text-emerald-400 text-[9px] font-bold tracking-widest uppercase mt-0.5">
-                                            Ruta Prov. 9</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div
-                                class="group relative rounded-lg overflow-hidden border border-slate-200 dark:border-white/10 shadow-sm bg-slate-200 dark:bg-slate-800 aspect-video">
-                                <img :src="'/img/peajes/cruz-piedra.jpeg'"
-                                    onerror="this.src='https://placehold.co/600x400?text=Cruz+de+Piedra'"
-                                    class="w-full h-full object-cover  transition-transform duration-500" />
-                                <div
-                                    class="absolute inset-0 bg-gradient-to-t from-blue-900/90 via-black/20 to-transparent flex items-end p-2.5">
-                                    <div>
-                                        <div
-                                            class="text-white font-['Barlow_Condensed'] text-[12px] font-bold tracking-wide leading-tight">
-                                            Cruz de Piedra</div>
-                                        <div
-                                            class="text-blue-400 text-[9px] font-bold tracking-widest uppercase mt-0.5">
-                                            Ruta Prov. 20</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div
-                                class="group relative rounded-lg overflow-hidden border border-slate-200 dark:border-white/10 shadow-sm bg-slate-200 dark:bg-slate-800 aspect-video">
-                                <img :src="'/img/peajes/perilago.jpeg'"
-                                    onerror="this.src='https://placehold.co/600x400?text=Perilago'"
-                                    class="w-full h-full object-cover  transition-transform duration-500" />
-                                <div
-                                    class="absolute inset-0 bg-gradient-to-t from-blue-900/90 via-black/20 to-transparent flex items-end p-2.5">
-                                    <div>
-                                        <div
-                                            class="text-white font-['Barlow_Condensed'] text-[12px] font-bold tracking-wide leading-tight">
-                                            Perilago</div>
-                                        <div
-                                            class="text-blue-400 text-[9px] font-bold tracking-widest uppercase mt-0.5">
-                                            Ruta Prov. 20</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div
-                                class="group relative rounded-lg overflow-hidden border border-slate-200 dark:border-white/10 shadow-sm bg-slate-200 dark:bg-slate-800 aspect-video">
-                                <img :src="'/img/peajes/ruta-30.jpeg'"
-                                    onerror="this.src='https://placehold.co/600x400?text=Ruta+30'"
-                                    class="w-full h-full object-cover  transition-transform duration-500" />
-                                <div
-                                    class="absolute inset-0 bg-gradient-to-t from-purple-900/90 via-black/20 to-transparent flex items-end p-2.5">
-                                    <div>
-                                        <div
-                                            class="text-white font-['Barlow_Condensed'] text-[12px] font-bold tracking-wide leading-tight">
-                                            Ruta 30</div>
-                                        <div
-                                            class="text-purple-400 text-[9px] font-bold tracking-widest uppercase mt-0.5">
-                                            Ruta Prov. 30</div>
-                                    </div>
-                                </div>
-                            </div>
-
                         </div>
+
                     </div>
                 </div>
 

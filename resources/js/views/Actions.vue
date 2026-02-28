@@ -98,11 +98,11 @@ const guardarAccion = async () => {
                 formData.append('archivos_a_eliminar', JSON.stringify(archivosAEliminar.value))
             }
             await axios.post(`/api/actions/${idEdicion.value}`, formData)
-            toast.success('Reporte de acción actualizado correctamente')
+            toast.success('Reporte de acción actualizado')
             router.push('/panel/acciones')
         } else {
             await axios.post('/api/actions', formData)
-            toast.success('Acción operativa registrada exitosamente')
+            toast.success('Acción registrada')
 
             formulario.value.title = ''
             formulario.value.description = ''
@@ -235,7 +235,7 @@ onUnmounted(() => {
 
                 <div class="p-5">
                     <p class="text-[12px] text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
-                        Adjunta fotografías de los mantenimientos realizados, facturas de compras o documentos de
+                        Adjuntá fotos de los mantenimientos hechos, facturas de compras o documentos de
                         respaldo.
                     </p>
 
