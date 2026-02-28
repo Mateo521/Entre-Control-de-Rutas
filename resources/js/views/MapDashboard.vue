@@ -1,5 +1,8 @@
 <script setup>
-import { ref, reactive, onMounted, onBeforeUnmount, computed } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount, computed, watch } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { toast } from 'vue3-toastify'
@@ -13,7 +16,7 @@ const searchRuta = ref('20')
 const searchKm = ref('')
 let marcadorTemporal = null
 
-
+const marcadoresPeajesGenerados = {}
 const marcadoresBusqueda = []
 
 
@@ -170,8 +173,8 @@ const trazasVialesGeoJSON = {
                 "color": "#f59e0b",
                 "peajes": [
                     { nombre: "Peaje La Cumbre", lat: -33.3590784, lng: -66.0670751, imagen: "/img/peajes/la-cumbre.jpeg" },
-                    { nombre: "Peaje Desaguadero (Isla Oeste)", lat: -33.4117474, lng: -67.1234507, imagen: "/img/peajes/desaguadero-o.jpeg" },
-                    { nombre: "Peaje Desaguadero (Isla Este)", lat: -33.4128459, lng: -67.1147563, imagen: "/img/peajes/desaguadero-e.jpeg" },
+                    { nombre: "Peaje Desaguadero Isla Oeste", lat: -33.4117474, lng: -67.1234507, imagen: "/img/peajes/desaguadero-o.jpeg" },
+                    { nombre: "Peaje Desaguadero Isla Este", lat: -33.4128459, lng: -67.1147563, imagen: "/img/peajes/desaguadero-e.jpeg" },
                 ]
             },
 
@@ -299,6 +302,24 @@ const cargarPeajesBase = async () => {
 }
 
 
+const enfocarPeaje = (nombrePeaje) => {
+    if (!nombrePeaje || !map) return;
+
+    const targetMarker = marcadoresPeajesGenerados[nombrePeaje.toLowerCase()];
+
+    if (targetMarker) {
+
+        map.flyTo(targetMarker.getLatLng(), 15, {
+            animate: true,
+            duration: 1.5
+        });
+
+
+        targetMarker.openPopup();
+    }
+}
+
+
 const renderizarTrazasEstaticas = () => {
     L.geoJSON(trazasVialesGeoJSON, {
         style: (feature) => ({ color: feature.properties.color, weight: 8, opacity: 0.6, lineCap: 'round', lineJoin: 'round' }),
@@ -365,12 +386,21 @@ const renderizarTrazasEstaticas = () => {
                         const nombreDB = p.name.toLowerCase();
                         const nombreGeo = peajeGeo.nombre.toLowerCase();
 
-
-                        if (nombreDB.includes(nombreGeo) || nombreGeo.includes(nombreDB)) return true;
                         if (nombreGeo.includes('desaguadero') && nombreDB.includes('desaguadero')) {
-                            if (nombreGeo.includes('este') && nombreDB.includes('este')) return true;
-                            if (nombreGeo.includes('oeste') && nombreDB.includes('oeste')) return true;
+                            const geoOeste = /\boeste\b/.test(nombreGeo);
+                            const dbOeste = /\boeste\b/.test(nombreDB);
+                            const geoEste = /\beste\b/.test(nombreGeo);
+                            const dbEste = /\beste\b/.test(nombreDB);
+
+                            if (geoOeste && dbOeste) return true;
+                            if (geoEste && dbEste) return true;
+                            
+                           
+                            return false; 
                         }
+
+                     
+                        if (nombreDB.includes(nombreGeo) || nombreGeo.includes(nombreDB)) return true;
 
                         return false;
                     });
@@ -386,7 +416,7 @@ const renderizarTrazasEstaticas = () => {
                         iconSize: [28, 28]
                     });
 
-                    L.marker([peajeGeo.lat, peajeGeo.lng], { icon: iconPeaje })
+                    const marcadorPeaje = L.marker([peajeGeo.lat, peajeGeo.lng], { icon: iconPeaje })
                         .addTo(map)
                         .bindPopup(`
     <div class="bg-white dark:bg-[#0d1b2a] p-1 rounded-lg shadow-xl border border-slate-200 dark:border-white/10 transition-colors">
@@ -414,6 +444,15 @@ const renderizarTrazasEstaticas = () => {
                             maxWidth: 350,
                             className: 'custom-popup-peaje'
                         });
+
+
+
+                    if (peajeDB) marcadoresPeajesGenerados[peajeDB.name.toLowerCase()] = marcadorPeaje;
+                    marcadoresPeajesGenerados[peajeGeo.nombre.toLowerCase()] = marcadorPeaje;
+
+
+
+
                 });
             }
         }
@@ -750,7 +789,21 @@ const cerrarModal = () => { mostrarModal.value = false }
 onMounted(async () => {
     await cargarPeajesBase();
     initMap();
+
+    if (route.query.focus) {
+        setTimeout(() => {
+            enfocarPeaje(route.query.focus)
+        }, 500);
+    }
+
 })
+
+watch(() => route.query.focus, (nuevoFoco) => {
+    if (nuevoFoco) {
+        enfocarPeaje(nuevoFoco);
+    }
+})
+
 onBeforeUnmount(() => { if (map) { map.remove() } })
 
 </script>

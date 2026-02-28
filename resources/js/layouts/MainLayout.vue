@@ -27,7 +27,7 @@ const handleLogout = async () => {
 
 const horaActual = ref('')
 
- 
+
 const actualizarReloj = () => {
     const ahora = new Date()
     horaActual.value = ahora.toLocaleTimeString('es-AR', {
@@ -71,6 +71,15 @@ const cargarPeajesBase = async () => {
     }
 }
 
+
+
+const footerDesplegado = ref(false)
+
+
+const enfocarPeajeYcerrar = (nombre) => {
+    footerDesplegado.value = false;
+    router.push({ path: '/panel/mapa', query: { focus: nombre } });
+}
 
 
 onMounted(() => {
@@ -188,6 +197,19 @@ onUnmounted(() => {
                         <line x1="8" y1="11" x2="14" y2="11"></line>
                     </svg>Búsqueda avanzada</router-link>
 
+
+                <router-link to="/panel/evidencias"
+                    active-class="border-amber-500 text-amber-600 dark:text-amber-500 bg-amber-500/10"
+                    class="flex items-center gap-2.5 px-5 py-2.5 text-[13.5px] font-medium transition-all no-underline border-l-[3px] border-transparent text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                    Galería de adjuntos
+                </router-link>
+
                 <router-link to="/panel/mapa"
                     active-class="border-amber-500 text-amber-600 dark:text-amber-500 bg-amber-500/10"
                     class="flex items-center gap-2.5 px-5 py-2.5 text-[13.5px] font-medium transition-all no-underline border-l-[3px] border-transparent text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5"><svg
@@ -263,46 +285,73 @@ onUnmounted(() => {
 
             <div class="flex-1 overflow-y-auto flex flex-col bg-slate-100 dark:bg-[#0a1628]">
 
+
                 <div :class="[
-                    'flex-1 overflow-y-auto',
-                    $route.name !== 'MapDashboard' ? 'p-6' : ''
+                    'flex-1 flex flex-col bg-slate-100 dark:bg-[#0a1628] relative',
+                    $route.name === 'MapDashboard' ? 'overflow-hidden' : 'overflow-y-auto'
                 ]">
-                    <router-view></router-view>
-                </div>
 
-                <div class="px-6 pb-6 mt-auto">
-                    <div class="pt-5 border-t border-slate-200 dark:border-white/10">
-                        <div class="flex items-center justify-between mb-4">
-                            <h4
-                                class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.15em] uppercase text-slate-500 dark:text-slate-400 m-0">
-                                Infraestructura operativa - Estaciones
-                            </h4>
+                    <div :class="[
+                        'flex-1',
+                        $route.name !== 'MapDashboard' ? 'p-6' : ''
+                    ]">
+                        <router-view></router-view>
+                    </div>
+
+                    <div :class="[
+                        $route.name === 'MapDashboard'
+                            ? 'absolute bottom-0 left-0 right-0 z-[1000] bg-white/95 dark:bg-[#0d1b2a]/95 backdrop-blur-md shadow-[0_-10px_30px_rgba(0,0,0,0.3)] transition-transform duration-500 ease-in-out border-t border-amber-500/30 px-6 pb-6 pt-2'
+                            : 'px-6 pb-6 mt-auto',
+                        $route.name === 'MapDashboard' && !footerDesplegado ? 'translate-y-full' : 'translate-y-0'
+                    ]">
+
+                        <button v-if="$route.name === 'MapDashboard'" @click="footerDesplegado = !footerDesplegado"
+                            class="absolute -top-10 left-1/2 -translate-x-1/2 h-10 px-8 bg-white/95 dark:bg-[#0d1b2a]/95 backdrop-blur-md border border-b-0 border-amber-500/30 rounded-t-xl flex items-center justify-center gap-2 cursor-pointer transition-colors hover:bg-amber-500/10 shadow-[0_-4px_10px_rgba(0,0,0,0.1)]">
                             <span
-                                class="text-[10px] text-slate-400 dark:text-slate-500 font-['Barlow_Condensed'] tracking-widest uppercase">
-                                Ente Control de Rutas
+                                class="font-['Barlow_Condensed'] text-[12px] font-bold tracking-[0.15em] uppercase text-amber-600 dark:text-amber-500">
+                                {{ footerDesplegado ? 'Ocultar Estaciones' : 'Ver Estaciones' }}
                             </span>
-                        </div>
+                            <svg :class="footerDesplegado ? '' : 'rotate-180'"
+                                class="w-4 h-4 text-amber-500 transition-transform duration-300" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
 
 
-                        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-                            <div v-for="peaje in peajes" :key="peaje.id"
-                                class="group relative rounded-lg overflow-hidden border border-slate-200 dark:border-white/10 shadow-sm bg-slate-200 dark:bg-slate-800 aspect-video">
+                        <div
+                            :class="['pt-4 border-slate-200 dark:border-white/10', $route.name !== 'MapDashboard' ? 'border-t' : '']">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4
+                                    class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.15em] uppercase text-slate-500 dark:text-slate-400 m-0">
+                                    Infraestructura operativa - Estaciones
+                                </h4>
+                                <span
+                                    class="text-[10px] text-slate-400 dark:text-slate-500 font-['Barlow_Condensed'] tracking-widest uppercase">
+                                    Ente Control de Rutas
+                                </span>
+                            </div>
 
-                                <img :src="peaje.image_path || `https://placehold.co/400x250/1e293b/f59e0b?text=${peaje.name.split(' ').pop()}`"
-                                    onerror="this.src='https://placehold.co/600x400?text=Cargando...'"
-                                    class="w-full h-full object-cover transition-transform duration-500 " />
-                                <!-- group-hover:scale-105 -->
+                            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+                                <div v-for="peaje in peajes" :key="peaje.id" @click="enfocarPeajeYcerrar(peaje.name)"
+                                    class="group relative cursor-pointer rounded-lg overflow-hidden border border-slate-200 dark:border-white/10 shadow-sm bg-slate-200 dark:bg-slate-800 aspect-video">
 
-                                <div
-                                    :class="`absolute inset-0 bg-gradient-to-t ${obtenerDatosRuta(peaje.name).bgGradiente} via-black/20 to-transparent flex items-end p-2.5`">
-                                    <div>
-                                        <div
-                                            class="text-white font-['Barlow_Condensed'] text-[12px] font-bold tracking-wide leading-tight truncate max-w-[120px]">
-                                            {{ peaje.name.replace('Peaje ', '') }}
-                                        </div>
-                                        <div
-                                            :class="`${obtenerDatosRuta(peaje.name).colorText} text-[9px] font-bold tracking-widest uppercase mt-0.5`">
-                                            {{ obtenerDatosRuta(peaje.name).ruta }}
+                                    <img :src="peaje.image_path || `https://placehold.co/400x250/1e293b/f59e0b?text=${peaje.name.split(' ').pop()}`"
+                                        onerror="this.src='https://placehold.co/600x400?text=Cargando...'"
+                                        class="w-full h-full object-cover transition-transform duration-500 " />
+
+                                    <div
+                                        :class="`absolute inset-0 bg-gradient-to-t ${obtenerDatosRuta(peaje.name).bgGradiente} via-black/20 to-transparent flex items-end p-2.5`">
+                                        <div>
+                                            <div
+                                                class="text-white font-['Barlow_Condensed'] text-[12px] font-bold tracking-wide leading-tight truncate max-w-[120px]">
+                                                {{ peaje.name.replace('Peaje ', '') }}
+                                            </div>
+                                            <div
+                                                :class="`${obtenerDatosRuta(peaje.name).colorText} text-[9px] font-bold tracking-widest uppercase mt-0.5`">
+                                                {{ obtenerDatosRuta(peaje.name).ruta }}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -311,6 +360,7 @@ onUnmounted(() => {
 
                     </div>
                 </div>
+
 
             </div>
 

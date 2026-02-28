@@ -70,7 +70,7 @@ const ejecutarArchivado = async () => {
 
     try {
         await axios.delete(`/api/incidents/${sucesoAArchivar.value.id}`)
-        toast.success('Transferido al archivo histórico')
+        toast.success('Movido al archivo histórico')
         mostrarModalArchivar.value = false
         sucesoAArchivar.value = null
         cargarSucesos(1)

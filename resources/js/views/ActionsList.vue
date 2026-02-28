@@ -66,7 +66,7 @@ const ejecutarArchivado = async () => {
     if (!accionAArchivar.value) return
     try {
         await axios.delete(`/api/actions/${accionAArchivar.value.id}`)
-        toast.success('Reporte transferido al archivo histórico')
+        toast.success('Reporte movido al archivo histórico')
         mostrarModalArchivar.value = false
         accionAArchivar.value = null
         cargarAcciones()
