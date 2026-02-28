@@ -25,6 +25,22 @@ const handleLogout = async () => {
 }
 
 
+const horaActual = ref('')
+
+ 
+const actualizarReloj = () => {
+    const ahora = new Date()
+    horaActual.value = ahora.toLocaleTimeString('es-AR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+    })
+}
+
+let intervaloReloj = null
+
+
 const obtenerDatosRuta = (nombre) => {
     const nombreLower = nombre.toLowerCase();
     if (nombreLower.includes('cumbre') || nombreLower.includes('desaguadero')) {
@@ -58,6 +74,8 @@ const cargarPeajesBase = async () => {
 
 
 onMounted(() => {
+    actualizarReloj()
+    intervaloReloj = setInterval(actualizarReloj, 1000)
     window.addEventListener('online', actualizarEstadoRed)
     window.addEventListener('offline', actualizarEstadoRed)
     cargarPeajesBase()
@@ -66,6 +84,7 @@ onMounted(() => {
 onUnmounted(() => {
     window.removeEventListener('online', actualizarEstadoRed)
     window.removeEventListener('offline', actualizarEstadoRed)
+    if (intervaloReloj) clearInterval(intervaloReloj)
 })
 </script>
 
@@ -195,17 +214,32 @@ onUnmounted(() => {
                 </a>
             </nav>
 
+
+
             <div
                 class="p-4 border-t border-black/5 dark:border-white/5 flex items-center gap-2.5 absolute bottom-0 w-full bg-white dark:bg-[#0d1b2a]">
                 <div
                     class="w-8 h-8 rounded-lg bg-amber-500/15 flex items-center justify-center shrink-0 font-['Barlow_Condensed'] font-bold text-amber-500 text-sm">
-                    AD</div>
-                <div>
+                    AD
+                </div>
+
+                <div class="flex-1">
                     <div class="text-[13px] font-semibold text-slate-900 dark:text-slate-100 leading-tight">
-                        Administrador</div>
-                    <div class="text-[11px] text-slate-400 dark:text-slate-500">admin@enterutas.gov.ar</div>
+                        Administrador
+                    </div>
+                    <div class="flex justify-between items-center mt-0.5">
+                        <div class="text-[10px] text-slate-400 dark:text-slate-500 truncate max-w-[110px]">
+                            admin@enterutas.gov.ar
+                        </div>
+
+                        <div
+                            class="text-[11px] font-mono font-bold text-amber-600 dark:text-amber-500/80 bg-amber-500/5 px-1.5 rounded border border-amber-500/10">
+                            {{ horaActual }}
+                        </div>
+                    </div>
                 </div>
             </div>
+
         </div>
 
         <div class="flex-1 flex flex-col "> <!-- pt-[24px] -->
@@ -256,7 +290,8 @@ onUnmounted(() => {
 
                                 <img :src="peaje.image_path || `https://placehold.co/400x250/1e293b/f59e0b?text=${peaje.name.split(' ').pop()}`"
                                     onerror="this.src='https://placehold.co/600x400?text=Cargando...'"
-                                    class="w-full h-full object-cover transition-transform duration-500 " /> <!-- group-hover:scale-105 -->
+                                    class="w-full h-full object-cover transition-transform duration-500 " />
+                                <!-- group-hover:scale-105 -->
 
                                 <div
                                     :class="`absolute inset-0 bg-gradient-to-t ${obtenerDatosRuta(peaje.name).bgGradiente} via-black/20 to-transparent flex items-end p-2.5`">
