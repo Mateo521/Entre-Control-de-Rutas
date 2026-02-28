@@ -64,11 +64,11 @@ class TollController extends Controller
         ], 200);
     }
 
-    // --- AQUÍ ESTÁ EL MÉTODO QUE FALTABA ---
+   
     public function uploadImage(Request $request, $id)
     {
         $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120', // Máximo 5MB
+            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120', 
         ]);
 
         $toll = Toll::findOrFail($id);
@@ -76,29 +76,29 @@ class TollController extends Controller
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             
-            // 1. Crear nombre único
+            
             $filename = 'peaje_' . $toll->id . '_' . time() . '.jpg';
             $destinationPath = public_path('img/peajes');
 
-            // 2. Crear carpeta si no existe
+           
             if (!File::exists($destinationPath)) {
                 File::makeDirectory($destinationPath, 0755, true);
             }
 
-            // 3. Inicializar compresor y leer imagen
+          
             $manager = new ImageManager(new Driver());
             $image = $manager->read($file);
 
-            // 4. Redimensionar a 800px de ancho y comprimir al 70% de calidad
+           
             $image->scaleDown(width: 800);
             $image->toJpeg(quality: 70)->save($destinationPath . '/' . $filename);
 
-            // 5. Eliminar imagen anterior si existe para ahorrar espacio
+            
             if ($toll->image_path && File::exists(public_path($toll->image_path))) {
                 File::delete(public_path($toll->image_path));
             }
 
-            // 6. Actualizar base de datos
+         
             $toll->update(['image_path' => '/img/peajes/' . $filename]);
 
             return response()->json([

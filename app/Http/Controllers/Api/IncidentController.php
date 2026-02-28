@@ -71,17 +71,17 @@ class IncidentController extends Controller
                 foreach ($archivos as $archivo) {
                     $extension = strtolower($archivo->getClientOriginalExtension());
                     
-                    // Si es una imagen, la comprimimos
+                    
                     if (in_array($extension, ['jpg', 'jpeg', 'png', 'webp'])) {
                         $filename = Str::random(40) . '.jpg';
                         $destinationPath = storage_path('app/public/sucesos');
 
-                        // Crear directorio si no existe
+                    
                         if (!file_exists($destinationPath)) {
                             mkdir($destinationPath, 0755, true);
                         }
 
-                        // Comprimir a 1024px máximo (ideal para evidencia) y 75% calidad
+                         
                         $manager = new ImageManager(new Driver());
                         $manager->read($archivo)
                                 ->scaleDown(width: 1024)
@@ -90,7 +90,7 @@ class IncidentController extends Controller
 
                         $mediaPaths[$campoNombre][] = '/storage/sucesos/' . $filename;
                     } 
-                    // Si es PDF o MP4, lo guardamos normal
+               
                     else {
                         $path = $archivo->store('sucesos', 'public');
                         $mediaPaths[$campoNombre][] = '/storage/' . $path;
@@ -102,7 +102,7 @@ class IncidentController extends Controller
         $incident = Incident::create([
             'toll_id' => $request->toll_id,
             'incident_type' => $request->incident_type,
-            'user_id' => Auth::id() ?: 1, // Fallback por si no hay sesión activa en API
+            'user_id' => Auth::id() ?: 1,  
             'dynamic_data' => $dynamicData,
             'media_paths' => $mediaPaths
         ]);
@@ -135,7 +135,7 @@ class IncidentController extends Controller
             }
         }
 
-        // --- Lógica de borrado de archivos existentes ---
+   
         if ($request->filled('archivos_a_eliminar')) {
             $aEliminar = json_decode($request->archivos_a_eliminar, true);
             foreach ($aEliminar as $campoNombre => $rutasParaBorrar) {
@@ -151,8 +151,7 @@ class IncidentController extends Controller
                 }
             }
         }
-
-        // --- Lógica de compresión para archivos NUEVOS en la edición ---
+ 
         $archivosMedia = $request->file('media');
 
         if (!empty($archivosMedia) && is_array($archivosMedia)) {

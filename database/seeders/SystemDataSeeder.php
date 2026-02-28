@@ -15,10 +15,10 @@ class SystemDataSeeder extends Seeder
 {
     public function run()
     {
-        // 1. Limpiar tablas (PostgreSQL)
+    
         DB::statement('TRUNCATE TABLE actions, incidents, tolls, users RESTART IDENTITY CASCADE;');
 
-        // 2. Crear un usuario administrador por defecto (Para evitar error de llave foránea user_id = 1)
+        
         User::create([
             'name' => 'Administrador',
             'email' => 'admin@enterutas.com',
@@ -33,7 +33,7 @@ class SystemDataSeeder extends Seeder
             ]
         ]; 
 
-        // 3. Creación de las 7 Estaciones Base (Peajes)
+        
         $tolls = [
             Toll::create(['name' => 'Peaje La Cumbre', 'dynamic_schema' => $schemaBase]),
             Toll::create(['name' => 'Peaje Desaguadero Este', 'dynamic_schema' => $schemaBase]),
@@ -44,7 +44,7 @@ class SystemDataSeeder extends Seeder
             Toll::create(['name' => 'Peaje Ruta 30', 'dynamic_schema' => $schemaBase]),
         ];
 
-        // 4. Casos Reales Georreferenciados
+        
         $casosReales = [
             ['toll_id' => 1, 'type' => 'accidente_vial', 'lat' => -33.4976835, 'lng' => -65.7934509, 'obs' => 'Colisión por alcance en Puente de Fraga (Km 731). Unidades de emergencia en el lugar.', 'dias_atras' => 2],
             ['toll_id' => 1, 'type' => 'animal_ruta', 'lat' => -33.3989463, 'lng' => -65.9825863, 'obs' => 'Presencia de equinos sueltos cerca del Acceso a Dique Paso de Las Carretas (Km 751).', 'dias_atras' => 5],
@@ -73,7 +73,7 @@ class SystemDataSeeder extends Seeder
                 'created_at' => clone $fechaIncidente
             ]);
 
-            // Crear Acción adaptada a tu modelo Action (Usando category y title)
+            
             if (in_array($caso['type'], ['accidente_vial', 'animal_ruta', 'falla_infraestructura'])) {
                 Action::create([
                     'toll_id' => $caso['toll_id'],
@@ -86,7 +86,7 @@ class SystemDataSeeder extends Seeder
             }
         }
 
-        // 5. Generar 45 registros adicionales aleatorios
+        
         $tipos = ['pesaje_excedido', 'fuga_peaje', 'animal_ruta', 'accidente_vial', 'falla_infraestructura', 'corte_ruta'];
         
         for ($i = 0; $i < 45; $i++) {
