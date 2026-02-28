@@ -183,7 +183,7 @@ onMounted(() => {
 
             <div class="bg-white dark:bg-[#0d1b2a] border border-slate-200 dark:border-white/10  shadow-sm overflow-hidden transition-colors">
                 <div class="bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10 px-5 py-3 flex items-center justify-between">
-                    <span class="font-['Barlow_Condensed'] font-bold text-[15px] text-slate-900 dark:text-slate-100 uppercase tracking-widest">Base Operativa</span>
+                    <span class="font-['Barlow_Condensed'] font-bold text-[15px] text-slate-900 dark:text-slate-100 uppercase tracking-widest">Base operativas</span>
                     <router-link to="/panel/peajes" class="text-[11px] font-bold text-amber-600 dark:text-amber-500 hover:text-amber-700 uppercase tracking-wider no-underline">Gestionar</router-link>
                 </div>
                 <div class="overflow-y-auto max-h-[260px]">
@@ -197,7 +197,7 @@ onMounted(() => {
                                     <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)]"></div>
                                     <div>
                                         <div class="text-[13px] font-semibold text-slate-900 dark:text-slate-100">{{ peaje.name }}</div>
-                                        <div class="text-[10px] text-slate-500 uppercase tracking-wider">{{ peaje.dynamic_schema && peaje.dynamic_schema.inventory_fields ? peaje.dynamic_schema.inventory_fields.length : 0 }} campos requeridos</div>
+                                        <div class="text-[10px] text-slate-500 uppercase tracking-wider">{{ peaje.dynamic_schema && peaje.dynamic_schema.inventory_fields ? peaje.dynamic_schema.inventory_fields.length : 0 }} campos</div>
                                     </div>
                                 </td>
                             </tr>

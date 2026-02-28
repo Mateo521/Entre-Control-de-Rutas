@@ -10,15 +10,33 @@ const filtroActivo = ref('todos') // 'todos', 'imagen', 'documento', 'videso'
 const cargarEvidencias = async () => {
     cargando.value = true
     try {
-        
-        const respuesta = await axios.get('/api/incidents', { params: { per_page: 50 } })
-        const sucesos = respuesta.data.data
+        let paginaActual = 1;
+        let ultimaPagina = 1;
+        let todosLosSucesos = [];
 
+        // 1. Recorremos todas las páginas que Laravel tenga disponibles
+        do {
+            const respuesta = await axios.get('/api/incidents', { 
+                params: { 
+                    per_page: 50, 
+                    page: paginaActual // Le decimos qué página específica queremos
+                } 
+            });
+            
+            // Sumamos los sucesos de esta página a nuestro arreglo maestro
+            todosLosSucesos = todosLosSucesos.concat(respuesta.data.data);
+            
+            // Laravel guarda el total de páginas en 'last_page' (o meta.last_page en Resources)
+            ultimaPagina = respuesta.data.last_page || (respuesta.data.meta && respuesta.data.meta.last_page) || 1;
+            
+            paginaActual++;
+        } while (paginaActual <= ultimaPagina);
+
+        // 2. Ahora procesamos TODOS los sucesos recolectados
         let mediaExtraida = []
 
-        sucesos.forEach(suceso => {
+        todosLosSucesos.forEach(suceso => {
             if (suceso.media_paths) {
-               
                 Object.entries(suceso.media_paths).forEach(([campoNombre, rutas]) => {
                     rutas.forEach(ruta => {
                         const extension = ruta.split('.').pop().toLowerCase()
