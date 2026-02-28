@@ -75,3 +75,23 @@ html.dark .custom-popup-peaje .leaflet-popup-tip {
     color: #f1f5f9 !important;
     border: 1px solid rgba(245, 158, 11, 0.2);
 }
+
+.custom-popup-peaje .leaflet-popup-content-wrapper {
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+.custom-popup-peaje .leaflet-popup-content {
+    margin: 0 !important;
+   
+}
+
+
+.custom-popup-peaje .leaflet-popup-tip {
+    background: white !important;  
+}
+
+.dark .custom-popup-peaje .leaflet-popup-tip {
+    background: #0d1b2a !important;  
+}

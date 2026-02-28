@@ -389,16 +389,29 @@ const renderizarTrazasEstaticas = () => {
                     L.marker([peajeGeo.lat, peajeGeo.lng], { icon: iconPeaje })
                         .addTo(map)
                         .bindPopup(`
-                <div class="mb-2.5 rounded overflow-hidden shadow-sm border border-slate-200 dark:border-slate-700">
-                    <img src="${imagenDinamica}" alt="Fachada ${peajeGeo.nombre}" class="w-full h-66 object-cover transition-transform duration-500" onerror="this.src='https://placehold.co/600x400?text=Error'" />
-                </div>
-                <strong class="font-[Barlow_Condensed] text-[17px] tracking-wide border-b border-slate-200 dark:border-slate-700 pb-1.5 mb-1.5 block text-slate-800 dark:text-slate-100">
-                    ${peajeDB ? peajeDB.name : peajeGeo.nombre}
-                </strong>
-                <div class="text-[12px] text-slate-500 dark:text-slate-400">Estación base operativa</div>
-                `, {
-                            minWidth: 400,
-                            maxWidth: 440,
+    <div class="bg-white dark:bg-[#0d1b2a] p-1 rounded-lg shadow-xl border border-slate-200 dark:border-white/10 transition-colors">
+        <div class="mb-3 rounded overflow-hidden border border-slate-100 dark:border-slate-800">
+            <img src="${imagenDinamica}" 
+                 alt="Fachada ${peajeGeo.nombre}" 
+                 class="w-full h-60 object-cover transition-transform duration-500" 
+                 onerror="this.src='https://placehold.co/600x400?text=Error+al+cargar'" />
+        </div>
+<div class="p-2">
+        <strong class="font-['Barlow_Condensed'] text-[18px] tracking-wide border-b border-slate-100 dark:border-white/5 pb-2 mb-2 block text-slate-800 dark:text-slate-100 uppercase">
+            ${peajeDB ? peajeDB.name : peajeGeo.nombre}
+        </strong>
+        
+        <div class="flex items-center gap-2 ">
+            <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+            <div class="text-[12px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                Operativo
+            </div>
+        </div>
+        </div>
+    </div>
+`, {
+                            minWidth: 320,
+                            maxWidth: 350,
                             className: 'custom-popup-peaje'
                         });
                 });
@@ -655,7 +668,7 @@ const limpiarBusqueda = () => {
 
 
 const obtenerKmDesdeCoordenadas = (rutaId, lat, lng) => {
-    // 1. Validar que la ruta exista en tus referenciasViales
+
     const puntos = referenciasViales[rutaId];
     if (!puntos || puntos.length < 2) {
         console.warn(`ID de ruta "${rutaId}" no encontrado en referenciasViales.`);
@@ -665,24 +678,22 @@ const obtenerKmDesdeCoordenadas = (rutaId, lat, lng) => {
     let mejorKm = null;
     let distanciaMinima = Infinity;
 
-    // 2. Recorrer los tramos (segmentos) de la ruta
     for (let i = 0; i < puntos.length - 1; i++) {
         const p1 = puntos[i];
         const p2 = puntos[i + 1];
 
-        // Matemáticas de proyección: Calculamos dónde cae el clic en la línea entre p1 y p2
         const dx = p2.lng - p1.lng;
         const dy = p2.lat - p1.lat;
         if (dx === 0 && dy === 0) continue;
 
         let t = ((lng - p1.lng) * dx + (lat - p1.lat) * dy) / (dx * dx + dy * dy);
-        t = Math.max(0, Math.min(1, t)); // Nos aseguramos de estar dentro del tramo
+        t = Math.max(0, Math.min(1, t));
 
-        // Coordenada proyectada
+
         const proyLat = p1.lat + t * dy;
         const proyLng = p1.lng + t * dx;
 
-        // Distancia real entre el clic y la carretera
+
         const dist = Math.sqrt(Math.pow(lat - proyLat, 2) + Math.pow(lng - proyLng, 2));
 
         if (dist < distanciaMinima) {
@@ -691,7 +702,6 @@ const obtenerKmDesdeCoordenadas = (rutaId, lat, lng) => {
         }
     }
 
-    // Si el clic está a más de ~800 metros de la ruta, lo ignoramos (evita errores en cruces)
     return (distanciaMinima < 0.008) ? mejorKm.toFixed(1) : null;
 };
 
