@@ -53,11 +53,24 @@ const seleccionarCapa = (llave) => {
 };
 
 const actualizarCapaMapa = () => {
+    let limiteZoom = 19; 
+
     if (tipoMapa.value === 'estandar') {
         const isDark = document.documentElement.classList.contains('dark');
         tileLayer.setUrl(isDark ? darkTile : lightTile);
     } else {
         tileLayer.setUrl(capasDisponibles[tipoMapa.value].url);
+        
+        if (tipoMapa.value === 'satelite') {
+            limiteZoom = 17; 
+        }
+    }
+
+    map.setMaxZoom(limiteZoom);
+    tileLayer.options.maxZoom = limiteZoom;
+
+    if (map.getZoom() > limiteZoom) {
+        map.setZoom(limiteZoom);
     }
 };
 
