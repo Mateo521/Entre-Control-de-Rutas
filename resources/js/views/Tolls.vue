@@ -311,9 +311,9 @@ onMounted(() => {
                     
                     <div class="mb-5">
                         <label class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-1.5">
-                            foto de fachada (opcional)
+                            foto de fachada
                         </label>
-                        <div class="relative w-full h-36 rounded-lg border-2 border-dashed border-slate-300 dark:border-white/20 bg-slate-50 dark:bg-white/5 overflow-hidden flex items-center justify-center group hover:border-amber-500/50 transition-colors cursor-pointer" @click="$refs.fileInput.click()">
+                        <div class="relative w-full h-66 rounded-lg border-2 border-dashed border-slate-300 dark:border-white/20 bg-slate-50 dark:bg-white/5 overflow-hidden flex items-center justify-center group hover:border-amber-500/50 transition-colors cursor-pointer" @click="$refs.fileInput.click()">
                             <img v-if="previewFoto" :src="previewFoto" class="w-full h-full object-cover absolute inset-0 z-0 group-hover:opacity-50 transition-opacity" />
                             
                             <div v-if="!previewFoto" class="text-center z-10 flex flex-col items-center">

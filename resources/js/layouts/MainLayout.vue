@@ -11,7 +11,7 @@ const horaActual = ref('')
 let intervaloReloj = null
 const footerDesplegado = ref(false)
 
-// NUEVO: Variables para controlar el menú en celular
+ 
 const sidebarAbierto = ref(false)
 
 const cerrarMenuMovil = () => {
@@ -96,16 +96,15 @@ onUnmounted(() => {
         class="flex min-h-screen bg-[#f0f4f8] dark:bg-[#0a1628] bg-[linear-gradient(rgba(0,0,0,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.04)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(245,158,11,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(245,158,11,0.04)_1px,transparent_1px)] bg-[size:40px_40px] transition-colors relative">
 
         <div v-if="!isOnline"
-            class="fixed top-0 left-0 w-full bg-red-600 text-white text-xs font-bold font-['Barlow_Condensed'] tracking-widest uppercase py-1.5 flex justify-center items-center z-[10000] shadow-md">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                class="mr-2">
-                <path d="M10.58 10.58a2 2 0 0 0 2.83 2.83"></path>
-                <path d="M14 14a3.53 3.53 0 0 0-5-5"></path>
-                <path d="M17.5 17.5a8.5 8.5 0 0 0-11-11"></path>
-                <path d="M21 21a13.5 13.5 0 0 0-18-18"></path>
-                <line x1="2" y1="2" x2="22" y2="22"></line>
+            class="fixed top-0 left-0 w-full gap-1  bg-red-600 text-white text-xs font-bold font-['Barlow_Condensed'] tracking-widest uppercase py-1.5 flex justify-center items-center z-[10000] shadow-md">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 8a16 16 0 0 1 20 0"></path>
+                <path d="M5 12a11 11 0 0 1 14 0"></path>
+                <path d="M8.5 16a6 6 0 0 1 7 0"></path>
+                <circle cx="12" cy="20" r="1.5" fill="currentColor" stroke="none"></circle>
             </svg>
-            Sin conexión al servidor central. Funciones limitadas.
+            Sin conexión a internet. Funciones limitadas.
         </div>
 
         <div v-if="sidebarAbierto" @click="cerrarMenuMovil"
@@ -338,8 +337,8 @@ onUnmounted(() => {
                             <div v-for="peaje in peajes" :key="peaje.id" @click="enfocarPeajeYcerrar(peaje.name)"
                                 class="shrink-0 snap-center w-[240px] md:w-auto transition-transform duration-300 relative z-10  hover:-translate-y-1 group relative cursor-pointer rounded-lg overflow-hidden border border-slate-200 dark:border-white/10 shadow-sm bg-slate-200 dark:bg-slate-800 aspect-video md:aspect-auto md:h-54">
 
-                                <img :src="peaje.image_path || `https://placehold.co/400x250/1e293b/f59e0b?text=${peaje.name.split(' ').pop()}`"
-                                    onerror="this.src='https://placehold.co/600x400?text=Cargando...'"
+                                <img :src="peaje.image_path || `/data/600x400.svg`"
+                                    onerror="this.src='/data/600x400.svg"
                                     class="w-full h-full object-cover transition-transform duration-500 " />
                                 <!-- group-hover:scale-105 -->
 
