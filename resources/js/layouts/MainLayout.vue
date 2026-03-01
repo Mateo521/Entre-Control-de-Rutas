@@ -333,14 +333,15 @@ onUnmounted(() => {
                         </div>
 
                         <div
-                            class="flex md:grid md:grid-cols-4 lg:grid-cols-7 gap-3 overflow-x-auto snap-x snap-mandatory pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                            class="flex md:grid md:grid-cols-4 lg:grid-cols-7 pt-1 gap-3 overflow-x-auto snap-x snap-mandatory  [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
 
                             <div v-for="peaje in peajes" :key="peaje.id" @click="enfocarPeajeYcerrar(peaje.name)"
-                                class="shrink-0 snap-center w-[240px] md:w-auto group relative cursor-pointer rounded-lg overflow-hidden border border-slate-200 dark:border-white/10 shadow-sm bg-slate-200 dark:bg-slate-800 aspect-video md:aspect-auto md:h-54">
+                                class="shrink-0 snap-center w-[240px] md:w-auto transition-transform duration-300 relative z-10  hover:-translate-y-1 group relative cursor-pointer rounded-lg overflow-hidden border border-slate-200 dark:border-white/10 shadow-sm bg-slate-200 dark:bg-slate-800 aspect-video md:aspect-auto md:h-54">
 
                                 <img :src="peaje.image_path || `https://placehold.co/400x250/1e293b/f59e0b?text=${peaje.name.split(' ').pop()}`"
                                     onerror="this.src='https://placehold.co/600x400?text=Cargando...'"
-                                    class="w-full h-full object-cover transition-transform duration-500 " /> <!-- group-hover:scale-105 -->
+                                    class="w-full h-full object-cover transition-transform duration-500 " />
+                                <!-- group-hover:scale-105 -->
 
                                 <div
                                     :class="`absolute inset-0 bg-gradient-to-t ${obtenerDatosRuta(peaje.name).bgGradiente} via-black/20 to-transparent flex items-end p-2.5`">
