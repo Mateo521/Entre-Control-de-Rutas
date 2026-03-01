@@ -67,8 +67,8 @@ const suavizarCoordenadas = (coordenadasCrudas, iteraciones = 3) => {
 
 
             const q = [
-                0.75 * p0[0] + 0.25 * p1[0], // Longitud
-                0.75 * p0[1] + 0.25 * p1[1]  // Latitud
+                0.75 * p0[0] + 0.25 * p1[0], // long
+                0.75 * p0[1] + 0.25 * p1[1]  // lat
             ];
 
             const r = [
@@ -89,6 +89,36 @@ const suavizarCoordenadas = (coordenadasCrudas, iteraciones = 3) => {
 
     return lineaSuavizada;
 }
+
+
+const sanLuisBounds = L.latLngBounds(
+    [-36.0, -67.5], // Esquina sur-oeste
+    [-31.8, -64.5]  // Esquina norte-este
+);
+
+const dibujarLimitesProvinciales = async () => {
+    try {
+
+        const respuesta = await axios.get('/data/san_luis_limites.geojson');
+        const limitesGeoJSON = respuesta.data;
+
+        L.geoJSON(limitesGeoJSON, {
+            style: {
+                color: "#f59e0b", 
+                weight: 2,        
+                opacity: 0.5,     
+                fillColor: "#f59e0b",
+                fillOpacity: 0.05, 
+                dashArray: '5, 10' 
+            },
+            interactive: false 
+        }).addTo(map);
+
+    } catch (error) {
+        console.warn('No se pudo cargar el archivo de límites de la provincia:', error);
+    }
+}
+
 
 const trazasVialesGeoJSON = {
     "type": "FeatureCollection",
@@ -595,7 +625,19 @@ const cargarPuntosGuardados = async () => {
 }
 
 const initMap = () => {
-    map = L.map(mapContainer.value, { zoomControl: false }).setView([-33.3017, -66.3378], 8)
+    map = L.map(mapContainer.value, {
+        
+        
+        zoomControl: false ,
+        maxBounds: sanLuisBounds,  
+        maxBoundsViscosity: 1.0,   
+        minZoom: 8.2,                
+        maxZoom: 18
+    
+    
+    
+    
+    }).setView([-33.3017, -66.3378], 8)
     const isDark = document.documentElement.classList.contains('dark')
 
     tileLayer = L.tileLayer(isDark ? darkTile : lightTile, {
@@ -603,6 +645,8 @@ const initMap = () => {
     }).addTo(map)
 
     L.control.zoom({ position: 'bottomright' }).addTo(map)
+
+    dibujarLimitesProvinciales()
 
     renderizarTrazasEstaticas()
   //  renderizarPuntosDeControl() //debugg
@@ -1044,9 +1088,9 @@ onBeforeUnmount(() => { if (map) { map.remove() } })
                         <label class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-1.5">Tipo de Evento</label>
                         <select v-model="puntoFormulario.tipo" required class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded px-3 py-2.5 text-slate-900 dark:text-white text-sm outline-none transition-colors focus:border-amber-500/50">
                             <option value="" disabled>— Seleccionar clasificación —</option>
-                            <option value="accidente_vial">Accidente vial</option>
+                            <option value="accidente_vial">Accidente</option>
                             <option value="animal_ruta">Animal en ruta</option>
-                            <option value="corte_ruta">Corte de ruta / Manifestación</option>
+                            <option value="corte_ruta">Corte de ruta</option>
                             <option value="falla_infraestructura">Falla en infraestructura</option>
                         </select>
                     </div>

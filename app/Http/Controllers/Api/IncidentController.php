@@ -17,18 +17,36 @@ class IncidentController extends Controller
     {
         $query = Incident::with('toll')->latest();
 
+
+
+        if ($request->filled('texto')) {
+            $texto = $request->input('texto');
+
+            $query->where(function ($q) use ($texto) {
+ 
+                $q->where('incident_type', 'like', '%' . $texto . '%')
+ 
+                    ->orWhere('dynamic_data', 'like', '%' . $texto . '%')
+ 
+                    ->orWhereHas('toll', function ($qToll) use ($texto) {
+                        $qToll->where('name', 'like', '%' . $texto . '%');
+                    });
+            });
+        }
+
+
         if ($request->filled('toll_id')) {
             $query->where('toll_id', $request->toll_id);
         }
-        
+
         if ($request->filled('incident_type')) {
             $query->where('incident_type', $request->incident_type);
         }
-        
+
         if ($request->filled('date_from')) {
             $query->whereDate('created_at', '>=', $request->date_from);
         }
-        
+
         if ($request->filled('date_to')) {
             $query->whereDate('created_at', '<=', $request->date_to);
         }
@@ -67,31 +85,29 @@ class IncidentController extends Controller
         if (!empty($archivosMedia) && is_array($archivosMedia)) {
             foreach ($archivosMedia as $campoNombre => $archivos) {
                 $mediaPaths[$campoNombre] = [];
-                
+
                 foreach ($archivos as $archivo) {
                     $extension = strtolower($archivo->getClientOriginalExtension());
-                    
-                    
+
+
                     if (in_array($extension, ['jpg', 'jpeg', 'png', 'webp'])) {
                         $filename = Str::random(40) . '.jpg';
                         $destinationPath = storage_path('app/public/sucesos');
 
-                    
+
                         if (!file_exists($destinationPath)) {
                             mkdir($destinationPath, 0755, true);
                         }
 
-                         
+
                         $manager = new ImageManager(new Driver());
                         $manager->read($archivo)
-                                ->scaleDown(width: 1024)
-                                ->toJpeg(quality: 75)
-                                ->save($destinationPath . '/' . $filename);
+                            ->scaleDown(width: 1024)
+                            ->toJpeg(quality: 75)
+                            ->save($destinationPath . '/' . $filename);
 
                         $mediaPaths[$campoNombre][] = '/storage/sucesos/' . $filename;
-                    } 
-               
-                    else {
+                    } else {
                         $path = $archivo->store('sucesos', 'public');
                         $mediaPaths[$campoNombre][] = '/storage/' . $path;
                     }
@@ -102,7 +118,7 @@ class IncidentController extends Controller
         $incident = Incident::create([
             'toll_id' => $request->toll_id,
             'incident_type' => $request->incident_type,
-            'user_id' => Auth::id() ?: 1,  
+            'user_id' => Auth::id() ?: 1,
             'dynamic_data' => $dynamicData,
             'media_paths' => $mediaPaths
         ]);
@@ -135,7 +151,7 @@ class IncidentController extends Controller
             }
         }
 
-   
+
         if ($request->filled('archivos_a_eliminar')) {
             $aEliminar = json_decode($request->archivos_a_eliminar, true);
             foreach ($aEliminar as $campoNombre => $rutasParaBorrar) {
@@ -151,7 +167,7 @@ class IncidentController extends Controller
                 }
             }
         }
- 
+
         $archivosMedia = $request->file('media');
 
         if (!empty($archivosMedia) && is_array($archivosMedia)) {
@@ -159,10 +175,10 @@ class IncidentController extends Controller
                 if (!isset($mediaPaths[$campoNombre])) {
                     $mediaPaths[$campoNombre] = [];
                 }
-                
+
                 foreach ($archivos as $archivo) {
                     $extension = strtolower($archivo->getClientOriginalExtension());
-                    
+
                     if (in_array($extension, ['jpg', 'jpeg', 'png', 'webp'])) {
                         $filename = Str::random(40) . '.jpg';
                         $destinationPath = storage_path('app/public/sucesos');
@@ -173,9 +189,9 @@ class IncidentController extends Controller
 
                         $manager = new ImageManager(new Driver());
                         $manager->read($archivo)
-                                ->scaleDown(width: 1024)
-                                ->toJpeg(quality: 75)
-                                ->save($destinationPath . '/' . $filename);
+                            ->scaleDown(width: 1024)
+                            ->toJpeg(quality: 75)
+                            ->save($destinationPath . '/' . $filename);
 
                         $mediaPaths[$campoNombre][] = '/storage/sucesos/' . $filename;
                     } else {
