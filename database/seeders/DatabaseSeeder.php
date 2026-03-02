@@ -12,9 +12,9 @@ class DatabaseSeeder extends Seeder
     {
      
         User::updateOrCreate(
-            ['email' => 'admin@enterutas.gov.ar'],  
+            ['email' => 'admin@gmail.com'],  
             [
-                'name' => 'Administrador Principal',
+                'name' => 'Administrador principal',
                 'password' => Hash::make('Admin1234!'),  
                 
             ]
