@@ -222,7 +222,7 @@ onMounted(() => {
                         </tr>
                         <tr v-else-if="peajes.length === 0">
                             <td colspan="6" class="px-4 py-8 text-center text-slate-500 text-sm">No hay peajes
-                                registrados aún. Haz clic en "Nuevo peaje".</td>
+                                registrados aún. Hacé clic en "Nuevo peaje".</td>
                         </tr>
                         <tr v-else v-for="peaje in peajes" :key="peaje.id"
                             class="hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-b border-slate-100 dark:border-white/5">
@@ -318,8 +318,8 @@ onMounted(() => {
                             
                             <div v-if="!previewFoto" class="text-center z-10 flex flex-col items-center">
                                 <svg class="w-8 h-8 text-slate-400 mb-2 group-hover:text-amber-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                                <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 group-hover:text-amber-500">Haz clic para subir imagen</span>
-                                <span class="text-[10px] text-slate-400 mt-1">Se comprimirá automáticamente</span>
+                                <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 group-hover:text-amber-500">Hacé clic para subir imagen</span>
+                                <span class="text-[10px] text-slate-400 mt-1">Se va a comprimir automáticamente</span>
                             </div>
 
                             <div v-if="previewFoto" class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
@@ -333,7 +333,7 @@ onMounted(() => {
                     <div class="mb-5">
                         <label
                             class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-1.5">Nombre
-                            del Peaje</label>
+                            del peaje</label>
                         <input v-model="nuevoPeaje.name" type="text" required placeholder="Ej: Peaje La Carolina"
                             class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg px-3.5 py-2.5 text-slate-900 dark:text-white text-sm outline-none transition-colors font-sans focus:border-amber-500/50" />
                     </div>
@@ -342,7 +342,7 @@ onMounted(() => {
                         <div class="flex items-center justify-between mb-2">
                             <label
                                 class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block">Campos
-                                Operativos Adicionales (JSON)</label>
+                                Operativos adicionales (json)</label>
                             <button type="button" @click="agregarCampo"
                                 class="text-[11px] font-semibold text-amber-600 dark:text-amber-500 hover:text-amber-700 bg-amber-50 dark:bg-amber-500/10 px-2 py-1 rounded cursor-pointer border-none transition-colors">
                                 + Agregar campo
@@ -351,7 +351,7 @@ onMounted(() => {
 
                         <div v-if="nuevoPeaje.camposDinámicos.length === 0"
                             class="text-[12px] text-slate-400 dark:text-slate-500 italic p-3 border border-dashed border-slate-300 dark:border-white/10 rounded-lg text-center bg-slate-50/50 dark:bg-transparent">
-                            No se solicitarán campos adicionales en los sucesos de este peaje.
+                            No se van a solicitar campos de más en los sucesos de este peaje.
                         </div>
 
                         <div v-else class="space-y-2 max-h-[160px] overflow-y-auto pr-1">

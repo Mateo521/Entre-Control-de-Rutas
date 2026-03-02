@@ -332,487 +332,37 @@ const trazasVialesGeoJSON = {
 }
 
 const referenciasViales = {
+
     '20': [
-        {
-            "km": 4,
-            "desc": "Puente Derivador",
-            "lat": -33.2941849,
-            "lng": -66.3007985
-        },
-        {
-            "km": 4.87,
-            "desc": "Traza principal",
-            "lat": -33.29462,
-            "lng": -66.2870306
-        },
-        {
-            "km": 5,
-            "desc": "Rodeo del Alto",
-            "lat": -33.2944079,
-            "lng": -66.2884821
-        },
-        {
-            "km": 5.35,
-            "desc": "Traza principal",
-            "lat": -33.2969535,
-            "lng": -66.2799964
-        },
-        {
-            "km": 5.53,
-            "desc": "Traza principal",
-            "lat": -33.2972261,
-            "lng": -66.2772227
-        },
-        {
-            "km": 5.56,
-            "desc": "Traza principal",
-            "lat": -33.29721,
-            "lng": -66.27677
-        },
-        {
-            "km": 5.83,
-            "desc": "Traza principal",
-            "lat": -33.29616,
-            "lng": -66.27268
-        },
-        {
-            "km": 5.97,
-            "desc": "Traza principal",
-            "lat": -33.29552,
-            "lng": -66.27062
-        },
-        {
-            "km": 6.48,
-            "desc": "Traza principal",
-            "lat": -33.2920447,
-            "lng": -66.2637178
-        },
-        {
-            "km": 7,
-            "desc": "Club La Estrega",
-            "lat": -33.2945745,
-            "lng": -66.2685864
-        },
-        {
-            "km": 7.14,
-            "desc": "Traza principal",
-            "lat": -33.2878294,
-            "lng": -66.2545769
-        },
-        {
-            "km": 8.08,
-            "desc": "Traza principal",
-            "lat": -33.2804371,
-            "lng": -66.2425691
-        },
-        {
-            "km": 8.55,
-            "desc": "Traza principal",
-            "lat": -33.2768961,
-            "lng": -66.2365943
-        },
-        {
-            "km": 8.63,
-            "desc": "Traza principal",
-            "lat": -33.2761918,
-            "lng": -66.2355086
-        },
-        {
-            "km": 9,
-            "desc": "Ave Fenix",
-            "lat": -33.2847671,
-            "lng": -66.2497884
-        },
-        {
-            "km": 9.54,
-            "desc": "Traza principal",
-            "lat": -33.2648545,
-            "lng": -66.2308586
-        },
-        {
-            "km": 10.06,
-            "desc": "Traza principal",
-            "lat": -33.2587553,
-            "lng": -66.2272913
-        },
-        {
-            "km": 10.4,
-            "desc": "Traza principal",
-            "lat": -33.25423,
-            "lng": -66.22708
-        },
-        {
-            "km": 10.5,
-            "desc": "Traza principal",
-            "lat": -33.25293,
-            "lng": -66.22684
-        },
-        {
-            "km": 10.77,
-            "desc": "Traza principal",
-            "lat": -33.25135,
-            "lng": -66.22341
-        },
-        {
-            "km": 10.91,
-            "desc": "Traza principal",
-            "lat": -33.2516617,
-            "lng": -66.2211567
-        },
-        {
-            "km": 11.18,
-            "desc": "Traza principal",
-            "lat": -33.2534633,
-            "lng": -66.2175249
-        },
-        {
-            "km": 11.3,
-            "desc": "Traza principal",
-            "lat": -33.254,
-            "lng": -66.21576
-        },
-        {
-            "km": 11.38,
-            "desc": "Traza principal",
-            "lat": -33.2547688,
-            "lng": -66.2147619
-        },
-        {
-            "km": 11.42,
-            "desc": "Traza principal",
-            "lat": -33.25499,
-            "lng": -66.21425
-        },
-        {
-            "km": 11.5,
-            "desc": "Traza principal",
-            "lat": -33.25452,
-            "lng": -66.21308
-        },
-        {
-            "km": 11.58,
-            "desc": "Traza principal",
-            "lat": -33.25387,
-            "lng": -66.21232
-        },
-        {
-            "km": 11.62,
-            "desc": "Traza principal",
-            "lat": -33.25334,
-            "lng": -66.21237
-        },
-        {
-            "km": 11.67,
-            "desc": "Traza principal",
-            "lat": -33.25278,
-            "lng": -66.21283
-        },
-        {
-            "km": 11.77,
-            "desc": "Traza principal",
-            "lat": -33.25153,
-            "lng": -66.21322
-        },
-        {
-            "km": 11.79,
-            "desc": "Traza principal",
-            "lat": -33.2513059,
-            "lng": -66.2130937
-        },
-        {
-            "km": 11.85,
-            "desc": "Traza principal",
-            "lat": -33.2509,
-            "lng": -66.21229
-        },
-        {
-            "km": 12,
-            "desc": "Rotonda Cruz de Piedra",
-            "lat": -33.2638394,
-            "lng": -66.2297909
-        },
-        {
-            "km": 12.1,
-            "desc": "Traza principal",
-            "lat": -33.2518942,
-            "lng": -66.2085661
-        },
-        {
-            "km": 12.54,
-            "desc": "Traza principal",
-            "lat": -33.254,
-            "lng": -66.20208
-        },
-        {
-            "km": 12.59,
-            "desc": "Traza principal",
-            "lat": -33.2542032,
-            "lng": -66.2012797
-        },
-        {
-            "km": 12.72,
-            "desc": "Traza principal",
-            "lat": -33.25376,
-            "lng": -66.19923
-        },
-        {
-            "km": 12.88,
-            "desc": "Traza principal",
-            "lat": -33.2537,
-            "lng": -66.19671
-        },
-        {
-            "km": 12.96,
-            "desc": "Traza principal",
-            "lat": -33.2533267,
-            "lng": -66.1955336
-        },
-        {
-            "km": 13,
-            "desc": "Peaje Cruz de Piedra",
-            "lat": -33.2519519,
-            "lng": -66.2260722
-        },
-        {
-            "km": 13.12,
-            "desc": "Traza principal",
-            "lat": -33.25155,
-            "lng": -66.19418
-        },
-        {
-            "km": 13.17,
-            "desc": "Traza principal",
-            "lat": -33.2512997,
-            "lng": -66.1935003
-        },
-        {
-            "km": 13.23,
-            "desc": "Traza principal",
-            "lat": -33.2515,
-            "lng": -66.19263
-        },
-        {
-            "km": 13.41,
-            "desc": "Traza principal",
-            "lat": -33.2512703,
-            "lng": -66.1899151
-        },
-        {
-            "km": 13.59,
-            "desc": "Traza principal",
-            "lat": -33.2529043,
-            "lng": -66.1878093
-        },
-        {
-            "km": 13.98,
-            "desc": "Traza principal",
-            "lat": -33.251001,
-            "lng": -66.1821855
-        },
-        {
-            "km": 14.26,
-            "desc": "Traza principal",
-            "lat": -33.251568,
-            "lng": -66.1777938
-        },
-        {
-            "km": 14.69,
-            "desc": "Traza principal",
-            "lat": -33.2560138,
-            "lng": -66.1758317
-        },
-        {
-            "km": 14.91,
-            "desc": "Traza principal",
-            "lat": -33.2588567,
-            "lng": -66.174879
-        },
-        {
-            "km": 15,
-            "desc": "Peaje Perilago",
-            "lat": -33.2542878,
-            "lng": -66.212412
-        },
-        {
-            "km": 15.17,
-            "desc": "Traza principal",
-            "lat": -33.26137,
-            "lng": -66.17225
-        },
-        {
-            "km": 15.44,
-            "desc": "Traza principal",
-            "lat": -33.2627598,
-            "lng": -66.1683674
-        },
-        {
-            "km": 15.64,
-            "desc": "Traza principal",
-            "lat": -33.26404,
-            "lng": -66.1655
-        },
-        {
-            "km": 15.8,
-            "desc": "Traza principal",
-            "lat": -33.2657315,
-            "lng": -66.1640798
-        },
-        {
-            "km": 16.19,
-            "desc": "Traza principal",
-            "lat": -33.2707589,
-            "lng": -66.1623082
-        },
-        {
-            "km": 16.4,
-            "desc": "Traza principal",
-            "lat": -33.27335,
-            "lng": -66.16144
-        },
-        {
-            "km": 16.62,
-            "desc": "Traza principal",
-            "lat": -33.2752965,
-            "lng": -66.1587576
-        },
-        {
-            "km": 16.79,
-            "desc": "Traza principal",
-            "lat": -33.27542,
-            "lng": -66.15613
-        },
-        {
-            "km": 17,
-            "desc": "La Hoya",
-            "lat": -33.2509587,
-            "lng": -66.1915335
-        },
-        {
-            "km": 17.78,
-            "desc": "Traza principal",
-            "lat": -33.2721132,
-            "lng": -66.1410199
-        },
-        {
-            "km": 18.44,
-            "desc": "Traza principal",
-            "lat": -33.2710583,
-            "lng": -66.1307046
-        },
-        {
-            "km": 19,
-            "desc": "Rotonda Virgen / El Volcan",
-            "lat": -33.2530479,
-            "lng": -66.1751547
-        },
-        {
-            "km": 20,
-            "desc": "Puente Los Puquios",
-            "lat": -33.262433,
-            "lng": -66.1698524
-        },
-        {
-            "km": 22.02,
-            "desc": "Traza principal",
-            "lat": -33.2669278,
-            "lng": -66.0744213
-        },
-        {
-            "km": 22.45,
-            "desc": "Traza principal",
-            "lat": -33.26768,
-            "lng": -66.0675449
-        },
-        {
-            "km": 23.87,
-            "desc": "Traza principal",
-            "lat": -33.2672577,
-            "lng": -66.0452015
-        },
-        {
-            "km": 24.32,
-            "desc": "Traza principal",
-            "lat": -33.2644799,
-            "lng": -66.0388586
-        },
-        {
-            "km": 26.74,
-            "desc": "Traza principal",
-            "lat": -33.2561069,
-            "lng": -66.0020352
-        },
-        {
-            "km": 27,
-            "desc": "Cruce Rp30 / Control Policial",
-            "lat": -33.269815,
-            "lng": -66.1078299
-        },
-        {
-            "km": 32.93,
-            "desc": "Traza principal",
-            "lat": -33.2524878,
-            "lng": -66.09964764
-        },
-        {
-            "km": 33,
-            "desc": "Arroyo y Retorno Los Risma",
-            "lat": -33.266405,
-            "lng": -66.0431169
-        },
-        {
-            "km": 36.5,
-            "desc": "Puente Arroyo La Petra",
-            "lat": -33.2574904,
-            "lng": -66.0071684
-        },
-        {
-            "km": 38,
-            "desc": "Retorno La Petra",
-            "lat": -33.2524878,
-            "lng": -65.9964764
-        },
-        {
-            "km": 39.83,
-            "desc": "Traza principal",
-            "lat": -33.2498757,
-            "lng": -65.9916789
-        },
-        {
-            "km": 39.88,
-            "desc": "Traza principal",
-            "lat": -33.2494978,
-            "lng": -65.9909967
-        },
-        {
-            "km": 44.37,
-            "desc": "Traza principal",
-            "lat": -33.2427678,
-            "lng": -65.9205906
-        },
-        {
-            "km": 44.7,
-            "desc": "Presa Saladillo",
-            "lat": -33.2423537,
-            "lng": -65.9254676
-        },
-        {
-            "km": 45.42,
-            "desc": "Traza principal",
-            "lat": -33.2403134,
-            "lng": -65.9044023
-        },
-        {
-            "km": 45.88,
-            "desc": "Traza principal",
-            "lat": -33.240701,
-            "lng": -65.8970534
-        },
-        {
-            "km": 46,
-            "desc": "Puente Rio 5to",
-            "lat": -33.2415744,
-            "lng": -65.8955251
-        }
+        { "km": 4, "desc": "Puente Derivador", "lat": -33.2941849, "lng": -66.3007985 },
+        { "km": 5, "desc": "Rodeo del Alto", "lat": -33.2944079, "lng": -66.2884821 },
+        { "km": 7, "desc": "Club La Estrega", "lat": -33.2945745, "lng": -66.2685864 },
+        { "km": 9, "desc": "Ave Fenix", "lat": -33.2847671, "lng": -66.2497884 },
+        { "km": 12, "desc": "Rotonda Cruz de Piedra", "lat": -33.2638394, "lng": -66.2297909 },
+        { "km": 13, "desc": "Peaje Cruz de Piedra", "lat": -33.2519519, "lng": -66.2260722 },
+        { "km": 15, "desc": "Peaje Perilago", "lat": -33.2542878, "lng": -66.212412 },
+        { "km": 16, "desc": "Traza principal", "lat": -33.253, "lng": -66.201 },
+        { "km": 17, "desc": "La Hoya", "lat": -33.2509587, "lng": -66.1915335 },
+        { "km": 19, "desc": "Rotonda Virgen / El Volcan", "lat": -33.2530479, "lng": -66.1751547 },
+        { "km": 20, "desc": "Puente Los Puquios", "lat": -33.262433, "lng": -66.1698524 },
+        { "km": 21.5, "desc": "Traza principal", "lat": -33.2657315, "lng": -66.1640798 },
+        { "km": 23, "desc": "Traza principal", "lat": -33.2721132, "lng": -66.1410199 },
+        { "km": 25, "desc": "Traza principal", "lat": -33.2710583, "lng": -66.1307046 },
+        { "km": 27, "desc": "Cruce Rp30 / Control Policial", "lat": -33.269815, "lng": -66.1078299 },
+        { "km": 29.5, "desc": "Traza principal", "lat": -33.2669278, "lng": -66.0744213 },
+        { "km": 31, "desc": "Traza principal", "lat": -33.26768, "lng": -66.0675449 },
+        { "km": 33, "desc": "Arroyo y Retorno Los Risma", "lat": -33.266405, "lng": -66.0431169 },
+        { "km": 34.5, "desc": "Traza principal", "lat": -33.2644799, "lng": -66.0388586 },
+        { "km": 36.5, "desc": "Puente Arroyo La Petra", "lat": -33.2574904, "lng": -66.0071684 },
+        { "km": 37.3, "desc": "Traza principal", "lat": -33.2561069, "lng": -66.0020352 },
+        { "km": 38, "desc": "Retorno La Petra", "lat": -33.2524878, "lng": -65.9964764 },
+        { "km": 40, "desc": "Traza principal", "lat": -33.2498757, "lng": -65.9916789 },
+        { "km": 41.5, "desc": "Traza principal", "lat": -33.2494978, "lng": -65.9909967 },
+        { "km": 44.7, "desc": "Presa Saladillo", "lat": -33.2423537, "lng": -65.9254676 },
+        { "km": 45.1, "desc": "Traza principal", "lat": -33.2427678, "lng": -65.9205906 },
+        { "km": 45.4, "desc": "Traza principal", "lat": -33.2403134, "lng": -65.9044023 },
+        { "km": 45.8, "desc": "Traza principal", "lat": -33.240701, "lng": -65.8970534 },
+        { "km": 46, "desc": "Puente Rio 5to", "lat": -33.2415744, "lng": -65.8955251 }
     ]
     ,
     '30': [
@@ -2000,13 +1550,13 @@ const calibrarRuta20Densa = () => {
         [-66.15613, -33.27542], [-66.1410199, -33.2721132], [-66.1307046, -33.2710583],
         [-66.1078299, -33.2698150], [-66.0744213, -33.2669278], [-66.0675449, -33.2676800],
         [-66.0452015, -33.2672577], [-66.0431169, -33.2664050], [-66.0388586, -33.2644799],
-        [-66.0071684, -33.2574904], [-66.0020352, -33.2561069], [-66.09964764, -33.2524878],  
+        [-66.0071684, -33.2574904], [-66.0020352, -33.2561069], [-66.09964764, -33.2524878],
         [-65.9964764, -33.2524878], [-65.9916789, -33.2498757], [-65.9909967, -33.2494978],
         [-65.9254676, -33.2423537], [-65.9205906, -33.2427678], [-65.9044023, -33.2403134],
         [-65.8970534, -33.2407010], [-65.8955251, -33.2415744]
     ];
 
- 
+
     const hitosRuta20 = [
         { km: 4, desc: 'Puente Derivador', lat: -33.2941849, lng: -66.3007985 },
         { km: 5, desc: 'Rodeo del Alto', lat: -33.2944079, lng: -66.2884821 },
@@ -2513,7 +2063,7 @@ const initMap = () => {
     //  renderizarPuntosDeReferencia() //debugg
     cargarPuntosGuardados()
     //  calibrarRutaInteligente() //debugg
- 
+
     map.on('click', (e) => {
         const { lat, lng } = e.latlng
         if (marcadorTemporal) { map.removeLayer(marcadorTemporal) }
@@ -2683,7 +2233,7 @@ const buscarKilometro = () => {
 
     dotKm.bindPopup(`
         <div class="font-[Barlow_Condensed] text-sm tracking-wide font-bold border-b border-slate-200 dark:border-white/10 pb-1 mb-1 text-red-600 dark:text-red-400">
-            Marcador Kilométrico (Aprox)
+            Marcador kilométrico (aprox)
         </div>
         <div class="text-[11px] text-slate-600 dark:text-slate-400 uppercase tracking-widest font-bold mb-1">
             Ruta ${searchRuta.value === '7' ? 'Nac. 7' : (searchRuta.value === '9' ? 'Prov. 9' : 'Prov. 20')} - Km ${km}
@@ -2900,7 +2450,7 @@ onBeforeUnmount(() => { if (map) { map.remove() } })
 
                     <div v-else class="text-sm">
                         <div class="text-slate-600 dark:text-slate-300 mb-3 leading-relaxed text-xs">El Km {{ searchKm
-                        }} se encuentra en el tramo comprendido entre:</div>
+                            }} se encuentra en el tramo comprendido entre:</div>
                         <ul class="list-none p-0 m-0 space-y-3 relative">
                             <li class="flex items-start gap-2 relative z-10">
                                 <span

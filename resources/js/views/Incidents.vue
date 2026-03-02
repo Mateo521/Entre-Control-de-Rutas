@@ -279,7 +279,7 @@ onUnmounted(() => {
                                                 <line x1="12" y1="3" x2="12" y2="15"></line>
                                             </svg>
                                         </div>
-                                        <span>Haz clic aquí para seleccionar evidencias</span>
+                                        <span>Hacé clic acá para seleccionar evidencias</span>
                                         <span class="text-[10px] font-normal opacity-70">Soporta múltiples imágenes y
                                             videos</span>
                                     </label>
