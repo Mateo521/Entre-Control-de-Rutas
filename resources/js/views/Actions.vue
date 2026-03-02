@@ -140,7 +140,7 @@ onUnmounted(() => {
             <div>
                 <h2
                     class="font-['Barlow_Condensed'] text-[28px] font-extrabold text-slate-900 dark:text-slate-100 m-0 mb-0.5 tracking-wide">
-                    {{ esEdicion ? `Edición de Acción #${idEdicion}` : 'Nueva Acción Operativa' }}
+                    {{ esEdicion ? `Edición de acción #${idEdicion}` : 'Nueva acción operativa' }}
                 </h2>
                 <p class="text-[13px] text-slate-500 dark:text-slate-400 m-0">Documentación de trabajos, mantenimientos
                     y adquisiciones</p>

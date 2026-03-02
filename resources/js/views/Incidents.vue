@@ -177,7 +177,7 @@ onUnmounted(() => {
             <div>
                 <h2
                     class="font-['Barlow_Condensed'] text-[28px] font-extrabold text-slate-900 dark:text-slate-100 m-0 mb-0.5 tracking-wide">
-                    {{ esEdicion ? `Edición de Suceso #${idEdicion}` : 'Registro Operativo' }}
+                    {{ esEdicion ? `Edición de suceso #${idEdicion}` : 'Registro operativo' }}
                 </h2>
                 <p class="text-[13px] text-slate-500 dark:text-slate-400 m-0">Reporte de sucesos en la traza con soporte
                     multimedia múltiple</p>
