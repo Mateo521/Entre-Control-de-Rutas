@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, onMounted, onBeforeUnmount, computed, watch } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount, onUnmounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
@@ -11,6 +11,16 @@ import axios from 'axios'
 const mapContainer = ref(null)
 let map = null
 let tileLayer = null
+
+
+const estaOnline = ref(navigator.onLine)
+
+
+const actualizarEstadoRed = () => {
+    estaOnline.value = navigator.onLine
+    actualizarCapaMapa()
+}
+
 
 const searchRuta = ref('20')
 const searchKm = ref('')
@@ -55,9 +65,17 @@ const seleccionarCapa = (llave) => {
 const actualizarCapaMapa = () => {
     let limiteZoom = 19;
 
-    if (tipoMapa.value === 'estandar') {
+
+    if (!estaOnline.value) {
+        tipoMapa.value = 'estandar';
+        tileLayer.setUrl('/mapa_offline/{z}/{x}/{y}.png');
+
+        limiteZoom = 14;
+    }
+    else if (tipoMapa.value === 'estandar') {
         const isDark = document.documentElement.classList.contains('dark');
         tileLayer.setUrl(isDark ? darkTile : lightTile);
+        limiteZoom = 19;
     } else {
         tileLayer.setUrl(capasDisponibles[tipoMapa.value].url);
 
@@ -69,11 +87,15 @@ const actualizarCapaMapa = () => {
         }
     }
 
-    map.setMaxZoom(limiteZoom);
-    tileLayer.options.maxZoom = limiteZoom;
 
-    if (map.getZoom() > limiteZoom) {
-        map.setZoom(limiteZoom);
+    if (map && tileLayer) {
+        map.setMaxZoom(limiteZoom);
+        tileLayer.options.maxZoom = limiteZoom;
+
+
+        if (map.getZoom() > limiteZoom) {
+            map.setZoom(limiteZoom);
+        }
     }
 };
 
@@ -92,7 +114,7 @@ const lightTile = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}
 const darkTile = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
 
 
-// Algoritmo de Chaikin
+// Algoritmo de chaikin
 const suavizarCoordenadas = (coordenadasCrudas, iteraciones = 3) => {
     if (coordenadasCrudas.length <= 2) return coordenadasCrudas;
 
@@ -2339,6 +2361,10 @@ const confirmarPunto = async () => {
 const cerrarModal = () => { mostrarModal.value = false }
 onMounted(async () => {
     await cargarPeajesBase();
+
+    window.addEventListener('online', actualizarEstadoRed)
+    window.addEventListener('offline', actualizarEstadoRed)
+
     initMap();
 
     if (route.query.focus) {
@@ -2354,6 +2380,13 @@ watch(() => route.query.focus, (nuevoFoco) => {
         enfocarPeaje(nuevoFoco);
     }
 })
+
+onUnmounted(() => {
+    window.removeEventListener('online', actualizarEstadoRed)
+    window.removeEventListener('offline', actualizarEstadoRed)
+})
+
+
 
 onBeforeUnmount(() => { if (map) { map.remove() } })
 
