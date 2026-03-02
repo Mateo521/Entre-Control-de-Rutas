@@ -11,7 +11,7 @@ const horaActual = ref('')
 let intervaloReloj = null
 const footerDesplegado = ref(false)
 
- 
+
 const sidebarAbierto = ref(false)
 
 const cerrarMenuMovil = () => {
@@ -66,6 +66,8 @@ const cargarPeajesBase = async () => {
             params: { per_page: 50 }
         })
         peajes.value = respuesta.data.data
+
+        cargarClimaPeajes();
     } catch (error) {
         console.error('Error al cargar peajes en el layout:', error)
     }
@@ -75,6 +77,48 @@ const enfocarPeajeYcerrar = (nombre) => {
     footerDesplegado.value = false;
     router.push({ path: '/panel/mapa', query: { focus: nombre } });
 }
+
+const climasPeajes = ref({});
+
+
+const coordenadasRespaldo = {
+    'Peaje Cruz de Piedra': { lat: -33.2519519, lng: -66.2260722 },
+    'Peaje Perilago': { lat: -33.2542878, lng: -66.2124120 },
+    'Peaje Los Puquios': { lat: -33.2714234, lng: -66.1964652 },
+    'Peaje La Cumbre': { lat: -33.8646, lng: -65.7725 },
+    'Peaje Ruta 30': { lat: -33.2698, lng: -66.1078 },
+    'Peaje Desaguadero Este': { lat: -33.4001, lng: -67.1523 },
+    'Peaje Desaguadero Oeste': { lat: -33.4001, lng: -67.1523 }
+};
+
+const cargarClimaPeajes = async () => {
+    if (!isOnline.value || peajes.value.length === 0) return;
+
+    peajes.value.forEach(async (peaje) => {
+        const lat = peaje.lat || peaje.latitude || (coordenadasRespaldo[peaje.name] ? coordenadasRespaldo[peaje.name].lat : null);
+        const lng = peaje.lng || peaje.longitude || (coordenadasRespaldo[peaje.name] ? coordenadasRespaldo[peaje.name].lng : null);
+
+        if (!lat || !lng) {
+            console.warn(`Coordenadas no encontradas para: ${peaje.name}`);
+            return;
+        }
+
+        try {
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`;
+            const respuesta = await axios.get(url);
+
+            climasPeajes.value = {
+                ...climasPeajes.value,
+                [peaje.id]: {
+                    temperatura: Math.round(respuesta.data.current_weather.temperature)
+                }
+            };
+        } catch (error) {
+            console.error(`Error al cargar clima para ${peaje.name}`);
+        }
+    });
+};
+
 
 onMounted(() => {
     actualizarReloj()
@@ -342,11 +386,30 @@ onUnmounted(() => {
                                     class="w-full h-full object-cover transition-transform duration-500 " />
                                 <!-- group-hover:scale-105 -->
 
+                                <div v-if="climasPeajes[peaje.id]"
+                                    class="absolute top-2 right-2 bg-black/60 backdrop-blur-md border border-white/10 px-2 py-1 rounded-md flex items-center gap-1.5 shadow-lg z-20">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fbbf24"
+                                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="5"></circle>
+                                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                                    </svg>
+                                    <span class="text-white font-mono text-[11px] font-bold">
+                                        {{ climasPeajes[peaje.id].temperatura }}°C
+                                    </span>
+                                </div>
+
                                 <div
                                     :class="`absolute inset-0 bg-gradient-to-t ${obtenerDatosRuta(peaje.name).bgGradiente} via-black/20 to-transparent flex items-end p-2.5`">
                                     <div>
                                         <div
-                                            class="text-white font-['Barlow_Condensed'] text-[13px] font-bold tracking-wide leading-tight truncate max-w-[200px] md:max-w-[120px]">
+                                            class="text-white font-['Barlow_Condensed'] text-[17px] font-bold tracking-wide leading-tight truncate max-w-[200px] md:max-w-[120px]">
                                             {{ peaje.name.replace('Peaje ', '') }}
                                         </div>
                                         <div
@@ -360,16 +423,7 @@ onUnmounted(() => {
                         </div>
                     </div>
                 </div>
-
-
-
-
-
-
             </div>
-
-
-
         </div>
     </div>
 </template>
