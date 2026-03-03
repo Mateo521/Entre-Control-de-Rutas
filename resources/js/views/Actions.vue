@@ -257,7 +257,7 @@ onUnmounted(() => {
                     </div>
 
                     <div
-                        class="mb-6 bg-slate-50 dark:bg-[#0a1628] p-5 rounded-xl border border-slate-200 dark:border-white/10">
+                        class="mb-6 bg-slate-50 dark:bg-[#0a1628] p-5  border border-slate-200 dark:border-white/10">
                         <div
                             class="flex items-center justify-between mb-4 border-b border-slate-200 dark:border-white/10 pb-3">
                             <span

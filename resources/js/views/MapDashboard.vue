@@ -337,9 +337,25 @@ const trazasVialesGeoJSON = {
                 "nombre": "Autopista Serranías Puntanas (Ruta Nac. 7)",
                 "color": "#f59e0b",
                 "peajes": [
-                    { nombre: "Peaje La Cumbre", lat: -33.3590784, lng: -66.0670751, imagen: "/img/peajes/la-cumbre.jpeg" },
-                    { nombre: "Peaje Desaguadero Isla Oeste", lat: -33.4117474, lng: -67.1234507, imagen: "/img/peajes/desaguadero-o.jpeg" },
-                    { nombre: "Peaje Desaguadero Isla Este", lat: -33.4128459, lng: -67.1147563, imagen: "/img/peajes/desaguadero-e.jpeg" },
+                    {
+                        nombre: "Peaje La Cumbre", lat: -33.3590784, lng: -66.0670751, imagen: "/img/peajes/la-cumbre.jpeg",
+                        balanzas: [
+                            { id_dinamico: "balanza_ascendente", nombre: "Balanza ascendente", lat: -33.3585080, lng: -66.0683294 },
+                            { id_dinamico: "balanza_descendente", nombre: "Balanza descendente", lat: -33.3599185, lng: -66.0647748 }
+                        ]
+                    },
+                    {
+                        nombre: "Peaje Desaguadero Oeste", lat: -33.4117474, lng: -67.1234507, imagen: "/img/peajes/desaguadero-o.jpeg",
+                        balanzas: [
+                            { id_dinamico: "balanza_ascendente", nombre: "Balanza ascendente", lat: -33.4120742, lng: -67.1222232 }
+                        ]
+                    },
+                    {
+                        nombre: "Peaje Desaguadero Este", lat: -33.4128459, lng: -67.1147563, imagen: "/img/peajes/desaguadero-e.jpeg",
+                        balanzas: [
+                            { id_dinamico: "balanza_descendente", nombre: "Balanza descendente", lat: -33.4125795, lng: -67.1158442 }
+                        ]
+                    }
                 ]
             },
 
@@ -2052,6 +2068,64 @@ const cargarPuntosGuardados = async () => {
     }
 }
 
+const renderizarBalanzas = () => {
+    trazasVialesGeoJSON.features.forEach(ruta => {
+        if (ruta.properties.peajes) {
+            ruta.properties.peajes.forEach(peajeEstatico => {
+                
+   
+                if (peajeEstatico.balanzas) {
+                    
+               
+                    const datosEnVivo = peajes.value.find(p => p.name === peajeEstatico.nombre);
+
+                    peajeEstatico.balanzas.forEach(balanza => {
+                        
+                     
+                        let estaOperativa = false;
+                        if (datosEnVivo && datosEnVivo.dynamic_data) {
+                            estaOperativa = datosEnVivo.dynamic_data[balanza.id_dinamico] === true;
+                        }
+
+                     
+                        const colorBalanza = estaOperativa 
+                            ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' 
+                            : 'bg-red-500 shadow-[0_0_10px_#ef4444]';
+
+                    
+                        const iconHTML = `
+                            <div class="relative flex items-center justify-center w-5 h-5 rounded-full border-2 border-white dark:border-slate-800 ${colorBalanza}">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round">
+                                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                                </svg>
+                            </div>
+                        `;
+
+                        const iconoBalanza = L.divIcon({
+                            html: iconHTML,
+                            className: 'border-none bg-transparent',
+                            iconSize: [20, 20],
+                            iconAnchor: [10, 10]
+                        });
+
+                 
+                        L.marker([balanza.lat, balanza.lng], { icon: iconoBalanza })
+                            .bindPopup(`
+                                <div class="font-['Barlow_Condensed'] text-[13px] font-bold uppercase tracking-wide border-b border-slate-200 dark:border-slate-700 pb-1 mb-2">
+                                    ${balanza.nombre}
+                                </div>
+                                <div class="text-[11px] font-bold tracking-widest uppercase ${estaOperativa ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}">
+                                    Estado: ${estaOperativa ? 'En Servicio' : 'Fuera de Servicio'}
+                                </div>
+                            `)
+                            .addTo(map);
+                    });
+                }
+            });
+        }
+    });
+};
+
 const initMap = () => {
     map = L.map(mapContainer.value, {
 
@@ -2081,6 +2155,7 @@ const initMap = () => {
     dibujarLimitesProvinciales()
 
     renderizarTrazasEstaticas()
+    renderizarBalanzas()
     // renderizarPuntosDeControl() //debugg
     //  renderizarPuntosDeReferencia() //debugg
     cargarPuntosGuardados()
@@ -2483,7 +2558,7 @@ onBeforeUnmount(() => { if (map) { map.remove() } })
 
                     <div v-else class="text-sm">
                         <div class="text-slate-600 dark:text-slate-300 mb-3 leading-relaxed text-xs">El Km {{ searchKm
-                            }} se encuentra en el tramo comprendido entre:</div>
+                        }} se encuentra en el tramo comprendido entre:</div>
                         <ul class="list-none p-0 m-0 space-y-3 relative">
                             <li class="flex items-start gap-2 relative z-10">
                                 <span

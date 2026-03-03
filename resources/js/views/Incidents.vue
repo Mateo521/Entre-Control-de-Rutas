@@ -340,9 +340,9 @@ onUnmounted(() => {
                         <line x1="12" y1="8" x2="12.01" y2="8"></line>
                     </svg>
                     <div class="text-[12.5px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                        <strong class="text-slate-700 dark:text-slate-200 block mb-1">Múltiples Adjuntos</strong>
-                        Puedes seleccionar varios archivos a la vez manteniendo presionada la tecla Ctrl/Cmd. El sistema
-                        armará un portafolio de evidencia para la auditoría posterior.
+                        <strong class="text-slate-700 dark:text-slate-200 block mb-1">Múltiples adjuntos</strong>
+                        Podés seleccionar varios archivos a la vez manteniendo presionada la tecla Ctrl/Cmd. El sistema
+                        va a armar un portafolio de evidencia para la auditoría posterior.
                     </div>
                 </div>
             </div>

@@ -93,11 +93,14 @@ const router = createRouter({
     routes
 });
 
-router.beforeEach((to, from, next) => {
-    const token = localStorage.getItem('access_token');
-    if (to.meta.requiresAuth && !token) { next('/'); }
-    else if (to.meta.requiresGuest && token) { next('/panel'); }
-    else { next(); }
+router.beforeEach((to, from) => {
+    const isAuthenticated = localStorage.getItem('access_token');
+    
+    if (to.meta.requiresAuth && !isAuthenticated) {
+        return '/login'; 
+    }
+    
+    return true; 
 });
 
 export default router;

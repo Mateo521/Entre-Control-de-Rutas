@@ -9,15 +9,19 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-public function up(): void
+public function up()
 {
     Schema::create('tolls', function (Blueprint $table) {
         $table->id();
         $table->string('name');
+        $table->string('image_path')->nullable();
+        $table->json('dynamic_schema')->nullable();
+        $table->json('dynamic_data')->nullable(); 
+        
     
-        $table->jsonb('dynamic_schema')->nullable(); 
+        $table->softDeletes(); 
+        
         $table->timestamps();
-        $table->softDeletes();  
     });
 }
     /**

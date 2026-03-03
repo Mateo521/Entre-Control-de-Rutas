@@ -25,7 +25,7 @@ class SystemDataSeeder extends Seeder
           'password' => bcrypt('Admin1234!'),
         ]);
 
-        // 1. Esquema para peajes comunes (Sin balanzas)
+         
         $schemaGenerico = [
             "inventory_fields" => [
                 ["name" => "estado_barreras", "type" => "booleano", "label" => "Estado de Barreras"],
@@ -34,38 +34,35 @@ class SystemDataSeeder extends Seeder
             ]
         ];
 
-        // 2. Esquema específico para La Cumbre (2 balanzas)
         $schemaLaCumbre = [
             "inventory_fields" => [
                 ["name" => "estado_barreras", "type" => "booleano", "label" => "Estado de Barreras"],
                 ["name" => "energia_red", "type" => "booleano", "label" => "Energía de Red Activa"],
-                ["name" => "balanza_norte", "type" => "booleano", "label" => "Balanza 1 - Sentido Norte"],
-                ["name" => "balanza_sur", "type" => "booleano", "label" => "Balanza 2 - Sentido Sur"],
+                ["name" => "balanza_ascendente", "type" => "booleano", "label" => "Balanza Ascendente (Mano a Mendoza)"],
+                ["name" => "balanza_descendente", "type" => "booleano", "label" => "Balanza Descendente (Mano a Bs As)"],
                 ["name" => "observaciones", "type" => "texto", "label" => "Observaciones Generales"]
             ]
         ];
 
-        // 3. Esquema específico para Desaguadero Este (1 balanza)
-        $schemaDesaguaderoEste = [
-            "inventory_fields" => [
-                ["name" => "estado_barreras", "type" => "booleano", "label" => "Estado de Barreras"],
-                ["name" => "energia_red", "type" => "booleano", "label" => "Energía de Red Activa"],
-                ["name" => "balanza_ingreso", "type" => "booleano", "label" => "Balanza Operativa - Este"],
-                ["name" => "observaciones", "type" => "texto", "label" => "Observaciones Generales"]
-            ]
-        ];
-
-        // 4. Esquema específico para Desaguadero Oeste (1 balanza)
         $schemaDesaguaderoOeste = [
             "inventory_fields" => [
                 ["name" => "estado_barreras", "type" => "booleano", "label" => "Estado de Barreras"],
                 ["name" => "energia_red", "type" => "booleano", "label" => "Energía de Red Activa"],
-                ["name" => "balanza_egreso", "type" => "booleano", "label" => "Balanza Operativa - Oeste"],
+                ["name" => "balanza_ascendente", "type" => "booleano", "label" => "Balanza Ascendente (Operativa)"],
                 ["name" => "observaciones", "type" => "texto", "label" => "Observaciones Generales"]
             ]
         ];
 
-        // 5. Creación de los peajes asignando el esquema correspondiente a cada uno
+        $schemaDesaguaderoEste = [
+            "inventory_fields" => [
+                ["name" => "estado_barreras", "type" => "booleano", "label" => "Estado de Barreras"],
+                ["name" => "energia_red", "type" => "booleano", "label" => "Energía de Red Activa"],
+                ["name" => "balanza_descendente", "type" => "booleano", "label" => "Balanza Descendente (Operativa)"],
+                ["name" => "observaciones", "type" => "texto", "label" => "Observaciones Generales"]
+            ]
+        ];
+
+     
         $tolls = [
             Toll::create(['name' => 'Peaje La Cumbre', 'dynamic_schema' => $schemaLaCumbre]),
             Toll::create(['name' => 'Peaje Desaguadero Este', 'dynamic_schema' => $schemaDesaguaderoEste]),

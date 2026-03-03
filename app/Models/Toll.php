@@ -9,9 +9,15 @@ class Toll extends Model
 {
     use SoftDeletes;
 
-protected $fillable = ['name', 'dynamic_schema', 'image_path'];
+protected $fillable = [
+        'name', 
+        'image_path', 
+        'dynamic_schema', 
+        'dynamic_data'
+    ];
 
     protected $casts = [
         'dynamic_schema' => 'array',
+        'dynamic_data' => 'array',
     ];
 }

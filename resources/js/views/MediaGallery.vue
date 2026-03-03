@@ -130,7 +130,7 @@ onMounted(() => {
         </div>
 
         <div v-else-if="evidenciasFiltradas.length === 0"
-            class="flex-1 flex items-center justify-center text-slate-400 text-sm font-medium border-2 border-dashed border-slate-200 dark:border-white/10 rounded-xl">
+            class="flex-1 flex items-center justify-center text-slate-400 text-sm font-medium border-2 border-dashed border-slate-200 dark:border-white/10 ">
             No se encontraron evidencias para este filtro.
         </div>
 

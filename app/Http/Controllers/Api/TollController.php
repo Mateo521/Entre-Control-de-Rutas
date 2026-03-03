@@ -51,11 +51,14 @@ class TollController extends Controller
             return response()->json(['message' => 'Peaje no encontrado'], 404);
         }
 
+      
         $validatedData = $request->validate([
             'name' => 'sometimes|string|max:255',
             'dynamic_schema' => 'nullable|array',
+            'dynamic_data' => 'nullable|array',  
         ]);
 
+       
         $toll->update($validatedData);
 
         return response()->json([

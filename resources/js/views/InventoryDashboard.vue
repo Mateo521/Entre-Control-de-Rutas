@@ -66,7 +66,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="h-full flex flex-col relative">
+    <div class=" flex flex-col relative">
         <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
                 <h2 class="font-['Barlow_Condensed'] text-[28px] font-extrabold text-slate-900 dark:text-slate-100 m-0 mb-0.5 tracking-wide">
@@ -87,7 +87,7 @@ onMounted(() => {
             </button>
         </div>
 
-        <div class="bg-white dark:bg-[#0d1b2a] border border-slate-200 dark:border-white/10 rounded-xl shadow-sm overflow-hidden flex-1 flex flex-col">
+        <div class="bg-white dark:bg-[#0d1b2a] border border-slate-200 dark:border-white/10  shadow-sm overflow-hidden flex-1 flex flex-col">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
@@ -141,7 +141,7 @@ onMounted(() => {
         </div>
 
         <div v-if="mostrarModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <div class="bg-white dark:bg-[#0d1b2a] w-full max-w-md rounded-xl shadow-2xl border border-slate-200 dark:border-white/10 overflow-hidden">
+            <div class="bg-white dark:bg-[#0d1b2a] w-full max-w-md  shadow-2xl border border-slate-200 dark:border-white/10 overflow-hidden">
                 <div class="p-5 border-b border-slate-200 dark:border-white/10 flex justify-between items-center bg-slate-50 dark:bg-white/5">
                     <h3 class="font-['Barlow_Condensed'] text-xl font-bold text-slate-900 dark:text-white uppercase tracking-wide m-0">Ingresar Material (OP)</h3>
                     <button @click="cerrarModal" class="text-slate-400 hover:text-red-500 transition-colors bg-transparent border-none cursor-pointer p-1">
