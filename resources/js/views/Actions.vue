@@ -20,8 +20,10 @@ const idEdicion = ref(null)
 
 const formulario = ref({ toll_id: '', category: '', title: '', description: '' })
 
+const inventario = ref([])
+const materialesUsados = ref([])
 
- 
+
 const archivosAdjuntos = ref([])
 const mediosExistentes = ref([])
 const archivosAEliminar = ref([])
@@ -50,16 +52,24 @@ const cargarAccionParaEditar = async (id) => {
         if (accion.media_paths && accion.media_paths.length > 0) {
             mediosExistentes.value = accion.media_paths
         }
+
+        if (accion.inventory_items && accion.inventory_items.length > 0) {
+            materialesUsados.value = accion.inventory_items.map(item => ({
+                inventory_item_id: item.id,
+                quantity: item.pivot.quantity_used
+            }))
+        }
+
     } catch (error) {
         toast.error('Error al cargar el reporte para su edición')
         router.push('/panel/acciones')
     }
 }
- 
+
 const procesarArchivo = (event) => {
     const files = Array.from(event.target.files)
     archivosAdjuntos.value.push(...files)
-    event.target.value = ''  
+    event.target.value = ''
 }
 
 const quitarArchivoNuevo = (index) => {
@@ -84,6 +94,13 @@ const guardarAccion = async () => {
         if (formulario.value.toll_id) {
             formData.append('toll_id', formulario.value.toll_id)
         }
+
+        if (materialesUsados.value.length > 0) {
+
+            const materialesValidos = materialesUsados.value.filter(m => m.inventory_item_id && m.quantity > 0)
+            formData.append('materiales', JSON.stringify(materialesValidos))
+        }
+
         formData.append('category', formulario.value.category)
         formData.append('title', formulario.value.title)
         formData.append('description', formulario.value.description)
@@ -115,11 +132,30 @@ const guardarAccion = async () => {
     }
 }
 
+const cargarInventario = async () => {
+    try {
+        const respuesta = await axios.get('/api/inventory')
+        inventario.value = respuesta.data
+    } catch (error) {
+        console.error('Error al cargar inventario:', error)
+    }
+}
+
+const agregarMaterial = () => {
+    materialesUsados.value.push({ inventory_item_id: '', quantity: '' })
+}
+
+const quitarMaterial = (index) => {
+    materialesUsados.value.splice(index, 1)
+}
+
+
 onMounted(async () => {
     window.addEventListener('online', actualizarEstadoRed)
     window.addEventListener('offline', actualizarEstadoRed)
 
     await cargarPeajes()
+    await cargarInventario()
 
     if (route.params.id) {
         esEdicion.value = true
@@ -132,6 +168,12 @@ onUnmounted(() => {
     window.removeEventListener('online', actualizarEstadoRed)
     window.removeEventListener('offline', actualizarEstadoRed)
 })
+
+
+
+
+
+
 </script>
 
 <template>
@@ -208,10 +250,72 @@ onUnmounted(() => {
                     <div class="mb-6">
                         <span
                             class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-2">Descripción
-                            Detallada</span>
+                            detallada</span>
                         <textarea v-model="formulario.description" required rows="6"
                             placeholder="Detalla los trabajos realizados, materiales, cuadrillas involucradas..."
                             class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg px-3.5 py-2.5 text-slate-900 dark:text-white text-sm outline-none transition-colors font-sans focus:border-emerald-500/50 resize-y"></textarea>
+                    </div>
+
+                    <div
+                        class="mb-6 bg-slate-50 dark:bg-[#0a1628] p-5 rounded-xl border border-slate-200 dark:border-white/10">
+                        <div
+                            class="flex items-center justify-between mb-4 border-b border-slate-200 dark:border-white/10 pb-3">
+                            <span
+                                class="font-['Barlow_Condensed'] text-[13px] font-bold tracking-[0.12em] uppercase text-slate-700 dark:text-amber-500 flex items-center gap-2">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" stroke-linecap="round">
+                                    <path
+                                        d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+                                    </path>
+                                </svg>
+                                Insumos Utilizados (Descuento de Stock)
+                            </span>
+                            <button type="button" @click="agregarMaterial"
+                                class="text-[11px] bg-amber-500 hover:bg-amber-400 text-[#0d1b2a] px-3 py-1.5 rounded font-bold uppercase tracking-wider transition-colors border-none cursor-pointer flex items-center gap-1">
+                                <span>+</span> Agregar Material
+                            </button>
+                        </div>
+
+                        <div v-if="materialesUsados.length === 0"
+                            class="text-[12px] text-slate-500 dark:text-slate-400 italic text-center py-2">
+                            No se requiere descontar materiales para esta acción operativa.
+                        </div>
+
+                        <div v-else class="space-y-3">
+                            <div v-for="(mat, index) in materialesUsados" :key="index"
+                                class="flex gap-3 items-end bg-white dark:bg-white/5 p-3 rounded border border-slate-200 dark:border-white/5 shadow-sm">
+
+                                <div class="flex-1">
+                                    <label
+                                        class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1">Insumo</label>
+                                    <select v-model="mat.inventory_item_id" required
+                                        class="w-full bg-slate-50 dark:bg-black/20 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-sm outline-none focus:border-emerald-500/50 appearance-none">
+                                        <option value="" disabled>Seleccione del catálogo...</option>
+                                        <option v-for="item in inventario" :key="item.id" :value="item.id">
+                                            {{ item.name }} (Stock: {{ item.current_stock }} {{ item.unit_measure }})
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="w-32">
+                                    <label
+                                        class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1">Cantidad</label>
+                                    <input v-model="mat.quantity" type="number" step="0.01" min="0.01" required
+                                        placeholder="Ej: 5"
+                                        class="w-full bg-slate-50 dark:bg-black/20 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-sm outline-none focus:border-emerald-500/50" />
+                                </div>
+
+                                <button type="button" @click="quitarMaterial(index)"
+                                    class="p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors bg-transparent border-none cursor-pointer"
+                                    title="Quitar">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="flex justify-end pt-4 border-t border-slate-100 dark:border-white/5">
@@ -262,7 +366,7 @@ onUnmounted(() => {
                             class="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-md px-3 py-2 flex items-center justify-between shadow-sm">
                             <span
                                 class="text-[11px] font-medium text-emerald-700 dark:text-emerald-400 truncate pr-2">{{
-                                archivo.name }}</span>
+                                    archivo.name }}</span>
                             <button type="button" @click="quitarArchivoNuevo(i)"
                                 class="text-[10px] font-bold uppercase tracking-wider text-red-500 hover:text-red-700 cursor-pointer bg-transparent border-none">Quitar</button>
                         </div>

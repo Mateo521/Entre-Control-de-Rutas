@@ -7,6 +7,11 @@ use App\Models\Action;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
+
+use App\Models\InventoryItem;
+use Illuminate\Support\Facades\DB;
+
+
 class ActionController extends Controller
 {
     public function index(Request $request)
@@ -29,6 +34,7 @@ class ActionController extends Controller
 
     public function store(Request $request)
     {
+         
         $request->validate([
             'toll_id' => 'nullable|exists:tolls,id',
             'category' => 'required|string',
@@ -37,6 +43,7 @@ class ActionController extends Controller
             'media.*' => 'nullable|file|mimes:jpg,jpeg,png,mp4,pdf|max:20480',
         ]);
 
+       
         $mediaPaths = [];
         $archivosMedia = $request->file('media');
 
@@ -47,21 +54,47 @@ class ActionController extends Controller
             }
         }
 
-        $action = Action::create([
-            'toll_id' => $request->toll_id,
-            'category' => $request->category,
-            'title' => $request->title,
-            'description' => $request->description,
-            'media_paths' => $mediaPaths
-        ]);
+  
+        $action = DB::transaction(function () use ($request, $mediaPaths) {
+            
+           
+            $newAction = Action::create([
+                'toll_id' => $request->toll_id,
+                'category' => $request->category,
+                'title' => $request->title,
+                'description' => $request->description,
+                'media_paths' => $mediaPaths
+            ]);
+
+           
+            if ($request->has('materiales')) {
+                $materiales = json_decode($request->materiales, true);
+                
+                if (is_array($materiales)) {
+                    foreach ($materiales as $mat) {
+                     
+                        $newAction->inventoryItems()->attach($mat['inventory_item_id'], [
+                            'quantity_used' => $mat['quantity']
+                        ]);
+
+                        
+                        $item = InventoryItem::find($mat['inventory_item_id']);
+                        if ($item) {
+                            $item->current_stock -= $mat['quantity'];
+                            $item->save();
+                        }
+                    }
+                }
+            }
+
+            return $newAction;
+        });
 
         return response()->json(['message' => 'Acción registrada exitosamente', 'data' => $action], 201);
     }
 
     public function update(Request $request, $id)
     {
-        $action = Action::findOrFail($id);
-
         $request->validate([
             'toll_id' => 'nullable|exists:tolls,id',
             'category' => 'required|string',
@@ -70,35 +103,79 @@ class ActionController extends Controller
             'media.*' => 'nullable|file|mimes:jpg,jpeg,png,mp4,pdf|max:20480',
         ]);
 
-        $mediaPaths = $action->media_paths ?? [];
+        $action = DB::transaction(function () use ($request, $id) {
+            
+            $actionToUpdate = Action::with('inventoryItems')->findOrFail($id);
 
-     
-        if ($request->filled('archivos_a_eliminar')) {
-            $aEliminar = json_decode($request->archivos_a_eliminar, true);
-            foreach ($aEliminar as $ruta) {
-                $pathRelativo = str_replace('/storage/', '', $ruta);
-                Storage::disk('public')->delete($pathRelativo);
-                $mediaPaths = array_values(array_filter($mediaPaths, fn($p) => $p !== $ruta));
+         
+            if ($request->has('materiales')) {
+                
+                
+                foreach ($actionToUpdate->inventoryItems as $existingItem) {
+                    $itemModel = InventoryItem::find($existingItem->id);
+                    if ($itemModel) {
+                        $itemModel->current_stock += $existingItem->pivot->quantity_used;
+                        $itemModel->save();
+                    }
+                }
+
+              
+                $actionToUpdate->inventoryItems()->detach();
+
+                
+                $materiales = json_decode($request->materiales, true);
+                if (is_array($materiales)) {
+                    foreach ($materiales as $mat) {
+                        $actionToUpdate->inventoryItems()->attach($mat['inventory_item_id'], [
+                            'quantity_used' => $mat['quantity']
+                        ]);
+
+                        $itemModel = InventoryItem::find($mat['inventory_item_id']);
+                        if ($itemModel) {
+                            $itemModel->current_stock -= $mat['quantity'];
+                            $itemModel->save();
+                        }
+                    }
+                }
             }
-        }
+
+           
+            $actionToUpdate->update([
+                'toll_id' => $request->toll_id,
+                'category' => $request->category,
+                'title' => $request->title,
+                'description' => $request->description,
+            ]);
+ 
+            $mediaPaths = $actionToUpdate->media_paths ?? [];
+
+          
+            if ($request->has('archivos_a_eliminar')) {
+                $aEliminar = json_decode($request->archivos_a_eliminar, true);
+                if (is_array($aEliminar)) {
+                    $mediaPaths = array_filter($mediaPaths, function ($path) use ($aEliminar) {
+                        return !in_array($path, $aEliminar);
+                    });
+                }
+            }
 
       
-        $archivosMedia = $request->file('media');
-        if (!empty($archivosMedia) && is_array($archivosMedia)) {
-            foreach ($archivosMedia as $archivo) {
-                $path = $archivo->store('acciones', 'public');
-                $mediaPaths[] = '/storage/' . $path;
+            $archivosMedia = $request->file('media');
+            if (!empty($archivosMedia) && is_array($archivosMedia)) {
+                foreach ($archivosMedia as $archivo) {
+                    $path = $archivo->store('acciones', 'public');
+                    $mediaPaths[] = '/storage/' . $path;
+                }
             }
-        }
 
-        $action->toll_id = $request->toll_id;
-        $action->category = $request->category;
-        $action->title = $request->title;
-        $action->description = $request->description;
-        $action->media_paths = $mediaPaths;
-        $action->save();
+         
+            $actionToUpdate->media_paths = array_values($mediaPaths);
+            $actionToUpdate->save();
 
-        return response()->json(['message' => 'Acción actualizada correctamente', 'data' => $action]);
+            return $actionToUpdate;
+        });
+
+        return response()->json(['message' => 'Acción actualizada exitosamente', 'data' => $action], 200);
     }
 
     public function destroy($id)

@@ -8,6 +8,7 @@ import IncidentsList from '../views/IncidentsList.vue';
 import AdvancedSearch from '../views/AdvancedSearch.vue';
 import MapDashboard from '../views/MapDashboard.vue';
 import MediaGallery from '../views/MediaGallery.vue'
+import InventoryDashboard from '../views/InventoryDashboard.vue';
 const routes = [
     {
         path: '/',
@@ -73,6 +74,11 @@ const routes = [
                 name: 'ActionsEdit',
                 component: () => import('../views/Actions.vue')
             },
+            {
+            path: 'inventario', 
+            name: 'InventoryDashboard',
+            component: InventoryDashboard
+        },
 {
     path: 'evidencias',
     name: 'MediaGallery',

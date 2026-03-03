@@ -18,6 +18,14 @@ class Action extends Model
         'media_paths'
     ];
 
+   
+    public function inventoryItems()
+    {
+        return $this->belongsToMany(InventoryItem::class, 'action_inventory')
+                    ->withPivot('quantity_used')
+                    ->withTimestamps();
+    }
+
     protected $casts = [
         'media_paths' => 'array',
     ];

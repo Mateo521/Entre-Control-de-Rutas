@@ -17,7 +17,7 @@ const nuevoPeaje = reactive({
     camposDinámicos: []
 })
 
- 
+
 const fotoSeleccionada = ref(null)
 const previewFoto = ref(null)
 const fileInput = ref(null)
@@ -44,8 +44,55 @@ const cargarPeajes = async (page = 1) => {
     }
 }
 
+
+const mostrarModalControl = ref(false)
+const peajeControl = ref(null)
+const valoresDinamicos = ref({})
+const guardandoControl = ref(false)
+const abrirControlOperativo = (peaje) => {
+    peajeControl.value = peaje
+
+    valoresDinamicos.value = peaje.dynamic_data ? JSON.parse(JSON.stringify(peaje.dynamic_data)) : {}
+
+    if (peaje.dynamic_schema && peaje.dynamic_schema.inventory_fields) {
+        peaje.dynamic_schema.inventory_fields.forEach(field => {
+            if (valoresDinamicos.value[field.name] === undefined) {
+
+                valoresDinamicos.value[field.name] = field.type === 'booleano' ? false : ''
+            }
+        })
+    }
+    mostrarModalControl.value = true
+}
+
+const cerrarModalControl = () => {
+    mostrarModalControl.value = false
+    peajeControl.value = null
+}
+
+const guardarEstadoOperativo = async () => {
+    guardandoControl.value = true
+    try {
+
+        await axios.put(`/api/tolls/${peajeControl.value.id}`, {
+            name: peajeControl.value.name,
+            dynamic_data: valoresDinamicos.value
+        })
+
+        toast.success('Estado operativo de la estación actualizado.')
+        cerrarModalControl()
+        cargarPeajes(paginaActual.value)
+    } catch (error) {
+        console.error("Error al guardar estado:", error)
+        toast.error('Error al actualizar los estados operativos.')
+    } finally {
+        guardandoControl.value = false
+    }
+}
+
+
 const abrirModal = (peaje = null) => {
-     
+
     fotoSeleccionada.value = null
     previewFoto.value = null
 
@@ -54,15 +101,15 @@ const abrirModal = (peaje = null) => {
         idEdicion.value = peaje.id
         nuevoPeaje.name = peaje.name
 
-        
+
         nuevoPeaje.camposDinámicos = peaje.dynamic_schema && peaje.dynamic_schema.inventory_fields
             ? peaje.dynamic_schema.inventory_fields.map(c => ({
                 ...c,
-                label: c.label || c.name.replace(/_/g, ' ')  
+                label: c.label || c.name.replace(/_/g, ' ')
             }))
             : []
-        
-        
+
+
         if (peaje.image_path) {
             previewFoto.value = peaje.image_path
         }
@@ -82,7 +129,7 @@ const cerrarModal = () => {
 }
 
 const agregarCampo = () => {
- 
+
     nuevoPeaje.camposDinámicos.push({ label: '', name: '', type: 'texto' })
 }
 
@@ -90,12 +137,12 @@ const quitarCampo = (index) => {
     nuevoPeaje.camposDinámicos.splice(index, 1)
 }
 
- 
+
 const seleccionarFoto = (event) => {
     const file = event.target.files[0]
     if (file) {
         fotoSeleccionada.value = file
-        previewFoto.value = URL.createObjectURL(file)  
+        previewFoto.value = URL.createObjectURL(file)
     }
 }
 
@@ -105,7 +152,7 @@ const guardarPeaje = async () => {
     guardando.value = true;
 
     try {
-  
+
         const camposFormateados = nuevoPeaje.camposDinámicos.map(c => {
             const internalName = c.name || (c.label ? c.label.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '') : 'campo');
             return {
@@ -124,33 +171,33 @@ const guardarPeaje = async () => {
 
         let peajeIdOperado = null;
 
-        
+
         if (esEdicion.value) {
             await axios.put(`/api/tolls/${idEdicion.value}`, payload)
             peajeIdOperado = idEdicion.value;
             toast.success('Configuración de peaje actualizada.')
         } else {
             const respuestaPost = await axios.post('/api/tolls', payload)
-            peajeIdOperado = respuestaPost.data.data.id;  
+            peajeIdOperado = respuestaPost.data.data.id;
             toast.success('Peaje registrado.')
         }
 
-       
+
         if (fotoSeleccionada.value && peajeIdOperado) {
             const formData = new FormData();
             formData.append('image', fotoSeleccionada.value);
 
             await axios.post(`/api/tolls/${peajeIdOperado}/image`, formData, {
-                headers: { 
+                headers: {
                     'Content-Type': 'multipart/form-data',
-                    'Accept': 'application/json'  
+                    'Accept': 'application/json'
                 }
             });
             toast.success('Foto de fachada guardada.');
         }
 
         cerrarModal()
-        cargarPeajes(paginaActual.value)  
+        cargarPeajes(paginaActual.value)
 
     } catch (error) {
         console.error("Error al guardar:", error)
@@ -232,7 +279,8 @@ onMounted(() => {
                                 <div class="font-semibold text-slate-900 dark:text-slate-100">{{ peaje.name }}</div>
                             </td>
                             <td class="px-4 py-3">
-                                <img v-if="peaje.image_path" :src="peaje.image_path" class="w-12 h-8 object-cover rounded shadow-sm border border-slate-200 dark:border-white/10" />
+                                <img v-if="peaje.image_path" :src="peaje.image_path"
+                                    class="w-12 h-8 object-cover rounded shadow-sm border border-slate-200 dark:border-white/10" />
                                 <span v-else class="text-[10px] text-slate-400 italic">Sin foto</span>
                             </td>
                             <td class="px-4 py-3">
@@ -258,6 +306,15 @@ onMounted(() => {
                                         stroke-width="2" stroke-linecap="round">
                                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                </button>
+                                <button @click="abrirControlOperativo(peaje)" title="Actualizar estado operativo"
+                                    class="p-1.5 mr-2 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 rounded transition-colors cursor-pointer border-none bg-transparent inline-flex items-center justify-center">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                                        <line x1="15" y1="9" x2="9" y2="15"></line>
                                     </svg>
                                 </button>
                             </td>
@@ -308,25 +365,38 @@ onMounted(() => {
                 </div>
 
                 <form @submit.prevent="guardarPeaje" class="p-6">
-                    
+
                     <div class="mb-5">
-                        <label class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-1.5">
+                        <label
+                            class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-1.5">
                             foto de fachada
                         </label>
-                        <div class="relative w-full h-66 rounded-lg border-2 border-dashed border-slate-300 dark:border-white/20 bg-slate-50 dark:bg-white/5 overflow-hidden flex items-center justify-center group hover:border-amber-500/50 transition-colors cursor-pointer" @click="$refs.fileInput.click()">
-                            <img v-if="previewFoto" :src="previewFoto" class="w-full h-full object-cover absolute inset-0 z-0 group-hover:opacity-50 transition-opacity" />
-                            
+                        <div class="relative w-full h-66 rounded-lg border-2 border-dashed border-slate-300 dark:border-white/20 bg-slate-50 dark:bg-white/5 overflow-hidden flex items-center justify-center group hover:border-amber-500/50 transition-colors cursor-pointer"
+                            @click="$refs.fileInput.click()">
+                            <img v-if="previewFoto" :src="previewFoto"
+                                class="w-full h-full object-cover absolute inset-0 z-0 group-hover:opacity-50 transition-opacity" />
+
                             <div v-if="!previewFoto" class="text-center z-10 flex flex-col items-center">
-                                <svg class="w-8 h-8 text-slate-400 mb-2 group-hover:text-amber-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                                <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 group-hover:text-amber-500">Hacé clic para subir imagen</span>
+                                <svg class="w-8 h-8 text-slate-400 mb-2 group-hover:text-amber-500 transition-colors"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                                </svg>
+                                <span
+                                    class="text-xs font-semibold text-slate-500 dark:text-slate-400 group-hover:text-amber-500">Hacé
+                                    clic para subir imagen</span>
                                 <span class="text-[10px] text-slate-400 mt-1">Se va a comprimir automáticamente</span>
                             </div>
 
-                            <div v-if="previewFoto" class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                                <span class="text-white text-xs font-bold uppercase tracking-wider bg-black/60 px-3 py-1.5 rounded shadow-lg">Cambiar foto</span>
+                            <div v-if="previewFoto"
+                                class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                <span
+                                    class="text-white text-xs font-bold uppercase tracking-wider bg-black/60 px-3 py-1.5 rounded shadow-lg">Cambiar
+                                    foto</span>
                             </div>
 
-                            <input ref="fileInput" type="file" accept="image/jpeg, image/png, image/webp" class="hidden" @change="seleccionarFoto" />
+                            <input ref="fileInput" type="file" accept="image/jpeg, image/png, image/webp" class="hidden"
+                                @change="seleccionarFoto" />
                         </div>
                     </div>
 
@@ -393,4 +463,71 @@ onMounted(() => {
             </div>
         </div>
     </div>
+    <div v-if="mostrarModalControl" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 dark:bg-[#0a1628]/80 backdrop-blur-sm transition-opacity p-4">
+            <div class="w-full max-w-lg bg-white dark:bg-[#0d1b2a] border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden relative">
+                
+                <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 h-1"></div>
+
+                <div class="px-6 py-4 border-b border-slate-100 dark:border-white/5 flex items-center justify-between">
+                    <div>
+                        <h3 class="font-['Barlow_Condensed'] text-[20px] font-bold text-slate-900 dark:text-slate-100 tracking-wide m-0 uppercase">
+                            Panel de Control Operativo
+                        </h3>
+                        <p class="text-[12px] text-slate-500 font-medium m-0">{{ peajeControl?.name }}</p>
+                    </div>
+                    <button @click="cerrarModalControl" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer bg-transparent border-none">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <form @submit.prevent="guardarEstadoOperativo" class="p-6">
+                    <div v-if="peajeControl?.dynamic_schema?.inventory_fields" class="space-y-4 max-h-[60vh] overflow-y-auto">
+                        
+                        <div v-for="field in peajeControl.dynamic_schema.inventory_fields" :key="field.name">
+                            
+                            <div v-if="field.type === 'booleano'" class="flex items-center justify-between bg-slate-50 dark:bg-white/5 p-4 rounded-lg border border-slate-200 dark:border-white/5">
+                                <div>
+                                    <span class="font-['Barlow_Condensed'] text-[15px] font-bold tracking-wider uppercase text-slate-700 dark:text-slate-200 block">
+                                        {{ field.label }}
+                                    </span>
+                                    <span class="text-[11px] font-bold tracking-widest uppercase" :class="valoresDinamicos[field.name] ? 'text-emerald-500' : 'text-red-500'">
+                                        {{ valoresDinamicos[field.name] ? 'En Servicio (Operativa)' : 'Fuera de Servicio' }}
+                                    </span>
+                                </div>
+                                
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" v-model="valoresDinamicos[field.name]" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                                </label>
+                            </div>
+
+                            <div v-else-if="field.type === 'texto'" class="mt-2">
+                                <label class="font-['Barlow_Condensed'] text-[11px] font-bold tracking-[0.12em] uppercase text-slate-500 dark:text-slate-400 block mb-1.5">
+                                    {{ field.label }}
+                                </label>
+                                <textarea v-model="valoresDinamicos[field.name]" rows="2" 
+                                    class="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg px-3.5 py-2.5 text-slate-900 dark:text-white text-sm outline-none transition-colors focus:border-emerald-500/50 resize-y"
+                                    placeholder="Novedades del turno..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div v-else class="text-[12px] text-slate-400 text-center py-4">
+                        Esta estación no posee balanzas ni campos dinámicos configurados.
+                    </div>
+
+                    <div class="flex gap-3 justify-end pt-5 mt-2 border-t border-slate-100 dark:border-white/5">
+                        <button type="button" @click="cerrarModalControl" class="px-4 py-2 rounded-lg text-[13px] font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors cursor-pointer border-none bg-transparent font-['Barlow_Condensed'] uppercase tracking-wider">
+                            Cerrar
+                        </button>
+                        <button type="submit" :disabled="guardandoControl" class="bg-emerald-600 text-white font-['Barlow_Condensed'] text-[13px] font-bold tracking-wider uppercase px-6 py-2 rounded-lg border-none cursor-pointer transition-all hover:bg-emerald-500 disabled:opacity-50">
+                            {{ guardandoControl ? 'Registrando...' : 'Guardar Estado' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
 </template>

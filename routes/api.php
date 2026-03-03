@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TollController;
 use App\Http\Controllers\Api\IncidentController;
-
+use App\Http\Controllers\Api\InventoryController;
 /*
 |--------------------------------------------------------------------------
 | rtas publicas
@@ -39,5 +39,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('actions', \App\Http\Controllers\ActionController::class);
 
     Route::post('/tolls/{id}/image', [App\Http\Controllers\Api\TollController::class, 'uploadImage']);
+
+    Route::get('/inventory', [InventoryController::class, 'index']);
+    Route::post('/inventory/movements', [InventoryController::class, 'storeMovement']);
 
 });

@@ -15,36 +15,70 @@ class SystemDataSeeder extends Seeder
 {
     public function run()
     {
-    
+
         DB::statement('TRUNCATE TABLE actions, incidents, tolls, users RESTART IDENTITY CASCADE;');
 
-        
+
         User::create([
             'name' => 'Administrador',
-            'email' => 'admin@enterutas.com',
-            'password' => Hash::make('password123'),
+            'email' => 'admin@gmail.com',
+          'password' => bcrypt('Admin1234!'),
         ]);
 
-        $schemaBase = [
+        // 1. Esquema para peajes comunes (Sin balanzas)
+        $schemaGenerico = [
             "inventory_fields" => [
                 ["name" => "estado_barreras", "type" => "booleano", "label" => "Estado de Barreras"],
                 ["name" => "energia_red", "type" => "booleano", "label" => "Energía de Red Activa"],
                 ["name" => "observaciones", "type" => "texto", "label" => "Observaciones Generales"]
             ]
-        ]; 
-
-        
-        $tolls = [
-            Toll::create(['name' => 'Peaje La Cumbre', 'dynamic_schema' => $schemaBase]),
-            Toll::create(['name' => 'Peaje Desaguadero Este', 'dynamic_schema' => $schemaBase]),
-            Toll::create(['name' => 'Peaje Desaguadero Oeste', 'dynamic_schema' => $schemaBase]),
-            Toll::create(['name' => 'Peaje Los Puquios', 'dynamic_schema' => $schemaBase]),
-            Toll::create(['name' => 'Peaje Cruz de Piedra', 'dynamic_schema' => $schemaBase]),
-            Toll::create(['name' => 'Peaje Perilago', 'dynamic_schema' => $schemaBase]),
-            Toll::create(['name' => 'Peaje Ruta 30', 'dynamic_schema' => $schemaBase]),
         ];
 
-        
+        // 2. Esquema específico para La Cumbre (2 balanzas)
+        $schemaLaCumbre = [
+            "inventory_fields" => [
+                ["name" => "estado_barreras", "type" => "booleano", "label" => "Estado de Barreras"],
+                ["name" => "energia_red", "type" => "booleano", "label" => "Energía de Red Activa"],
+                ["name" => "balanza_norte", "type" => "booleano", "label" => "Balanza 1 - Sentido Norte"],
+                ["name" => "balanza_sur", "type" => "booleano", "label" => "Balanza 2 - Sentido Sur"],
+                ["name" => "observaciones", "type" => "texto", "label" => "Observaciones Generales"]
+            ]
+        ];
+
+        // 3. Esquema específico para Desaguadero Este (1 balanza)
+        $schemaDesaguaderoEste = [
+            "inventory_fields" => [
+                ["name" => "estado_barreras", "type" => "booleano", "label" => "Estado de Barreras"],
+                ["name" => "energia_red", "type" => "booleano", "label" => "Energía de Red Activa"],
+                ["name" => "balanza_ingreso", "type" => "booleano", "label" => "Balanza Operativa - Este"],
+                ["name" => "observaciones", "type" => "texto", "label" => "Observaciones Generales"]
+            ]
+        ];
+
+        // 4. Esquema específico para Desaguadero Oeste (1 balanza)
+        $schemaDesaguaderoOeste = [
+            "inventory_fields" => [
+                ["name" => "estado_barreras", "type" => "booleano", "label" => "Estado de Barreras"],
+                ["name" => "energia_red", "type" => "booleano", "label" => "Energía de Red Activa"],
+                ["name" => "balanza_egreso", "type" => "booleano", "label" => "Balanza Operativa - Oeste"],
+                ["name" => "observaciones", "type" => "texto", "label" => "Observaciones Generales"]
+            ]
+        ];
+
+        // 5. Creación de los peajes asignando el esquema correspondiente a cada uno
+        $tolls = [
+            Toll::create(['name' => 'Peaje La Cumbre', 'dynamic_schema' => $schemaLaCumbre]),
+            Toll::create(['name' => 'Peaje Desaguadero Este', 'dynamic_schema' => $schemaDesaguaderoEste]),
+            Toll::create(['name' => 'Peaje Desaguadero Oeste', 'dynamic_schema' => $schemaDesaguaderoOeste]),
+            Toll::create(['name' => 'Peaje Los Puquios', 'dynamic_schema' => $schemaGenerico]),
+            Toll::create(['name' => 'Peaje Cruz de Piedra', 'dynamic_schema' => $schemaGenerico]),
+            Toll::create(['name' => 'Peaje Perilago', 'dynamic_schema' => $schemaGenerico]),
+            Toll::create(['name' => 'Peaje Ruta 30', 'dynamic_schema' => $schemaGenerico]),
+        ];
+
+
+
+
         $casosReales = [
             ['toll_id' => 1, 'type' => 'accidente_vial', 'lat' => -33.4976835, 'lng' => -65.7934509, 'obs' => 'Colisión por alcance en Puente de Fraga (Km 731). Unidades de emergencia en el lugar.', 'dias_atras' => 2],
             ['toll_id' => 1, 'type' => 'animal_ruta', 'lat' => -33.3989463, 'lng' => -65.9825863, 'obs' => 'Presencia de equinos sueltos cerca del Acceso a Dique Paso de Las Carretas (Km 751).', 'dias_atras' => 5],
@@ -57,10 +91,10 @@ class SystemDataSeeder extends Seeder
 
         foreach ($casosReales as $caso) {
             $fechaIncidente = Carbon::now()->subDays($caso['dias_atras'])->subHours(rand(1, 12));
-            
+
             $incident = Incident::create([
                 'toll_id' => $caso['toll_id'],
-                'user_id' => 1, 
+                'user_id' => 1,
                 'incident_type' => $caso['type'],
                 'dynamic_data' => [
                     'latitud' => $caso['lat'],
@@ -73,7 +107,7 @@ class SystemDataSeeder extends Seeder
                 'created_at' => clone $fechaIncidente
             ]);
 
-            
+
             if (in_array($caso['type'], ['accidente_vial', 'animal_ruta', 'falla_infraestructura'])) {
                 Action::create([
                     'toll_id' => $caso['toll_id'],
@@ -86,13 +120,13 @@ class SystemDataSeeder extends Seeder
             }
         }
 
-        
+
         $tipos = ['pesaje_excedido', 'fuga_peaje', 'animal_ruta', 'accidente_vial', 'falla_infraestructura', 'corte_ruta'];
-        
+
         for ($i = 0; $i < 45; $i++) {
             $randomToll = $tolls[array_rand($tolls)];
             $randomType = $tipos[array_rand($tipos)];
-            
+
             Incident::create([
                 'toll_id' => $randomToll->id,
                 'user_id' => 1,
