@@ -19,16 +19,16 @@ class InventorySeeder extends Seeder
 
         $catalogo = [
           
-            ['name' => 'Material en Frío (Granel)', 'category' => 'Bacheo', 'unit_measure' => 'Toneladas', 'alert' => 10, 'initial' => 50],
-            ['name' => 'Bolsas Material en Frío', 'category' => 'Bacheo', 'unit_measure' => 'Unidades', 'alert' => 50, 'initial' => 300],
+            ['name' => 'Material en frío (Granel)', 'category' => 'Bacheo', 'unit_measure' => 'Toneladas', 'alert' => 10, 'initial' => 50],
+            ['name' => 'Bolsas Material en frío', 'category' => 'Bacheo', 'unit_measure' => 'Unidades', 'alert' => 50, 'initial' => 300],
             
            
-            ['name' => 'Hojas de Guardarrail', 'category' => 'Guardarrail', 'unit_measure' => 'Unidades', 'alert' => 20, 'initial' => 150],
+            ['name' => 'Hojas de guardarrail', 'category' => 'Guardarrail', 'unit_measure' => 'Unidades', 'alert' => 20, 'initial' => 150],
             ['name' => 'Tornillos', 'category' => 'Guardarrail', 'unit_measure' => 'Unidades', 'alert' => 500, 'initial' => 3000],
             ['name' => 'Punteras', 'category' => 'Guardarrail', 'unit_measure' => 'Unidades', 'alert' => 10, 'initial' => 40],
             ['name' => 'Cebras', 'category' => 'Guardarrail', 'unit_measure' => 'Unidades', 'alert' => 20, 'initial' => 80],
-            ['name' => 'Chapitas Reflectivas', 'category' => 'Guardarrail', 'unit_measure' => 'Unidades', 'alert' => 100, 'initial' => 500],
-            ['name' => 'Patas (Postes)', 'category' => 'Guardarrail', 'unit_measure' => 'Unidades', 'alert' => 30, 'initial' => 150],
+            ['name' => 'Chapitas reflectivas', 'category' => 'Guardarrail', 'unit_measure' => 'Unidades', 'alert' => 100, 'initial' => 500],
+            ['name' => 'Patas (postes)', 'category' => 'Guardarrail', 'unit_measure' => 'Unidades', 'alert' => 30, 'initial' => 150],
         ];
 
         foreach ($catalogo as $item) {

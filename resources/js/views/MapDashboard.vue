@@ -2072,32 +2072,33 @@ const renderizarBalanzas = () => {
     trazasVialesGeoJSON.features.forEach(ruta => {
         if (ruta.properties.peajes) {
             ruta.properties.peajes.forEach(peajeEstatico => {
-                
-   
+
+
                 if (peajeEstatico.balanzas) {
-                    
-               
+
+
                     const datosEnVivo = peajes.value.find(p => p.name === peajeEstatico.nombre);
 
                     peajeEstatico.balanzas.forEach(balanza => {
-                        
-                     
+
+
                         let estaOperativa = false;
                         if (datosEnVivo && datosEnVivo.dynamic_data) {
                             estaOperativa = datosEnVivo.dynamic_data[balanza.id_dinamico] === true;
                         }
 
-                     
-                        const colorBalanza = estaOperativa 
-                            ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' 
+
+                        const colorBalanza = estaOperativa
+                            ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]'
                             : 'bg-red-500 shadow-[0_0_10px_#ef4444]';
 
-                    
+
                         const iconHTML = `
-                            <div class="relative flex items-center justify-center w-5 h-5 rounded-full border-2 border-white dark:border-slate-800 ${colorBalanza}">
-                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round">
-                                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                                </svg>
+                            <div class="relative flex items-center justify-center w-7 h-7 rounded-full border-2 border-white dark:border-slate-800 ${colorBalanza}">
+                                <svg class="w-5 h-5 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.5 21h13M12 21V7m0 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm2-1.8c3.073.661 2.467 2.8 5 2.8M5 8c3.359 0 2.192-2.115 5.012-2.793M7 9.556V7.75m0 1.806-1.95 4.393a.773.773 0 0 0 .37.962.785.785 0 0 0 .362.089h2.436a.785.785 0 0 0 .643-.335.776.776 0 0 0 .09-.716L7 9.556Zm10 0V7.313m0 2.243-1.95 4.393a.773.773 0 0 0 .37.962.786.786 0 0 0 .362.089h2.436a.785.785 0 0 0 .643-.335.775.775 0 0 0 .09-.716L17 9.556Z"/>
+</svg>
+
                             </div>
                         `;
 
@@ -2108,7 +2109,7 @@ const renderizarBalanzas = () => {
                             iconAnchor: [10, 10]
                         });
 
-                 
+
                         L.marker([balanza.lat, balanza.lng], { icon: iconoBalanza })
                             .bindPopup(`
                                 <div class="font-['Barlow_Condensed'] text-[13px] font-bold uppercase tracking-wide border-b border-slate-200 dark:border-slate-700 pb-1 mb-2">
@@ -2558,7 +2559,7 @@ onBeforeUnmount(() => { if (map) { map.remove() } })
 
                     <div v-else class="text-sm">
                         <div class="text-slate-600 dark:text-slate-300 mb-3 leading-relaxed text-xs">El Km {{ searchKm
-                        }} se encuentra en el tramo comprendido entre:</div>
+                            }} se encuentra en el tramo comprendido entre:</div>
                         <ul class="list-none p-0 m-0 space-y-3 relative">
                             <li class="flex items-start gap-2 relative z-10">
                                 <span

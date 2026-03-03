@@ -153,7 +153,7 @@ onMounted(() => {
             <div>
                 <h2
                     class="font-['Barlow_Condensed'] text-[28px] font-extrabold text-slate-900 dark:text-slate-100 m-0 mb-0.5 tracking-wide">
-                    Historial Operativo
+                    Historial
                 </h2>
                 <p class="text-[13px] text-slate-500 dark:text-slate-400 m-0">
                     Consulta de sucesos y auditoría de evidencia física
