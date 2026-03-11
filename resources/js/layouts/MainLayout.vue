@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 
@@ -81,26 +81,28 @@ const enfocarPeajeYcerrar = (nombre) => {
 const climasPeajes = ref({});
 
 
+
 const coordenadasRespaldo = {
-    'Peaje Cruz de Piedra': { lat: -33.2519519, lng: -66.2260722 },
-    'Peaje Perilago': { lat: -33.2542878, lng: -66.2124120 },
-    'Peaje Los Puquios': { lat: -33.2714234, lng: -66.1964652 },
-    'Peaje La Cumbre': { lat: -33.8646, lng: -65.7725 },
-    'Peaje Ruta 30': { lat: -33.2698, lng: -66.1078 },
-    'Peaje Desaguadero Este': { lat: -33.4001, lng: -67.1523 },
-    'Peaje Desaguadero Oeste': { lat: -33.4001, lng: -67.1523 }
+    'Peaje Cruz de Piedra': { lat: -33.2541131, lng: -66.2270219 },
+    'Peaje Perilago': { lat: -33.2542911, lng: -66.2124143 },
+    'Peaje Los Puquios': { lat: -33.2435, lng: -66.1558 },
+    'Peaje La Cumbre': { lat: -33.3590784, lng: -66.0670751 },
+    'Peaje Desaguadero Oeste': { lat: -33.4117474, lng: -67.1234507 },
+    'Peaje Desaguadero Este': { lat: -33.4128459, lng: -67.1147563 },
+    'Peaje Ruta 30': { lat: -33.1585, lng: -64.9542 }
 };
 
 const cargarClimaPeajes = async () => {
     if (!isOnline.value || peajes.value.length === 0) return;
 
-    peajes.value.forEach(async (peaje) => {
+
+    for (const peaje of peajes.value) {
         const lat = peaje.lat || peaje.latitude || (coordenadasRespaldo[peaje.name] ? coordenadasRespaldo[peaje.name].lat : null);
         const lng = peaje.lng || peaje.longitude || (coordenadasRespaldo[peaje.name] ? coordenadasRespaldo[peaje.name].lng : null);
 
         if (!lat || !lng) {
             console.warn(`Coordenadas no encontradas para: ${peaje.name}`);
-            return;
+            continue;
         }
 
         try {
@@ -116,8 +118,32 @@ const cargarClimaPeajes = async () => {
         } catch (error) {
             console.error(`Error al cargar clima para ${peaje.name}`);
         }
-    });
+    }
 };
+
+
+const grupoRuta20 = computed(() => {
+    return {
+        cruzPiedra: peajes.value.find(p => p.name.includes('Cruz de Piedra')),
+        perilago: peajes.value.find(p => p.name.includes('Perilago'))
+    };
+});
+
+
+const grupoDesaguadero = computed(() => {
+    const este = peajes.value.find(p => p.name.includes('Desaguadero Este'));
+    const oeste = peajes.value.find(p => p.name.includes('Desaguadero Oeste'));
+    return [este, oeste].filter(Boolean);
+});
+
+
+const otrosPeajes = computed(() => {
+    return peajes.value.filter(p =>
+        !p.name.includes('Cruz de Piedra') &&
+        !p.name.includes('Perilago') &&
+        !p.name.includes('Desaguadero')
+    );
+});
 
 
 onMounted(() => {
@@ -279,6 +305,29 @@ onUnmounted(() => {
                     </svg>Inventario
                 </router-link>
 
+                <router-link to="/panel/bacheo" @click="cerrarMenuMovil"
+                    active-class="border-amber-500 text-amber-600 dark:text-amber-500 bg-amber-500/10"
+                    class="flex items-center gap-2.5 px-5 py-2.5 text-[13.5px] font-medium transition-all no-underline border-l-[3px] border-transparent text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5">
+                    <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="15" height="15"
+                        fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linejoin="round" stroke-width="2"
+                            d="M7.58209 8.96025 9.8136 11.1917l-1.61782 1.6178c-1.08305-.1811-2.23623.1454-3.07364.9828-1.1208 1.1208-1.32697 2.8069-.62368 4.1363.14842.2806.42122.474.73509.5213.06726.0101.1347.0133.20136.0098-.00351.0666-.00036.1341.00977.2013.04724.3139.24069.5867.52125.7351 1.32944.7033 3.01552.4971 4.13627-.6237.8375-.8374 1.1639-1.9906.9829-3.0736l4.8107-4.8108c1.0831.1811 2.2363-.1454 3.0737-.9828 1.1208-1.1208 1.3269-2.80688.6237-4.13632-.1485-.28056-.4213-.474-.7351-.52125-.0673-.01012-.1347-.01327-.2014-.00977.0035-.06666.0004-.13409-.0098-.20136-.0472-.31386-.2406-.58666-.5212-.73508-1.3294-.70329-3.0155-.49713-4.1363.62367-.8374.83741-1.1639 1.9906-.9828 3.07365l-1.7788 1.77875-2.23152-2.23148-1.41419 1.41424Zm1.31056-3.1394c-.04235-.32684-.24303-.61183-.53647-.76186l-1.98183-1.0133c-.38619-.19746-.85564-.12345-1.16234.18326l-.86321.8632c-.3067.3067-.38072.77616-.18326 1.16235l1.0133 1.98182c.15004.29345.43503.49412.76187.53647l1.1127.14418c.3076.03985.61628-.06528.8356-.28461l.86321-.8632c.21932-.21932.32446-.52801.2846-.83561l-.14417-1.1127ZM19.4448 16.4052l-3.1186-3.1187c-.7811-.781-2.0474-.781-2.8285 0l-.1719.172c-.7811.781-.7811 2.0474 0 2.8284l3.1186 3.1187c.7811.781 2.0474.781 2.8285 0l.1719-.172c.7811-.781.7811-2.0474 0-2.8284Z" />
+                    </svg>
+                    Cuadrilla de bacheo
+                </router-link>
+
+                <router-link to="/panel/pasteros" @click="cerrarMenuMovil"
+                    active-class="border-amber-500 text-amber-600 dark:text-amber-500 bg-amber-500/10"
+                    class="flex items-center gap-2.5 px-5 py-2.5 text-[13.5px] font-medium transition-all no-underline border-l-[3px] border-transparent text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5">
+                    <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9.83892 12.4543s1.24988-3.08822-.21626-5.29004C8.15656 4.96245 4.58671 4.10885 4.39794 4.2436c-.18877.13476-1.11807 3.32546.34803 5.52727 1.4661 2.20183 5.09295 2.68343 5.09295 2.68343Zm0 0C10.3389 13.4543 12 15 12 18v2c0-2-.4304-3.4188 2.0696-5.9188m0 0s-.4894-2.7888 1.1206-4.35788c1.6101-1.56907 4.4903-1.54682 4.6701-1.28428.1798.26254.4317 2.84376-1.0809 4.31786-1.61 1.5691-4.7098 1.3243-4.7098 1.3243Z" />
+                    </svg>
+
+                    Empresas privadas
+                </router-link>
+
 
                 <router-link to="/panel/mapa" @click="cerrarMenuMovil"
                     active-class="border-amber-500 text-amber-600 dark:text-amber-500 bg-amber-500/10"
@@ -355,6 +404,9 @@ onUnmounted(() => {
                     <router-view></router-view>
                 </div>
 
+
+
+
                 <div :class="[
                     $route.name === 'MapDashboard'
                         ? 'absolute bottom-0 left-0 right-0 z-[1050] bg-white/95 dark:bg-[#0d1b2a]/95 backdrop-blur-md shadow-[0_-10px_30px_rgba(0,0,0,0.3)] transition-transform duration-500 ease-in-out border-t border-amber-500/30 px-4 md:px-6 pb-4 pt-2'
@@ -390,44 +442,111 @@ onUnmounted(() => {
                         </div>
 
                         <div
-                            class="flex md:grid md:grid-cols-4 lg:grid-cols-7 pt-1 gap-3 overflow-x-auto snap-x snap-mandatory  [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                            class="flex gap-4 overflow-x-auto snap-x snap-mandatory pt-1 w-full [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
 
-                            <div v-for="peaje in peajes" :key="peaje.id" @click="enfocarPeajeYcerrar(peaje.name)"
-                                class="shrink-0 snap-center w-[240px] md:w-auto transition-transform duration-300 relative z-10  hover:-translate-y-1 group relative cursor-pointer rounded-lg overflow-hidden border border-slate-200 dark:border-white/10 shadow-sm bg-slate-200 dark:bg-slate-800 aspect-video md:aspect-auto md:h-54">
+                            <div v-if="grupoRuta20.cruzPiedra || grupoRuta20.perilago"
+                                class="flex flex-1 min-w-[320px] gap-2 shrink-0 snap-center bg-slate-100 dark:bg-white/5 p-2 rounded-xl border border-slate-200 dark:border-white/10">
+                                <div v-if="grupoRuta20.cruzPiedra"
+                                    @click="enfocarPeajeYcerrar(grupoRuta20.cruzPiedra.name)"
+                                    class="flex-[3] transition-transform duration-300 relative z-10 hover:-translate-y-1 group cursor-pointer rounded-lg overflow-hidden border-2 border-amber-500/50 shadow-md bg-slate-200 dark:bg-slate-800 aspect-video md:aspect-auto md:h-28">
+                                    <img :src="grupoRuta20.cruzPiedra.image_path || '/data/600x400.svg'"
+                                        onerror="this.src='/data/600x400.svg'"
+                                        class="w-full h-full object-cover transition-transform duration-500" />
 
-                                <img :src="peaje.image_path || `/data/600x400.svg`"
-                                    onerror="this.src='/data/600x400.svg"
-                                    class="w-full h-full object-cover transition-transform duration-500 " />
-                                <!-- group-hover:scale-105 -->
+                                    <div v-if="climasPeajes[grupoRuta20.cruzPiedra.id]"
+                                        class="absolute top-2 right-2 bg-black/60 backdrop-blur-md border border-white/10 px-2 py-1 rounded-md flex items-center gap-1.5 shadow-lg z-20">
+                                        <span class="text-white font-mono text-[10px] font-bold">{{
+                                            climasPeajes[grupoRuta20.cruzPiedra.id].temperatura }}°C</span>
+                                    </div>
+
+                                    <div
+                                        :class="`absolute inset-0 bg-gradient-to-t ${obtenerDatosRuta(grupoRuta20.cruzPiedra.name).bgGradiente} via-black/20 to-transparent flex items-end p-2.5`">
+                                        <div>
+                                            <div
+                                                class="text-white font-['Barlow_Condensed'] text-[15px] font-bold tracking-wide leading-tight truncate">
+                                                {{ grupoRuta20.cruzPiedra.name.replace('Peaje ', '') }}
+                                            </div>
+                                            <div
+                                                class="text-amber-400 text-[9px] font-bold tracking-widest uppercase mt-0.5">
+                                                Estación Central</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div v-if="grupoRuta20.perilago" @click="enfocarPeajeYcerrar(grupoRuta20.perilago.name)"
+                                    class="flex-[2] transition-transform duration-300 relative z-10 hover:-translate-y-1 group cursor-pointer rounded-lg overflow-hidden border border-slate-300 dark:border-white/20 shadow-sm bg-slate-200 dark:bg-slate-800 aspect-video md:aspect-auto md:h-28 opacity-90">
+                                    <img :src="grupoRuta20.perilago.image_path || '/data/600x400.svg'"
+                                        onerror="this.src='/data/600x400.svg'"
+                                        class="w-full h-full object-cover transition-transform duration-500 grayscale-[30%]" />
+
+                                    <div
+                                        class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent flex items-end p-2.5">
+                                        <div>
+                                            <div
+                                                class="text-slate-200 font-['Barlow_Condensed'] text-[14px] font-bold tracking-wide leading-tight truncate">
+                                                {{ grupoRuta20.perilago.name.replace('Peaje ', '') }}
+                                            </div>
+                                            <div
+                                                class="text-slate-400 text-[9px] font-bold tracking-widest uppercase mt-0.5">
+                                                Dependencia</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div v-if="grupoDesaguadero.length > 0"
+                                class="flex flex-1 min-w-[320px] gap-2 shrink-0 snap-center bg-slate-100 dark:bg-white/5 p-2 rounded-xl border border-slate-200 dark:border-white/10">
+                                <div v-for="peaje in grupoDesaguadero" :key="peaje.id"
+                                    @click="enfocarPeajeYcerrar(peaje.name)"
+                                    class="flex-1 transition-transform duration-300 relative z-10 hover:-translate-y-1 group cursor-pointer rounded-lg overflow-hidden border border-slate-200 dark:border-white/20 shadow-sm bg-slate-200 dark:bg-slate-800 aspect-video md:aspect-auto md:h-28">
+                                    <img :src="peaje.image_path || '/data/600x400.svg'"
+                                        onerror="this.src='/data/600x400.svg'"
+                                        class="w-full h-full object-cover transition-transform duration-500" />
+
+                                    <div v-if="climasPeajes[peaje.id]"
+                                        class="absolute top-2 right-2 bg-black/60 backdrop-blur-md border border-white/10 px-2 py-1 rounded-md flex items-center gap-1.5 shadow-lg z-20">
+                                        <span class="text-white font-mono text-[10px] font-bold">{{
+                                            climasPeajes[peaje.id].temperatura }}°C</span>
+                                    </div>
+
+                                    <div
+                                        :class="`absolute inset-0 bg-gradient-to-t ${obtenerDatosRuta(peaje.name).bgGradiente} via-black/20 to-transparent flex items-end p-2.5`">
+                                        <div>
+                                            <div
+                                                class="text-white font-['Barlow_Condensed'] text-[15px] font-bold tracking-wide leading-tight truncate">
+                                                {{ peaje.name.replace('Peaje Desaguadero', 'Desag.') }}
+                                            </div>
+                                            <div
+                                                :class="`${obtenerDatosRuta(peaje.name).colorText} text-[9px] font-bold tracking-widest uppercase mt-0.5`">
+                                                {{ obtenerDatosRuta(peaje.name).ruta }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div v-for="peaje in otrosPeajes" :key="peaje.id" @click="enfocarPeajeYcerrar(peaje.name)"
+                                class="flex-1 min-w-[180px] shrink-0 snap-center transition-transform duration-300 relative z-10 hover:-translate-y-1 group cursor-pointer rounded-lg overflow-hidden border border-slate-200 dark:border-white/10 shadow-sm bg-slate-200 dark:bg-slate-800 aspect-video md:aspect-auto md:h-28">
+
+                                <img :src="peaje.image_path || '/data/600x400.svg'"
+                                    onerror="this.src='/data/600x400.svg'"
+                                    class="w-full h-full object-cover transition-transform duration-500" />
 
                                 <div v-if="climasPeajes[peaje.id]"
                                     class="absolute top-2 right-2 bg-black/60 backdrop-blur-md border border-white/10 px-2 py-1 rounded-md flex items-center gap-1.5 shadow-lg z-20">
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fbbf24"
-                                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="12" cy="12" r="5"></circle>
-                                        <line x1="12" y1="1" x2="12" y2="3"></line>
-                                        <line x1="12" y1="21" x2="12" y2="23"></line>
-                                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                                        <line x1="1" y1="12" x2="3" y2="12"></line>
-                                        <line x1="21" y1="12" x2="23" y2="12"></line>
-                                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                                    </svg>
-                                    <span class="text-white font-mono text-[11px] font-bold">
-                                        {{ climasPeajes[peaje.id].temperatura }}°C
-                                    </span>
+                                    <span class="text-white font-mono text-[10px] font-bold">{{
+                                        climasPeajes[peaje.id].temperatura }}°C</span>
                                 </div>
 
                                 <div
                                     :class="`absolute inset-0 bg-gradient-to-t ${obtenerDatosRuta(peaje.name).bgGradiente} via-black/20 to-transparent flex items-end p-2.5`">
                                     <div>
                                         <div
-                                            class="text-white font-['Barlow_Condensed'] text-[17px] font-bold tracking-wide leading-tight truncate max-w-[200px] md:max-w-[120px]">
+                                            class="text-white font-['Barlow_Condensed'] text-[15px] font-bold tracking-wide leading-tight truncate">
                                             {{ peaje.name.replace('Peaje ', '') }}
                                         </div>
                                         <div
-                                            :class="`${obtenerDatosRuta(peaje.name).colorText} text-[10px] font-bold tracking-widest uppercase mt-0.5`">
+                                            :class="`${obtenerDatosRuta(peaje.name).colorText} text-[9px] font-bold tracking-widest uppercase mt-0.5`">
                                             {{ obtenerDatosRuta(peaje.name).ruta }}
                                         </div>
                                     </div>
@@ -437,6 +556,10 @@ onUnmounted(() => {
                         </div>
                     </div>
                 </div>
+
+
+
+
             </div>
         </div>
     </div>

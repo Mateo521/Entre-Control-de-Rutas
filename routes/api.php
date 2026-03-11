@@ -5,6 +5,10 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TollController;
 use App\Http\Controllers\Api\IncidentController;
 use App\Http\Controllers\Api\InventoryController;
+
+use App\Http\Controllers\ContractorWorkController;
+
+
 /*
 |--------------------------------------------------------------------------
 | rtas publicas
@@ -42,5 +46,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/inventory', [InventoryController::class, 'index']);
     Route::post('/inventory/movements', [InventoryController::class, 'storeMovement']);
+
+
+    Route::get('/contractors', [ContractorWorkController::class, 'index']);
+    Route::post('/contractors', [ContractorWorkController::class, 'store']);
 
 });

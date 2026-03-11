@@ -1,106 +1,117 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import Login from '../views/Login.vue';
-import MainLayout from '../layouts/MainLayout.vue';
-import Dashboard from '../views/Dashboard.vue';
-import Tolls from '../views/Tolls.vue';
-import Incidents from '../views/Incidents.vue';
-import IncidentsList from '../views/IncidentsList.vue';
-import AdvancedSearch from '../views/AdvancedSearch.vue';
-import MapDashboard from '../views/MapDashboard.vue';
-import MediaGallery from '../views/MediaGallery.vue'
-import InventoryDashboard from '../views/InventoryDashboard.vue';
+import { createRouter, createWebHistory } from "vue-router";
+import Login from "../views/Login.vue";
+import MainLayout from "../layouts/MainLayout.vue";
+import Dashboard from "../views/Dashboard.vue";
+import Tolls from "../views/Tolls.vue";
+import Incidents from "../views/Incidents.vue";
+import IncidentsList from "../views/IncidentsList.vue";
+import AdvancedSearch from "../views/AdvancedSearch.vue";
+import MapDashboard from "../views/MapDashboard.vue";
+import MediaGallery from "../views/MediaGallery.vue";
+import InventoryDashboard from "../views/InventoryDashboard.vue";
+import BacheoDashboard from "../views/BacheoDashboard.vue";
+import PasterosDashboard from "../views/PasterosDashboard.vue";
+
 const routes = [
     {
-        path: '/',
-        name: 'Login',
+        path: "/",
+        name: "Login",
         component: Login,
-        meta: { requiresGuest: true }
+        meta: { requiresGuest: true },
     },
     {
-       
-        path: '/panel',
+        path: "/panel",
         component: MainLayout,
         meta: { requiresAuth: true },
-       
+
         children: [
             {
-                path: '',  
-                name: 'Dashboard',
-                component: Dashboard
+                path: "",
+                name: "Dashboard",
+                component: Dashboard,
             },
             {
-                path: 'peajes',  
-                name: 'Tolls',
-                component: Tolls
+                path: "peajes",
+                name: "Tolls",
+                component: Tolls,
             },
             {
-                path: 'sucesos',
-                name: 'IncidentsList',
-                component: IncidentsList
+                path: "sucesos",
+                name: "IncidentsList",
+                component: IncidentsList,
             },
             {
-                path: 'sucesos/nuevo',
-                name: 'IncidentsCreate',
-                component: Incidents
+                path: "sucesos/nuevo",
+                name: "IncidentsCreate",
+                component: Incidents,
             },
             {
-                path: 'busqueda',
-                name: 'AdvancedSearch',
-                component: AdvancedSearch
+                path: "busqueda",
+                name: "AdvancedSearch",
+                component: AdvancedSearch,
             },
             {
-                path: 'mapa',
-                name: 'MapDashboard',
-                component: MapDashboard
+                path: "mapa",
+                name: "MapDashboard",
+                component: MapDashboard,
             },
             {
-                
-                path: 'sucesos/editar/:id',
-                name: 'IncidentsEdit',
-                component: Incidents
+                path: "sucesos/editar/:id",
+                name: "IncidentsEdit",
+                component: Incidents,
             },
             {
-                path: 'acciones',
-                name: 'ActionsList',
-                component: () => import('../views/ActionsList.vue')
+                path: "acciones",
+                name: "ActionsList",
+                component: () => import("../views/ActionsList.vue"),
             },
             {
-                path: 'acciones/nuevo',
-                name: 'ActionsCreate',
-                component: () => import('../views/Actions.vue')
+                path: "acciones/nuevo",
+                name: "ActionsCreate",
+                component: () => import("../views/Actions.vue"),
             },
             {
-                path: 'acciones/editar/:id',
-                name: 'ActionsEdit',
-                component: () => import('../views/Actions.vue')
+                path: "acciones/editar/:id",
+                name: "ActionsEdit",
+                component: () => import("../views/Actions.vue"),
             },
             {
-            path: 'inventario', 
-            name: 'InventoryDashboard',
-            component: InventoryDashboard
-        },
-{
-    path: 'evidencias',
-    name: 'MediaGallery',
-    component: MediaGallery
-},
-        ]
-    }
+                path: "inventario",
+                name: "InventoryDashboard",
+                component: InventoryDashboard,
+            },
+            {
+                path: "bacheo",
+                name: "BacheoDashboard",
+                component: BacheoDashboard,
+            },
+            {
+                path: "evidencias",
+                name: "MediaGallery",
+                component: MediaGallery,
+            },
+            {
+                path: "pasteros",
+                name: "PasterosDashboard",
+                component: PasterosDashboard,
+            },
+        ],
+    },
 ];
 
 const router = createRouter({
     history: createWebHistory(),
-    routes
+    routes,
 });
 
 router.beforeEach((to, from) => {
-    const isAuthenticated = localStorage.getItem('access_token');
-    
+    const isAuthenticated = localStorage.getItem("access_token");
+
     if (to.meta.requiresAuth && !isAuthenticated) {
-        return '/login'; 
+        return "/login";
     }
-    
-    return true; 
+
+    return true;
 });
 
 export default router;
