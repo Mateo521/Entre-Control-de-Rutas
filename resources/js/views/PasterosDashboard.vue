@@ -50,6 +50,25 @@ const quitarArchivo = (index) => {
     archivosAdjuntos.value.splice(index, 1)
 }
 
+const mostrarVisor = ref(false)
+const evidenciasSeleccionadas = ref([])
+
+const abrirVisor = (archivos) => {
+    evidenciasSeleccionadas.value = archivos
+    mostrarVisor.value = true
+}
+
+const cerrarVisor = () => {
+    mostrarVisor.value = false
+    evidenciasSeleccionadas.value = []
+}
+
+const esImagen = (ruta) => {
+    const extension = ruta.split('.').pop().toLowerCase()
+    return ['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(extension)
+}
+
+
 const guardarTrabajo = async () => {
     guardando.value = true
     try {
@@ -162,16 +181,17 @@ onMounted(() => {
                                     (Pago)</span>
                             </td>
                             <td class="px-4 py-3">
-                                <span v-if="trabajo.media_paths && trabajo.media_paths.length > 0"
-                                    class="text-[12px] font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                                <button v-if="trabajo.media_paths && trabajo.media_paths.length > 0"
+                                    @click="abrirVisor(trabajo.media_paths)"
+                                    class="text-[12px] font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 transition-colors flex items-center gap-1 cursor-pointer bg-transparent border-none p-0">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2">
                                         <path
                                             d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48">
                                         </path>
                                     </svg>
-                                    {{ trabajo.media_paths.length }} Archivos
-                                </span>
+                                    Ver {{ trabajo.media_paths.length }} Archivo(s)
+                                </button>
                                 <span v-else class="text-[12px] text-slate-400 italic">Sin fotos</span>
                             </td>
                         </tr>
@@ -206,7 +226,7 @@ onMounted(() => {
                         <div>
                             <label
                                 class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Razón
-                                Social (Pastero/Empresa)</label>
+                                social (Pastero/Empresa)</label>
                             <input v-model="formulario.company_name" type="text" required
                                 placeholder="Ej: Servicios Viales SRL"
                                 class="w-full bg-slate-50 dark:bg-black/20 border border-slate-300 dark:border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-indigo-500/50" />
@@ -214,21 +234,21 @@ onMounted(() => {
                         <div>
                             <label
                                 class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Tipo
-                                de Tarea</label>
+                                de tarea</label>
                             <select v-model="formulario.work_type" required
                                 class="w-full bg-slate-50 dark:bg-black/20 border border-slate-300 dark:border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-indigo-500/50 appearance-none">
                                 <option value="" disabled>Seleccione...</option>
-                                <option value="Corte de pasto">Corte de Pasto / Desmalezado</option>
-                                <option value="Poda correctiva">Poda Correctiva</option>
-                                <option value="Pintura">Pintura (Puentes/Alcantarillas)</option>
-                                <option value="Mantenimiento general">Mantenimiento General</option>
+                                <option value="Corte de pasto">Corte de pasto / Desmalezado</option>
+                                <option value="Poda correctiva">Poda correctiva</option>
+                                <option value="Pintura">Pintura</option>
+                                <option value="Mantenimiento general">Mantenimiento general</option>
                             </select>
                         </div>
                     </div>
 
                     <div class="mb-5">
                         <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Tramo
-                            / Ubicación Exacta</label>
+                            / Ubicación exacta</label>
                         <input v-model="formulario.location" type="text" required
                             placeholder="Ej: Autopista 55, del Km 750 al 780"
                             class="w-full bg-slate-50 dark:bg-black/20 border border-slate-300 dark:border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-indigo-500/50" />
@@ -237,12 +257,12 @@ onMounted(() => {
                     <div class="mb-5">
                         <label
                             class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Estado
-                            del Trabajo</label>
+                            del trabajo</label>
                         <select v-model="formulario.status" required
                             class="w-full bg-slate-50 dark:bg-black/20 border border-slate-300 dark:border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-indigo-500/50 appearance-none">
-              <option value="En progreso">En Progreso (Ejecutando)</option>
-<option value="Finalizado">Finalizado (Pendiente de revisión)</option>
-<option value="Certificado para pago">Certificado para Pago (Aprobado)</option>
+                            <option value="En progreso">En progreso (Ejecutando)</option>
+                            <option value="Finalizado">Finalizado (Pendiente de revisión)</option>
+                            <option value="Certificado para pago">Certificado para pago (Aprobado)</option>
                         </select>
                     </div>
 
@@ -256,7 +276,7 @@ onMounted(() => {
 
                     <div class="mb-2">
                         <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Fotos
-                            de Certificación (Antes / Después)</label>
+                            de certificación (Antes / Después)</label>
                         <input id="pastero-file" type="file" multiple @change="procesarArchivo" accept="image/*,.pdf"
                             class="hidden" />
                         <label for="pastero-file"
@@ -278,7 +298,7 @@ onMounted(() => {
                                 class="bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 rounded-md px-3 py-2 flex items-center justify-between shadow-sm">
                                 <span
                                     class="text-[11px] font-medium text-indigo-700 dark:text-indigo-300 truncate pr-2">{{
-                                    archivo.name }}</span>
+                                        archivo.name }}</span>
                                 <button type="button" @click="quitarArchivo(i)"
                                     class="text-[10px] font-bold uppercase tracking-wider text-red-500 hover:text-red-700 cursor-pointer bg-transparent border-none">Quitar</button>
                             </div>
@@ -296,6 +316,61 @@ onMounted(() => {
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+    <div v-if="mostrarVisor"
+        class="fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/80 dark:bg-[#0a1628]/90 backdrop-blur-md p-4 transition-opacity">
+        <div
+            class="w-full max-w-4xl bg-white dark:bg-[#0d1b2a] border border-slate-200 dark:border-white/10 shadow-2xl flex flex-col max-h-[90vh]">
+            <div
+                class="px-6 py-4 border-b border-slate-100 dark:border-white/5 flex items-center justify-between bg-slate-50 dark:bg-white/5">
+                <h3
+                    class="font-['Barlow_Condensed'] text-[20px] font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wide m-0">
+                    Evidencia Fotográfica / Documental
+                </h3>
+                <button @click="cerrarVisor"
+                    class="text-slate-500 hover:text-red-500 transition-colors cursor-pointer bg-transparent border-none">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <div
+                class="p-6 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 bg-slate-100 dark:bg-[#0a1628]">
+                <div v-for="(archivo, index) in evidenciasSeleccionadas" :key="index"
+                    class="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg overflow-hidden shadow-sm group relative">
+
+                    <div v-if="esImagen(archivo)" class="aspect-video w-full bg-slate-200 dark:bg-black/50 relative">
+                        <img :src="archivo" class="w-full h-full object-cover" />
+                        <div
+                            class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                            <a :href="archivo" target="_blank"
+                                class="bg-amber-500 text-black px-4 py-2 rounded font-['Barlow_Condensed'] font-bold tracking-wider uppercase text-sm no-underline hover:bg-amber-400">Ampliar
+                                Foto</a>
+                        </div>
+                    </div>
+
+                    <div v-else
+                        class="aspect-video w-full flex flex-col items-center justify-center bg-slate-50 dark:bg-black/20 p-4 text-center relative">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" class="text-red-500 mb-2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        <span
+                            class="text-xs font-bold text-slate-500 uppercase tracking-widest break-all line-clamp-2">Documento
+                            PDF</span>
+                        <div
+                            class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                            <a :href="archivo" target="_blank"
+                                class="bg-indigo-500 text-white px-4 py-2 rounded font-['Barlow_Condensed'] font-bold tracking-wider uppercase text-sm no-underline hover:bg-indigo-400">Ver
+                                Archivo</a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

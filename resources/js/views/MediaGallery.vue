@@ -1,85 +1,179 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
 import { toast } from 'vue3-toastify'
 
 const cargando = ref(true)
 const evidencias = ref([])
-const filtroActivo = ref('todos') // 'todos', 'imagen', 'documento', 'videso' 
+const filtroActivo = ref('todos') // 'todos', 'imagen', 'documento', 'video' 
 
-const cargarEvidencias = async () => {
-    cargando.value = true
+
+const paginaActual = ref(1)
+const hayMasPaginas = ref(true)
+const observadorRef = ref(null)
+let observador = null
+const urlProcesadas = new Set()
+
+
+const esImagen = (ruta) => {
+    if (!ruta) return false;
+    const ext = ruta.split('.').pop().toLowerCase();
+    return ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp', 'svg'].includes(ext);
+};
+
+const esVideo = (ruta) => {
+    if (!ruta) return false;
+    const ext = ruta.split('.').pop().toLowerCase();
+    return ['mp4', 'mov', 'webm', 'ogg', 'avi', 'mkv'].includes(ext);
+};
+
+const esDocumento = (ruta) => {
+    if (!ruta) return false;
+    return !esImagen(ruta) && !esVideo(ruta);
+};
+
+
+const formatearMedia = (ruta, id, tipoSuceso, ubicacion, fechaOriginal, etiquetaCampo) => {
+    const extension = ruta.split('.').pop().toLowerCase();
+    let tipoGeneral = 'documento';
+
+    if (esImagen(ruta)) {
+        tipoGeneral = 'imagen';
+    } else if (esVideo(ruta)) {
+        tipoGeneral = 'video';
+    }
+
+    return {
+        id: Math.random().toString(36).substring(7),
+        url: ruta,
+        tipo: tipoGeneral,
+        extension: extension.toUpperCase(),
+        campo: etiquetaCampo.replace(/_/g, ' '),
+        suceso_id: id,
+        suceso_tipo: tipoSuceso.replace(/_/g, ' '),
+        peaje: ubicacion,
+        fecha: new Date(fechaOriginal).toLocaleDateString('es-AR'),
+        fechaIso: fechaOriginal
+    };
+};
+
+const cargandoMas = ref(false)
+const cargarSiguientePagina = async () => {
+    if ((cargando.value && paginaActual.value > 1) || cargandoMas.value) return;
+
+    if (paginaActual.value > 1) {
+        cargandoMas.value = true;
+    }
+
     try {
-        let paginaActual = 1;
-        let ultimaPagina = 1;
-        let todosLosSucesos = [];
 
-        // 1. Recorremos todas las páginas que Laravel tenga disponibles
-        do {
-            const respuesta = await axios.get('/api/incidents', {
-                params: {
-                    per_page: 50,
-                    page: paginaActual // Le decimos qué página específica queremos
-                }
-            });
+        const [resIncidents, resContractors, resActions] = await Promise.all([
+            axios.get('/api/incidents', { params: { page: paginaActual.value, per_page: 15 } }).catch(() => ({ data: { data: [], last_page: 1 } })),
+            axios.get('/api/contractors', { params: { page: paginaActual.value, per_page: 15 } }).catch(() => ({ data: { data: [], last_page: 1 } })),
+            axios.get('/api/actions', { params: { page: paginaActual.value, per_page: 15 } }).catch(() => ({ data: { data: [], last_page: 1 } }))
+        ]);
 
-            // Sumamos los sucesos de esta página a nuestro arreglo maestro
-            todosLosSucesos = todosLosSucesos.concat(respuesta.data.data);
 
-            // Laravel guarda el total de páginas en 'last_page' (o meta.last_page en Resources)
-            ultimaPagina = respuesta.data.last_page || (respuesta.data.meta && respuesta.data.meta.last_page) || 1;
+        const dataIncidents = Array.isArray(resIncidents.data) ? resIncidents.data : (resIncidents.data.data || []);
+        const dataContractors = Array.isArray(resContractors.data) ? resContractors.data : (resContractors.data.data || []);
+        const dataActions = Array.isArray(resActions.data) ? resActions.data : (resActions.data.data || []);
 
-            paginaActual++;
-        } while (paginaActual <= ultimaPagina);
+        let nuevaMedia = [];
 
-        // 2. Ahora procesamos TODOS los sucesos recolectados
-        let mediaExtraida = []
 
-        todosLosSucesos.forEach(suceso => {
+        dataIncidents.forEach(suceso => {
             if (suceso.media_paths) {
-                Object.entries(suceso.media_paths).forEach(([campoNombre, rutas]) => {
+                Object.entries(suceso.media_paths).forEach(([campo, rutas]) => {
                     rutas.forEach(ruta => {
-                        const extension = ruta.split('.').pop().toLowerCase()
-                        let tipoGeneral = 'documento'
-
-                        if (['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(extension)) {
-                            tipoGeneral = 'imagen'
-                        } else if (['mp4', 'mov', 'webm'].includes(extension)) {
-                            tipoGeneral = 'video'
+                        if (!urlProcesadas.has(ruta)) {
+                            urlProcesadas.add(ruta);
+                            nuevaMedia.push(formatearMedia(ruta, suceso.id, suceso.incident_type, suceso.toll?.name || 'Traza', suceso.created_at, campo));
                         }
-
-                        mediaExtraida.push({
-                            id: Math.random().toString(36).substring(7),
-                            url: ruta,
-                            tipo: tipoGeneral,
-                            extension: extension.toUpperCase(),
-                            campo: campoNombre.replace(/_/g, ' '),
-                            suceso_id: suceso.id,
-                            suceso_tipo: suceso.incident_type.replace(/_/g, ' '),
-                            peaje: suceso.toll ? suceso.toll.name : 'Traza',
-                            fecha: new Date(suceso.created_at).toLocaleDateString('es-AR')
-                        })
-                    })
-                })
+                    });
+                });
             }
-        })
+        });
 
-        evidencias.value = mediaExtraida
+
+        dataContractors.forEach(trabajo => {
+            if (trabajo.media_paths && Array.isArray(trabajo.media_paths)) {
+                trabajo.media_paths.forEach(ruta => {
+                    if (!urlProcesadas.has(ruta)) {
+                        urlProcesadas.add(ruta);
+                        nuevaMedia.push(formatearMedia(ruta, trabajo.id, trabajo.work_type, trabajo.company_name, trabajo.created_at, 'Certificación'));
+                    }
+                });
+            }
+        });
+
+
+        dataActions.forEach(accion => {
+            if (accion.media_paths && Array.isArray(accion.media_paths)) {
+                accion.media_paths.forEach(ruta => {
+                    if (!urlProcesadas.has(ruta)) {
+                        urlProcesadas.add(ruta);
+                        nuevaMedia.push(formatearMedia(ruta, accion.id, accion.category, accion.toll?.name || 'Traza', accion.created_at, 'Evidencia Operativa'));
+                    }
+                });
+            }
+        });
+
+
+        evidencias.value.push(...nuevaMedia);
+
+
+        evidencias.value.sort((a, b) => new Date(b.fechaIso) - new Date(a.fechaIso));
+
+
+        const maxPaginasIncidents = resIncidents.data.last_page || 1;
+        const maxPaginasActions = resActions.data.last_page || 1;
+        const maxPaginasContractors = resContractors.data.last_page || 1;
+
+        const paginaMaximaGlobal = Math.max(maxPaginasIncidents, maxPaginasActions, maxPaginasContractors);
+
+        if (paginaActual.value >= paginaMaximaGlobal) {
+            hayMasPaginas.value = false;
+        } else {
+            paginaActual.value++;
+        }
+
     } catch (error) {
-        toast.error('Error al cargar la galería de evidencias.')
+        toast.error('Error al cargar la galería de evidencias unificada.');
+        console.error(error);
     } finally {
-        cargando.value = false
+        cargando.value = false;
+        cargandoMas.value = false;
     }
 }
 
-// Filtro computado para los botones
 const evidenciasFiltradas = computed(() => {
     if (filtroActivo.value === 'todos') return evidencias.value
     return evidencias.value.filter(item => item.tipo === filtroActivo.value)
 })
 
 onMounted(() => {
-    cargarEvidencias()
+
+    observador = new IntersectionObserver((entradas) => {
+        if (entradas[0].isIntersecting && !cargando.value && hayMasPaginas.value) {
+            cargarSiguientePagina();
+        }
+    }, { rootMargin: '100px' });
+
+
+
+    cargarSiguientePagina().then(() => {
+
+
+        if (observadorRef.value) {
+            observador.observe(observadorRef.value);
+        }
+    });
+})
+
+onUnmounted(() => {
+    if (observador && observadorRef.value) {
+        observador.unobserve(observadorRef.value);
+    }
 })
 </script>
 
@@ -125,7 +219,9 @@ onMounted(() => {
             </div>
         </div>
 
-        <div v-if="cargando" class="flex-1 flex items-center justify-center text-slate-400 text-sm font-medium">
+
+        <div v-if="cargando && paginaActual === 1"
+            class="flex-1 flex items-center justify-center text-slate-400 text-sm font-medium">
             Analizando y cargando archivos...
         </div>
 
@@ -134,7 +230,7 @@ onMounted(() => {
             No se encontraron evidencias para este filtro.
         </div>
 
-        <div v-else class="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-5 space-y-5 pb-10">
+        <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 pb-4 items-start">
 
             <div v-for="item in evidenciasFiltradas" :key="item.id"
                 class="break-inside-avoid relative group overflow-hidden shadow-sm border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0d1b2a] hover:shadow-lg transition-all hover:-translate-y-1">
@@ -151,7 +247,7 @@ onMounted(() => {
                         <div class="flex items-center justify-between mt-2">
                             <span class="text-slate-300 text-xs">{{ item.fecha }}</span>
                             <a :href="item.url" target="_blank"
-                                class="bg-white/20 hover:bg-amber-500 hover:text-black text-white p-1.5 rounded transition-colors backdrop-blur-sm">
+                                class="bg-white/20 hover:bg-amber-500 hover:text-black text-white p-1.5 rounded transition-colors backdrop-blur-sm cursor-pointer border-none outline-none">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="2">
                                     <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
@@ -207,6 +303,26 @@ onMounted(() => {
                     <span class="text-[10px] text-slate-400">{{ item.fecha }}</span>
                 </div>
 
+            </div>
+        </div>
+
+        <div ref="observadorRef" class="w-full h-16 flex items-center justify-center mt-6 mb-10">
+            <div v-if="cargandoMas" class="flex flex-col items-center gap-2">
+                <svg class="animate-spin h-6 w-6 text-amber-500" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
+                </svg>
+                <span class="text-slate-400 text-xs font-bold uppercase tracking-widest font-['Barlow_Condensed']">
+                    Cargando historial anterior...
+                </span>
+            </div>
+
+            <div v-else-if="!hayMasPaginas && evidencias.length > 0"
+                class="text-slate-500 text-[11px] font-bold uppercase tracking-widest bg-slate-100 dark:bg-white/5 px-4 py-2 rounded-full border border-slate-200 dark:border-white/10">
+                Fin del archivo fotográfico
             </div>
         </div>
     </div>

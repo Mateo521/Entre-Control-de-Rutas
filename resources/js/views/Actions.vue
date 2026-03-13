@@ -333,7 +333,7 @@ onUnmounted(() => {
                 <div class="bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10 px-5 py-3.5">
                     <span
                         class="font-['Barlow_Condensed'] font-bold text-[15px] text-slate-900 dark:text-slate-100 tracking-wide">
-                        Portafolio de Evidencia
+                        Portafolio de evidencia
                     </span>
                 </div>
 

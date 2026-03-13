@@ -8,9 +8,14 @@ use Illuminate\Support\Facades\DB;
 
 class ContractorWorkController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(ContractorWork::latest()->get());
+
+        $perPage = $request->input('per_page', 15);
+
+        $trabajos = ContractorWork::latest()->paginate($perPage);
+
+        return response()->json($trabajos);
     }
 
     public function store(Request $request)
