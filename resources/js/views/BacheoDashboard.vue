@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { toast } from 'vue3-toastify'
  
@@ -15,12 +15,15 @@ const formulario = ref({
  
 const materialConsumido = ref([])
 
+
+const historialBacheo = ref([])
+const cargandoHistorial = ref(true)
+
 const cargarInventarioEspecializado = async () => {
     cargandoInventario.value = true
     try {
         const respuesta = await axios.get('/api/inventory')
-       
-        inventarioBacheo.value = respuesta.data.filter(item => item.category === 'Bacheo')
+        inventarioBacheo.value = respuesta.data.filter(item => item.category.toLowerCase().includes('bacheo'))
          
         materialConsumido.value = inventarioBacheo.value.map(item => ({
             inventory_item_id: item.id,
@@ -31,14 +34,27 @@ const cargarInventarioEspecializado = async () => {
         }))
     } catch (error) {
         toast.error('Error al cargar el stock de materiales de bacheo.')
-        console.error(error)
     } finally {
         cargandoInventario.value = false
     }
 }
 
+
+const cargarHistorial = async () => {
+    cargandoHistorial.value = true
+    try {
+        const respuesta = await axios.get('/api/actions')
+      
+        const todosLosTrabajos = respuesta.data.data || respuesta.data
+        historialBacheo.value = todosLosTrabajos.filter(trabajo => trabajo.category === 'Mantenimiento Vial - Bacheo')
+    } catch (error) {
+        console.error('Error al cargar el historial:', error)
+    } finally {
+        cargandoHistorial.value = false
+    }
+}
+
 const registrarTrabajoBacheo = async () => {
- 
     if (!formulario.value.title || !formulario.value.description) {
         toast.warning('Debe completar el título y la descripción del trabajo.')
         return
@@ -47,7 +63,6 @@ const registrarTrabajoBacheo = async () => {
     guardando.value = true
     try {
         const formData = new FormData()
-    
         formData.append('category', 'Mantenimiento Vial - Bacheo')
         formData.append('title', formulario.value.title)
         formData.append('description', formulario.value.description)
@@ -72,26 +87,34 @@ const registrarTrabajoBacheo = async () => {
         toast.success('Parte de bacheo registrado y stock actualizado.')
   
         formulario.value = { title: '', description: '', toll_id: '' }
+        
+      
         await cargarInventarioEspecializado()  
+        await cargarHistorial()
         
     } catch (error) {
         toast.error('Ocurrió un error al registrar el parte de trabajo.')
-        console.error(error)
     } finally {
         guardando.value = false
     }
 }
 
+const formatearFecha = (fecha) => {
+    if(!fecha) return '';
+    return new Date(fecha).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
 onMounted(() => {
     cargarInventarioEspecializado()
+    cargarHistorial()
 })
 </script>
 
 <template>
-    <div class="h-full flex flex-col relative">
-        <div class="mb-6">
+    <div class="h-full flex flex-col relative space-y-6">
+        <div>
             <h2 class="font-['Barlow_Condensed'] text-[28px] font-extrabold text-slate-900 dark:text-slate-100 m-0 tracking-wide uppercase">
-                Módulo: Cuadrilla de Bacheo
+                Cuadrilla de bacheo
             </h2>
             <p class="text-[13px] text-slate-500 dark:text-slate-400 m-0 font-medium">
                 Gestión de asfalto en frío y registro de reparaciones en la traza vial.
@@ -102,10 +125,11 @@ onMounted(() => {
             <div class="lg:col-span-1 space-y-4">
                 <div class="bg-white dark:bg-[#0d1b2a] border border-slate-200 dark:border-white/10 rounded-xl p-5 shadow-sm">
                     <h3 class="font-['Barlow_Condensed'] text-lg font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide mb-4 border-b border-slate-100 dark:border-white/5 pb-2">
-                        Stock Disponible
+                        Stock Disponible (Bacheo)
                     </h3>
                     
                     <div v-if="cargandoInventario" class="text-sm text-slate-500">Cargando materiales...</div>
+                    <div v-else-if="inventarioBacheo.length === 0" class="text-sm text-slate-500 italic">No hay insumos de la categoría "Bacheo" en el catálogo.</div>
                     
                     <div v-else class="space-y-4">
                         <div v-for="item in inventarioBacheo" :key="item.id" class="flex justify-between items-center bg-slate-50 dark:bg-white/5 p-3 rounded-lg border border-slate-200 dark:border-white/5">
@@ -143,7 +167,7 @@ onMounted(() => {
                             </div>
                         </div>
 
-                        <div class="mt-6 bg-slate-50 dark:bg-white/5 p-4 rounded-lg border border-slate-200 dark:border-white/10">
+                        <div v-if="materialConsumido.length > 0" class="mt-6 bg-slate-50 dark:bg-white/5 p-4 rounded-lg border border-slate-200 dark:border-white/10">
                             <label class="block text-[12px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-3">
                                 Material Consumido en este arreglo
                             </label>
@@ -167,5 +191,48 @@ onMounted(() => {
                 </div>
             </div>
         </div>
+
+        <div class="bg-white dark:bg-[#0d1b2a] border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden shadow-sm mt-6">
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5">
+                <h3 class="font-['Barlow_Condensed'] text-lg font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide m-0">
+                    Historial de trabajos
+                </h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-200 dark:border-white/10 bg-white dark:bg-black/20">
+                            <th class="px-6 py-3 font-['Barlow_Condensed'] text-[11px] font-bold text-slate-500 uppercase tracking-widest">Fecha</th>
+                            <th class="px-6 py-3 font-['Barlow_Condensed'] text-[11px] font-bold text-slate-500 uppercase tracking-widest">Ubicación</th>
+                            <th class="px-6 py-3 font-['Barlow_Condensed'] text-[11px] font-bold text-slate-500 uppercase tracking-widest">Detalle del trabajo</th>
+                        </tr>
+                    </thead>
+                    <tbody v-if="cargandoHistorial">
+                        <tr>
+                            <td colspan="3" class="p-6 text-center text-slate-400 text-sm">Cargando historial...</td>
+                        </tr>
+                    </tbody>
+                    <tbody v-else-if="historialBacheo.length === 0">
+                        <tr>
+                            <td colspan="3" class="p-6 text-center text-slate-400 text-sm">Aún no se han registrado trabajos de bacheo.</td>
+                        </tr>
+                    </tbody>
+                    <tbody v-else>
+                        <tr v-for="trabajo in historialBacheo" :key="trabajo.id" class="border-b border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-400">
+                                {{ formatearFecha(trabajo.created_at) }}
+                            </td>
+                            <td class="px-6 py-4 text-sm font-bold text-slate-800 dark:text-slate-200">
+                                {{ trabajo.title }}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
+                                {{ trabajo.description }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 </template>

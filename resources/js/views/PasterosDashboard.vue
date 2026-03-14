@@ -22,7 +22,10 @@ const cargarTrabajos = async () => {
     cargando.value = true
     try {
         const respuesta = await axios.get('/api/contractors')
-        trabajos.value = respuesta.data
+        
+   
+        trabajos.value = respuesta.data.data || []
+        
     } catch (error) {
         toast.error('Error al cargar el historial de trabajos tercerizados.')
     } finally {

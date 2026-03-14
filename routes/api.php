@@ -45,7 +45,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/tolls/{id}/image', [App\Http\Controllers\Api\TollController::class, 'uploadImage']);
 
     Route::get('/inventory', [InventoryController::class, 'index']);
+    Route::post('/inventory', [InventoryController::class, 'store']);
+    Route::put('/inventory/{id}', [InventoryController::class, 'update']);
+    Route::delete('/inventory/{id}', [InventoryController::class, 'destroy']);
+
     Route::post('/inventory/movements', [InventoryController::class, 'storeMovement']);
+
+    Route::get('/contractors', [ContractorWorkController::class, 'index']);
 
 
     Route::get('/contractors', [ContractorWorkController::class, 'index']);

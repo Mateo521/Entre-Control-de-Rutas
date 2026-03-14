@@ -49,4 +49,63 @@ class InventoryController extends Controller
 
         return response()->json(['message' => 'Movimiento registrado correctamente']);
     }
+
+    public function store(\Illuminate\Http\Request $request)
+    {
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'category' => 'required|string|max:100',
+            'unit_measure' => 'required|string|max:50',
+            'alert_threshold' => 'required|numeric|min:0',
+            'current_stock' => 'required|numeric|min:0',
+        ]);
+
+
+        $item = \App\Models\InventoryItem::create([
+            'name' => $request->name,
+            'category' => $request->category,
+            'unit_measure' => $request->unit_measure,
+            'alert_threshold' => $request->alert_threshold,
+            'current_stock' => $request->current_stock,
+        ]);
+
+
+        return response()->json($item, 201);
+    }
+
+    public function update(\Illuminate\Http\Request $request, $id)
+    {
+
+        $item = \App\Models\InventoryItem::findOrFail($id);
+
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'category' => 'required|string|max:100',
+            'unit_measure' => 'required|string|max:50',
+            'alert_threshold' => 'required|numeric|min:0',
+        ]);
+
+
+        $item->update([
+            'name' => $request->name,
+            'category' => $request->category,
+            'unit_measure' => $request->unit_measure,
+            'alert_threshold' => $request->alert_threshold,
+        ]);
+
+        return response()->json($item, 200);
+    }
+
+
+    public function destroy($id)
+    {
+        $item = \App\Models\InventoryItem::findOrFail($id);
+
+
+        $item->delete();
+
+        return response()->json(['message' => 'Insumo eliminado correctamente'], 200);
+    }
 }
