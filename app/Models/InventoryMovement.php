@@ -6,8 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class InventoryMovement extends Model
 {
-    protected $fillable = ['inventory_item_id', 'user_id', 'type', 'quantity', 'reference_document', 'description'];
-
+protected $fillable = ['inventory_item_id', 'user_id', 'type', 'quantity', 'reference_document', 'description'];
     public function item()
     {
         return $this->belongsTo(InventoryItem::class, 'inventory_item_id');

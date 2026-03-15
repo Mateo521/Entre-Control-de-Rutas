@@ -17,7 +17,7 @@ class ActionController extends Controller
     public function index(Request $request)
     {
         $query = Action::with('toll')->latest();
-        
+
         if ($request->boolean('archived')) {
             $query->onlyTrashed();
         }
@@ -34,7 +34,7 @@ class ActionController extends Controller
 
     public function store(Request $request)
     {
-         
+
         $request->validate([
             'toll_id' => 'nullable|exists:tolls,id',
             'category' => 'required|string',
@@ -43,7 +43,7 @@ class ActionController extends Controller
             'media.*' => 'nullable|file|mimes:jpg,jpeg,png,mp4,pdf|max:20480',
         ]);
 
-       
+
         $mediaPaths = [];
         $archivosMedia = $request->file('media');
 
@@ -54,10 +54,10 @@ class ActionController extends Controller
             }
         }
 
-  
+
         $action = DB::transaction(function () use ($request, $mediaPaths) {
-            
-           
+
+
             $newAction = Action::create([
                 'toll_id' => $request->toll_id,
                 'category' => $request->category,
@@ -66,18 +66,18 @@ class ActionController extends Controller
                 'media_paths' => $mediaPaths
             ]);
 
-           
+
             if ($request->has('materiales')) {
                 $materiales = json_decode($request->materiales, true);
-                
+
                 if (is_array($materiales)) {
                     foreach ($materiales as $mat) {
-                     
+
                         $newAction->inventoryItems()->attach($mat['inventory_item_id'], [
                             'quantity_used' => $mat['quantity']
                         ]);
 
-                        
+
                         $item = InventoryItem::find($mat['inventory_item_id']);
                         if ($item) {
                             $item->current_stock -= $mat['quantity'];
@@ -95,22 +95,20 @@ class ActionController extends Controller
 
     public function update(Request $request, $id)
     {
+
         $request->validate([
             'toll_id' => 'nullable|exists:tolls,id',
-            'category' => 'required|string',
+            'category' => 'nullable|string',
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'media.*' => 'nullable|file|mimes:jpg,jpeg,png,mp4,pdf|max:20480',
         ]);
 
         $action = DB::transaction(function () use ($request, $id) {
-            
+
             $actionToUpdate = Action::with('inventoryItems')->findOrFail($id);
 
-         
             if ($request->has('materiales')) {
-                
-                
                 foreach ($actionToUpdate->inventoryItems as $existingItem) {
                     $itemModel = InventoryItem::find($existingItem->id);
                     if ($itemModel) {
@@ -119,10 +117,8 @@ class ActionController extends Controller
                     }
                 }
 
-              
                 $actionToUpdate->inventoryItems()->detach();
 
-                
                 $materiales = json_decode($request->materiales, true);
                 if (is_array($materiales)) {
                     foreach ($materiales as $mat) {
@@ -139,17 +135,19 @@ class ActionController extends Controller
                 }
             }
 
-           
-            $actionToUpdate->update([
-                'toll_id' => $request->toll_id,
-                'category' => $request->category,
-                'title' => $request->title,
-                'description' => $request->description,
-            ]);
- 
+            $actionToUpdate->title = $request->title;
+            $actionToUpdate->description = $request->description;
+
+            if ($request->has('category')) {
+                $actionToUpdate->category = $request->category;
+            }
+            if ($request->has('toll_id')) {
+                $actionToUpdate->toll_id = $request->toll_id;
+            }
+
+
             $mediaPaths = $actionToUpdate->media_paths ?? [];
 
-          
             if ($request->has('archivos_a_eliminar')) {
                 $aEliminar = json_decode($request->archivos_a_eliminar, true);
                 if (is_array($aEliminar)) {
@@ -159,7 +157,6 @@ class ActionController extends Controller
                 }
             }
 
-      
             $archivosMedia = $request->file('media');
             if (!empty($archivosMedia) && is_array($archivosMedia)) {
                 foreach ($archivosMedia as $archivo) {
@@ -168,8 +165,9 @@ class ActionController extends Controller
                 }
             }
 
-         
             $actionToUpdate->media_paths = array_values($mediaPaths);
+
+
             $actionToUpdate->save();
 
             return $actionToUpdate;

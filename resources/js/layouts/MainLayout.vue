@@ -1,10 +1,11 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { toast } from 'vue3-toastify';
 import axios from 'axios'
 
 const router = useRouter()
-
+//const toast = useToast();
 const isOnline = ref(navigator.onLine)
 const peajes = ref([])
 const horaActual = ref('')
@@ -41,6 +42,27 @@ const actualizarReloj = () => {
         second: '2-digit',
         hour12: false
     })
+}
+
+
+const revisarAlertas = async () => {
+    try {
+        const respuesta = await axios.get('/api/notes/alerts');
+        const alertas = respuesta.data;
+
+        if (alertas && alertas.length > 0) {
+            alertas.forEach(alerta => {
+
+                toast.warning(`EVENTO PRÓXIMO: ${alerta.title}`, {
+                    autoClose: 8000,
+                    position: 'top-right',
+
+                });
+            });
+        }
+    } catch (error) {
+        console.error('Error al verificar alertas:', error);
+    }
 }
 
 const obtenerDatosRuta = (nombre) => {
@@ -152,6 +174,7 @@ onMounted(() => {
     window.addEventListener('online', actualizarEstadoRed)
     window.addEventListener('offline', actualizarEstadoRed)
     cargarPeajesBase()
+    revisarAlertas();
 })
 
 onUnmounted(() => {
@@ -326,6 +349,19 @@ onUnmounted(() => {
                     </svg>
 
                     Empresas privadas
+                </router-link>
+
+                <router-link to="/panel/notas" @click="cerrarMenuMovil"
+                    active-class="border-amber-500 text-amber-600 dark:text-amber-500 bg-amber-500/10"
+                    class="flex items-center gap-2.5 px-5 py-2.5 text-[13.5px] font-medium transition-all no-underline border-l-[3px] border-transparent text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5">
+                    <svg class="w-4  h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-3 5h3m-6 0h.01M12 16h3m-6 0h.01M10 3v4h4V3h-4Z" />
+                    </svg>
+
+
+                    Notas
                 </router-link>
 
 

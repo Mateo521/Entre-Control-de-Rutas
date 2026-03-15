@@ -7,12 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class InventoryItem extends Model
 {
     use HasFactory;
-    protected $fillable = [
+protected $fillable = [
         'name', 
         'category', 
         'unit_measure', 
         'alert_threshold', 
-        'current_stock'
+        'current_stock',
+        'toll_id' 
     ];
 
     public function movements()
@@ -25,5 +26,10 @@ class InventoryItem extends Model
         return $this->belongsToMany(Action::class, 'action_inventory')
                     ->withPivot('quantity_used')
                     ->withTimestamps();
+    }
+
+    public function toll()
+    {
+        return $this->belongsTo(Toll::class);
     }
 }

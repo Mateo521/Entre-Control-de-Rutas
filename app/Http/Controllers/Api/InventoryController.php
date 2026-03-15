@@ -13,7 +13,8 @@ class InventoryController extends Controller
 
     public function index()
     {
-        return response()->json(InventoryItem::orderBy('category')->get());
+
+        return response()->json(InventoryItem::with('toll')->orderBy('category')->get());
     }
 
 
@@ -52,39 +53,36 @@ class InventoryController extends Controller
 
     public function store(\Illuminate\Http\Request $request)
     {
-
         $request->validate([
             'name' => 'required|string|max:255',
             'category' => 'required|string|max:100',
             'unit_measure' => 'required|string|max:50',
             'alert_threshold' => 'required|numeric|min:0',
-            'current_stock' => 'required|numeric|min:0',
+            'toll_id' => 'required|exists:tolls,id',
         ]);
-
 
         $item = \App\Models\InventoryItem::create([
             'name' => $request->name,
             'category' => $request->category,
             'unit_measure' => $request->unit_measure,
             'alert_threshold' => $request->alert_threshold,
-            'current_stock' => $request->current_stock,
+            'current_stock' => 0,
+            'toll_id' => $request->toll_id,
         ]);
-
 
         return response()->json($item, 201);
     }
 
     public function update(\Illuminate\Http\Request $request, $id)
     {
-
         $item = \App\Models\InventoryItem::findOrFail($id);
-
 
         $request->validate([
             'name' => 'required|string|max:255',
             'category' => 'required|string|max:100',
             'unit_measure' => 'required|string|max:50',
             'alert_threshold' => 'required|numeric|min:0',
+            'toll_id' => 'required|exists:tolls,id',
         ]);
 
 
@@ -93,6 +91,7 @@ class InventoryController extends Controller
             'category' => $request->category,
             'unit_measure' => $request->unit_measure,
             'alert_threshold' => $request->alert_threshold,
+            'toll_id' => $request->toll_id,
         ]);
 
         return response()->json($item, 200);

@@ -5,7 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TollController;
 use App\Http\Controllers\Api\IncidentController;
 use App\Http\Controllers\Api\InventoryController;
-
+use App\Http\Controllers\Api\NoteController;
 use App\Http\Controllers\ContractorWorkController;
 
 
@@ -57,4 +57,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/contractors', [ContractorWorkController::class, 'index']);
     Route::post('/contractors', [ContractorWorkController::class, 'store']);
 
+    Route::get('/notes/alerts', [App\Http\Controllers\Api\NoteController::class, 'alerts']);
+    Route::patch('/notes/{note}/status', [App\Http\Controllers\Api\NoteController::class, 'changeStatus']);
+    Route::apiResource('notes', App\Http\Controllers\Api\NoteController::class);
 });
