@@ -11,10 +11,31 @@ use Illuminate\Support\Facades\DB;
 class InventoryController extends Controller
 {
 
-    public function index()
+public function index(\Illuminate\Http\Request $request)
     {
+        $query = \App\Models\InventoryItem::with('toll');
 
-        return response()->json(InventoryItem::with('toll')->orderBy('category')->get());
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where('name', 'ILIKE', "%{$search}%"); 
+        }
+
+        if ($request->filled('toll_id')) {
+            $query->where('toll_id', $request->input('toll_id'));
+        }
+
+        if ($request->filled('category')) {
+            $query->where('category', $request->input('category'));
+        }
+
+ 
+        if ($request->boolean('no_paginate')) {
+            return response()->json($query->orderBy('category')->get());
+        }
+
+    
+        $items = $query->orderBy('category')->paginate(15);
+        return response()->json($items);
     }
 
 

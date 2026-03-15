@@ -18,7 +18,6 @@ const formulario = ref({
     toll_id: '' 
 })
 
-
 const mostrarModalEditar = ref(false)
 const guardandoEdicion = ref(false)
 const idEdicion = ref(null)
@@ -27,6 +26,12 @@ const formEditar = ref({
     description: ''
 })
 
+ 
+const paginacion = ref({
+    current_page: 1,
+    last_page: 1,
+    total: 0
+})
 
 const cargarPeajes = async () => {
     try {
@@ -37,11 +42,15 @@ const cargarPeajes = async () => {
     }
 }
 
-
 const cargarInventarioEspecializado = async () => {
     cargandoInventario.value = true
     try {
-        const respuesta = await axios.get('/api/inventory')
+       
+        const respuesta = await axios.get('/api/inventory', {
+            params: { no_paginate: true } 
+        })
+        
+     
         inventarioBacheo.value = respuesta.data.filter(item => item.category.toLowerCase().includes('bacheo'))
     } catch (error) {
         toast.error('Error al cargar el stock de materiales de bacheo.')
@@ -50,14 +59,12 @@ const cargarInventarioEspecializado = async () => {
     }
 }
 
-
 watch(() => formulario.value.toll_id, (nuevoTollId) => {
     if (!nuevoTollId) {
         materialConsumido.value = []
         return
     }
     
-
     const materialesDelPeaje = inventarioBacheo.value.filter(item => item.toll_id === nuevoTollId)
     
     materialConsumido.value = materialesDelPeaje.map(item => ({
@@ -69,13 +76,26 @@ watch(() => formulario.value.toll_id, (nuevoTollId) => {
     }))
 })
 
-
-const cargarHistorial = async () => {
+ 
+const cargarHistorial = async (page = 1) => {
     cargandoHistorial.value = true
     try {
-        const respuesta = await axios.get('/api/actions')
+       
+        const respuesta = await axios.get('/api/actions', {
+            params: { page: page }
+        })
+        
+       
         const todosLosTrabajos = respuesta.data.data || respuesta.data
         historialBacheo.value = todosLosTrabajos.filter(trabajo => trabajo.category === 'Mantenimiento Vial - Bacheo')
+        
+        if (respuesta.data.current_page) {
+            paginacion.value = {
+                current_page: respuesta.data.current_page,
+                last_page: respuesta.data.last_page,
+                total: respuesta.data.total
+            }
+        }
     } catch (error) {
         console.error('Error al cargar el historial:', error)
     } finally {
@@ -113,14 +133,12 @@ const registrarTrabajoBacheo = async () => {
         }
  
         await axios.post('/api/actions', formData)
-        
         toast.success('Parte de bacheo registrado y stock actualizado.')
   
-       
         formulario.value = { title: '', description: '', toll_id: '' }
         
         await cargarInventarioEspecializado()  
-        await cargarHistorial()
+        await cargarHistorial(1)  
         
     } catch (error) {
         toast.error('Ocurrió un error al registrar el parte de trabajo.')
@@ -129,13 +147,9 @@ const registrarTrabajoBacheo = async () => {
     }
 }
 
-
 const abrirModalEditar = (trabajo) => {
     idEdicion.value = trabajo.id
-    formEditar.value = {
-        title: trabajo.title,
-        description: trabajo.description
-    }
+    formEditar.value = { title: trabajo.title, description: trabajo.description }
     mostrarModalEditar.value = true
 }
 
@@ -151,18 +165,16 @@ const guardarEdicion = async () => {
         await axios.put(`/api/actions/${idEdicion.value}`, {
             title: formEditar.value.title,
             description: formEditar.value.description
-         
         })
         toast.success('Registro actualizado correctamente.')
         cerrarModalEditar()
-        await cargarHistorial()
+        await cargarHistorial(paginacion.value.current_page)
     } catch (error) {
         toast.error('Error al actualizar el registro.')
     } finally {
         guardandoEdicion.value = false
     }
 }
-
 
 const eliminarTrabajo = async (id) => {
     const confirmacion = confirm('¿Desea eliminar este registro del historial? Nota: Esto no restaurará el stock consumido.')
@@ -171,7 +183,7 @@ const eliminarTrabajo = async (id) => {
     try {
         await axios.delete(`/api/actions/${id}`)
         toast.success('Registro eliminado exitosamente.')
-        await cargarHistorial()
+        await cargarHistorial(paginacion.value.current_page)
     } catch (error) {
         toast.error('Error al eliminar el registro.')
     }
@@ -202,7 +214,7 @@ onMounted(() => {
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-1 space-y-4">
-                <div class="bg-white dark:bg-[#0d1b2a] border border-slate-200 dark:border-white/10 rounded-xl p-5 shadow-sm">
+                <div class="bg-white dark:bg-[#0d1b2a] border border-slate-200 dark:border-white/10  p-5 shadow-sm">
                     <h3 class="font-['Barlow_Condensed'] text-lg font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide mb-4 border-b border-slate-100 dark:border-white/5 pb-2">
                         Stock Disponible (Bacheo)
                     </h3>
@@ -232,7 +244,7 @@ onMounted(() => {
             </div>
 
             <div class="lg:col-span-2">
-                <div class="bg-white dark:bg-[#0d1b2a] border border-slate-200 dark:border-white/10 rounded-xl p-6 shadow-sm">
+                <div class="bg-white dark:bg-[#0d1b2a] border border-slate-200 dark:border-white/10  p-6 shadow-sm">
                     <h3 class="font-['Barlow_Condensed'] text-lg font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide mb-5 border-b border-slate-100 dark:border-white/5 pb-2">
                         Registrar Nuevo Bacheo
                     </h3>
@@ -288,7 +300,7 @@ onMounted(() => {
             </div>
         </div>
 
-        <div class="bg-white dark:bg-[#0d1b2a] border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden shadow-sm mt-6">
+        <div class="bg-white dark:bg-[#0d1b2a] border border-slate-200 dark:border-white/10  overflow-hidden shadow-sm mt-6">
             <div class="px-6 py-4 border-b border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5">
                 <h3 class="font-['Barlow_Condensed'] text-lg font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide m-0">
                     Historial de trabajos
@@ -335,10 +347,26 @@ onMounted(() => {
                     </tbody>
                 </table>
             </div>
+            
+            <div v-if="paginacion.total > 0" class="px-6 py-4 flex items-center justify-between bg-slate-50 dark:bg-white/5 border-t border-slate-200 dark:border-white/10">
+                <span class="text-xs text-slate-500 dark:text-slate-400">
+                    Página <strong>{{ paginacion.current_page }}</strong> de <strong>{{ paginacion.last_page }}</strong>
+                </span>
+                <div class="flex items-center gap-2">
+                    <button @click="cargarHistorial(paginacion.current_page - 1)" :disabled="paginacion.current_page === 1"
+                        class="px-3 py-1 text-xs font-bold text-slate-600 border border-slate-300 rounded hover:bg-white disabled:opacity-50 cursor-pointer">
+                        Anterior
+                    </button>
+                    <button @click="cargarHistorial(paginacion.current_page + 1)" :disabled="paginacion.current_page === paginacion.last_page"
+                        class="px-3 py-1 text-xs font-bold text-slate-600 border border-slate-300 rounded hover:bg-white disabled:opacity-50 cursor-pointer">
+                        Siguiente
+                    </button>
+                </div>
+            </div>
         </div>
 
         <div v-if="mostrarModalEditar" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <div class="bg-white dark:bg-[#0d1b2a] w-full max-w-lg shadow-2xl border border-slate-200 dark:border-white/10 overflow-hidden rounded-xl">
+            <div class="bg-white dark:bg-[#0d1b2a] w-full max-w-lg shadow-2xl border border-slate-200 dark:border-white/10 overflow-hidden ">
                 <div class="p-5 border-b border-slate-200 dark:border-white/10 flex justify-between items-center bg-slate-50 dark:bg-white/5">
                     <h3 class="font-['Barlow_Condensed'] text-xl font-bold text-slate-900 dark:text-white uppercase tracking-wide m-0">Editar Registro de Bacheo</h3>
                     <button @click="cerrarModalEditar" class="text-slate-400 hover:text-red-500 transition-colors bg-transparent border-none cursor-pointer p-1">

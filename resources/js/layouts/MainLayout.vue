@@ -451,7 +451,7 @@ onUnmounted(() => {
                 ]">
 
                     <button v-if="$route.name === 'MapDashboard'" @click="footerDesplegado = !footerDesplegado"
-                        class="absolute -top-10 left-1/2 -translate-x-1/2 h-10 px-6 md:px-8 bg-white/95 dark:bg-[#0d1b2a]/95 backdrop-blur-md border border-b-0 border-amber-500/30 rounded-t-xl flex items-center justify-center gap-2 cursor-pointer transition-colors hover:bg-amber-500/10 shadow-[0_-4px_10px_rgba(0,0,0,0.1)]">
+                        class="absolute -top-10 left-1/2 -translate-x-1/2 h-10 px-6 md:px-8 bg-white/95 dark:bg-[#0d1b2a]/95 backdrop-blur-md border border-b-0 border-amber-500/30  flex items-center justify-center gap-2 cursor-pointer transition-colors hover:bg-amber-500/10 shadow-[0_-4px_10px_rgba(0,0,0,0.1)]">
                         <span
                             class="font-['Barlow_Condensed'] text-[12px] font-bold tracking-[0.15em] uppercase text-amber-600 dark:text-amber-500">
                             {{ footerDesplegado ? 'Ocultar peajes' : 'Ver peajes' }}
@@ -481,7 +481,7 @@ onUnmounted(() => {
                             class="flex gap-4 overflow-x-auto snap-x snap-mandatory pt-1 w-full [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
 
                             <div v-if="grupoRuta20.cruzPiedra || grupoRuta20.perilago"
-                                class="flex flex-1 min-w-[320px] gap-2 shrink-0 snap-center bg-slate-100 dark:bg-white/5 p-2 rounded-xl border border-slate-200 dark:border-white/10">
+                                class="flex flex-1 min-w-[320px] gap-2 shrink-0 snap-center bg-slate-100 dark:bg-white/5 p-2  border border-slate-200 dark:border-white/10">
                                 <div v-if="grupoRuta20.cruzPiedra"
                                     @click="enfocarPeajeYcerrar(grupoRuta20.cruzPiedra.name)"
                                     class="flex-[3] transition-transform duration-300 relative z-10 hover:-translate-y-1 group cursor-pointer rounded-lg overflow-hidden border-2 border-amber-500/50 shadow-md bg-slate-200 dark:bg-slate-800 aspect-video md:aspect-auto md:h-28">
@@ -531,7 +531,7 @@ onUnmounted(() => {
                             </div>
 
                             <div v-if="grupoDesaguadero.length > 0"
-                                class="flex flex-1 min-w-[320px] gap-2 shrink-0 snap-center bg-slate-100 dark:bg-white/5 p-2 rounded-xl border border-slate-200 dark:border-white/10">
+                                class="flex flex-1 min-w-[320px] gap-2 shrink-0 snap-center bg-slate-100 dark:bg-white/5 p-2  border border-slate-200 dark:border-white/10">
                                 <div v-for="peaje in grupoDesaguadero" :key="peaje.id"
                                     @click="enfocarPeajeYcerrar(peaje.name)"
                                     class="flex-1 transition-transform duration-300 relative z-10 hover:-translate-y-1 group cursor-pointer rounded-lg overflow-hidden border border-slate-200 dark:border-white/20 shadow-sm bg-slate-200 dark:bg-slate-800 aspect-video md:aspect-auto md:h-28">

@@ -203,13 +203,13 @@ onMounted(() => {
 
         <div v-if="cargando" class="py-12 text-center text-slate-400 text-sm">Cargando información...</div>
         
-        <div v-else-if="notas.length === 0" class="py-12 text-center text-slate-400 text-sm border-2 border-dashed border-slate-200 dark:border-white/10 rounded-xl">
+        <div v-else-if="notas.length === 0" class="py-12 text-center text-slate-400 text-sm border-2 border-dashed border-slate-200 dark:border-white/10 ">
             {{ vistaActual === 'pendientes' ? 'No hay notas pendientes registradas.' : 'El archivo histórico está vacío.' }}
         </div>
 
         <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             <div v-for="nota in notas" :key="nota.id" 
-                :class="['bg-white dark:bg-[#0d1b2a] border rounded-xl p-5 shadow-sm transition-all flex flex-col', 
+                :class="['bg-white dark:bg-[#0d1b2a] border  p-5 shadow-sm transition-all flex flex-col', 
                          nota.is_completed ? 'border-emerald-200 dark:border-emerald-900/50 opacity-70' : 'border-slate-200 dark:border-white/10']">
                 
                 <div class="flex items-start justify-between gap-3 mb-3">
@@ -254,7 +254,7 @@ onMounted(() => {
         </div>
 
         <div v-if="mostrarModalFormulario" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <div class="bg-white dark:bg-[#0d1b2a] w-full max-w-md shadow-2xl border border-slate-200 dark:border-white/10 overflow-hidden rounded-xl">
+            <div class="bg-white dark:bg-[#0d1b2a] w-full max-w-md shadow-2xl border border-slate-200 dark:border-white/10 overflow-hidden ">
                 <div class="p-5 border-b border-slate-200 dark:border-white/10 flex justify-between items-center bg-slate-50 dark:bg-white/5">
                     <h3 class="font-['Barlow_Condensed'] text-xl font-bold text-slate-900 dark:text-white uppercase tracking-wide m-0">
                         {{ modoEdicion ? 'Editar Nota' : 'Nueva Nota' }}
