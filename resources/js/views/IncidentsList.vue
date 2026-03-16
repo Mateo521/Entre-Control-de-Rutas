@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { toast } from 'vue3-toastify'
-
+import ImageLightbox from '@/components/ImageLightbox.vue'
 
 const sucesos = ref([])
 const cargando = ref(true)
@@ -34,16 +34,16 @@ const cargarSucesos = async (page = 1) => {
     try {
         const respuesta = await axios.get('/api/incidents', {
             params: {
-                status: filtroEstado.value, 
+                status: filtroEstado.value,
                 archived: verArchivados.value ? 1 : 0,
                 page: page
             }
         })
 
-    
+
         sucesos.value = respuesta.data.data
 
-     
+
         paginaActual.value = respuesta.data.current_page
         ultimaPagina.value = respuesta.data.last_page
         totalRegistros.value = respuesta.data.total
@@ -104,7 +104,7 @@ const traducirTipo = (tipo) => {
 const abrirGaleria = (suceso) => {
     sucesoActivo.value = suceso
     let medios = suceso.media_paths || {}
- 
+
     for (let key in medios) {
         if (!Array.isArray(medios[key])) medios[key] = [medios[key]];
     }
@@ -128,6 +128,35 @@ const esVideo = (ruta) => {
     return ruta.match(/\.(mp4|webm|ogg)$/i) != null;
 }
 
+
+const mostrarLightbox = ref(false)
+const imagenSeleccionada = ref('')
+const imagenesRelacionadas = ref([])
+
+const abrirLightbox = (rutaClickeada) => {
+    let todasLasImagenes = []
+
+
+    for (const [campo, rutas] of Object.entries(mediosActivos.value)) {
+
+        const rutasFiltradas = rutas.filter(ruta => esImagen(ruta));
+
+
+        rutasFiltradas.forEach(ruta => {
+            todasLasImagenes.push({
+                url: ruta,
+                title: traducirTipo(sucesoActivo.value?.incident_type),
+                subtitle: sucesoActivo.value?.toll ? sucesoActivo.value.toll.name : 'Estación no definida',
+                date: formatearFecha(sucesoActivo.value?.created_at),
+                badge: campo.replace(/_/g, ' ')
+            })
+        })
+    }
+
+    imagenesRelacionadas.value = todasLasImagenes
+    imagenSeleccionada.value = rutaClickeada
+    mostrarLightbox.value = true
+}
 
 const abrirDetalles = (suceso) => {
     sucesoDetalle.value = suceso
@@ -325,7 +354,7 @@ onMounted(() => {
         </div>
 
         <div v-if="mostrarModalArchivar"
-            class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/90 backdrop-blur-sm p-4">
+            class="fixed inset-0 z-[808]  flex items-center justify-center bg-slate-900/90 backdrop-blur-sm p-4">
             <div
                 class="w-full max-w-sm bg-white dark:bg-[#0a1628]  shadow-2xl overflow-hidden border border-slate-200 dark:border-white/10 text-center p-6">
                 <div
@@ -353,7 +382,7 @@ onMounted(() => {
         </div>
 
         <div v-if="mostrarGaleria"
-            class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/90 backdrop-blur-sm transition-opacity p-4">
+            class="fixed inset-0 z-[808]  flex items-center justify-center bg-slate-900/90 backdrop-blur-sm transition-opacity p-4">
             <div
                 class="w-full max-w-4xl bg-white dark:bg-[#0a1628] shadow-2xl overflow-hidden flex flex-col max-h-full border border-slate-200 dark:border-white/10">
                 <div
@@ -393,25 +422,54 @@ onMounted(() => {
                                         {{ nombreCampo.replace('_', ' ') }} {{ rutas.length > 1 ? `#${idx + 1}` : '' }}
                                     </span>
                                 </div>
+
                                 <div
                                     class="aspect-video bg-slate-200 dark:bg-black/40 flex items-center justify-center relative group overflow-hidden">
-                                    <img v-if="esImagen(ruta)" :src="ruta"
-                                        class="w-full h-full object-cover bg-black/5" />
-                                    <video v-else-if="esVideo(ruta)" :src="ruta" controls
-                                        class="w-full h-full object-contain bg-black"></video>
-                                    <div v-else class="flex flex-col items-center gap-3 p-6 text-center">
-                                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" stroke-width="1.5" class="text-slate-400">
-                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                            <polyline points="14 2 14 8 20 8"></polyline>
-                                        </svg>
-                                        <span class="text-sm text-slate-500">Documento no previsualizable</span>
-                                    </div>
-                                    <a :href="ruta" target="_blank"
-                                        class="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white no-underline font-['Barlow_Condensed'] tracking-widest text-sm font-bold uppercase z-10">
-                                        Abrir archivo original
-                                    </a>
+
+                                    <template v-if="esImagen(ruta)">
+                                        <img :src="ruta" class="w-full h-full object-cover bg-black/5" />
+                                        <div
+                                            class="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                            <button type="button" @click="abrirLightbox(ruta)"
+                                                class="bg-amber-500 text-black px-4 py-2 rounded-lg font-['Barlow_Condensed'] font-bold uppercase tracking-wider text-sm border-none cursor-pointer hover:bg-amber-400 shadow-lg transition-transform hover:scale-105">
+                                                Ampliar Foto
+                                            </button>
+                                        </div>
+                                    </template>
+
+                                    <template v-else-if="esVideo(ruta)">
+                                        <video :src="ruta" controls
+                                            class="w-full h-full object-contain bg-black"></video>
+                                        <a :href="ruta" target="_blank" title="Abrir video en pestaña nueva"
+                                            class="absolute top-2 right-2 bg-black/60 text-white p-2 rounded hover:bg-amber-500 hover:text-black transition-colors z-10 backdrop-blur-sm">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2">
+                                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6">
+                                                </path>
+                                                <polyline points="15 3 21 3 21 9"></polyline>
+                                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                                            </svg>
+                                        </a>
+                                    </template>
+
+                                    <template v-else>
+                                        <div class="flex flex-col items-center gap-3 p-6 text-center">
+                                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="1.5" class="text-slate-400">
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z">
+                                                </path>
+                                                <polyline points="14 2 14 8 20 8"></polyline>
+                                            </svg>
+                                            <span class="text-sm text-slate-500">Documento PDF / Archivo</span>
+                                        </div>
+                                        <a :href="ruta" target="_blank"
+                                            class="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white no-underline font-['Barlow_Condensed'] tracking-widest text-sm font-bold uppercase z-10">Abrir
+                                            original</a>
+                                    </template>
+
                                 </div>
+
+
                             </div>
                         </template>
 
@@ -425,7 +483,7 @@ onMounted(() => {
         </div>
 
         <div v-if="mostrarDetalles"
-            class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/90 backdrop-blur-sm transition-opacity p-4">
+            class="fixed inset-0 z-[808]  flex items-center justify-center bg-slate-900/90 backdrop-blur-sm transition-opacity p-4">
             <div
                 class="w-full max-w-md bg-white dark:bg-[#0a1628] shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-white/10">
                 <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-1"></div>
@@ -468,10 +526,11 @@ onMounted(() => {
                     class="px-6 py-4 bg-slate-50 dark:bg-[#0d1b2a] border-t border-slate-200 dark:border-white/10 flex justify-end">
                     <button @click="cerrarDetalles"
                         class="px-5 py-2 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors border-none bg-slate-200/50 dark:bg-white/5 cursor-pointer font-['Barlow_Condensed'] uppercase tracking-wider">Cerrar
-                        </button>
+                    </button>
                 </div>
             </div>
         </div>
-
+        <ImageLightbox :mostrar="mostrarLightbox" :imagenes="imagenesRelacionadas" :imagenInicial="imagenSeleccionada"
+            @cerrar="mostrarLightbox = false" />
     </div>
 </template>

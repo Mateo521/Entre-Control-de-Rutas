@@ -206,7 +206,7 @@ onUnmounted(() => {
 
         <div :class="[
             'w-[240px] min-h-screen bg-white dark:bg-[#0d1b2a] border-r border-amber-500/20 dark:border-amber-500/10 shrink-0 transition-transform duration-300 ease-in-out shadow-[2px_0_12px_rgba(0,0,0,0.06)] dark:shadow-none',
-            'fixed inset-y-0 left-0 z-[1002] md:relative md:translate-x-0',
+            'fixed inset-y-0 left-0 z-[888] md:relative md:translate-x-0',
             sidebarAbierto ? 'translate-x-0' : '-translate-x-full'
         ]">
             <div

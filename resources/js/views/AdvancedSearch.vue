@@ -346,7 +346,7 @@ onMounted(() => {
         </div>
 
         <div v-if="mostrarDetalles"
-            class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/90 backdrop-blur-sm transition-opacity p-4">
+            class="fixed inset-0 z-[808]  flex items-center justify-center bg-slate-900/90 backdrop-blur-sm transition-opacity p-4">
             <div
                 class="w-full max-w-md bg-white dark:bg-[#0a1628]  shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-white/10">
                 <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-1"></div>

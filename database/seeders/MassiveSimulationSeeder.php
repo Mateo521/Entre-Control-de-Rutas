@@ -136,13 +136,21 @@ class MassiveSimulationSeeder extends Seeder
                 foreach ($insumosAUsar as $insumo) {
                     $cantidadUsada = $faker->randomFloat(2, 1, 30);
                     
-                   
-                    $action->inventoryItems()->attach($insumo->id, [
-                        'quantity_used' => $cantidadUsada
-                    ]);
+             
+                    if ($insumo->current_stock < $cantidadUsada) {
+                        $cantidadUsada = $insumo->current_stock;
+                    }
 
-              
-                    $insumo->decrement('current_stock', $cantidadUsada);
+                   
+                    if ($cantidadUsada > 0) {
+                        $action->inventoryItems()->attach($insumo->id, [
+                            'quantity_used' => $cantidadUsada
+                        ]);
+
+                        
+                        $insumo->current_stock -= $cantidadUsada;
+                        $insumo->save();
+                    }
                 }
             }
         }
@@ -206,5 +214,6 @@ class MassiveSimulationSeeder extends Seeder
 
 
          $this->call(TowServiceSeeder::class);
+         $this->call(GalleryStressSeeder::class);
     }
 }

@@ -2,9 +2,11 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { toast } from 'vue3-toastify'
+import ImageLightbox from '@/components/ImageLightbox.vue'
 
 const acciones = ref([])
 const cargando = ref(true)
+
 
 const verArchivados = ref(false)
 const mostrarModalArchivar = ref(false)
@@ -21,6 +23,30 @@ const ultimaPagina = ref(1);
 const totalRegistros = ref(0);
 
 
+
+
+
+
+const mostrarLightbox = ref(false)
+const imagenSeleccionada = ref('')
+const imagenesRelacionadas = ref([])
+
+const abrirLightbox = (rutaClickeada) => {
+  
+    const soloImagenes = mediosActivos.value.filter(ruta => esImagen(ruta))
+    
+    
+    imagenesRelacionadas.value = soloImagenes.map(imgUrl => ({
+        url: imgUrl,
+        title: accionActiva.value.title,
+        subtitle: accionActiva.value.toll ? accionActiva.value.toll.name : 'Región Centro General',
+        date: formatearFecha(accionActiva.value.created_at),
+        badge: accionActiva.value.category
+    }))
+    
+    imagenSeleccionada.value = rutaClickeada
+    mostrarLightbox.value = true
+}
 
 const mostrarDetalles = ref(false)
 const accionDetalle = ref(null)
@@ -280,7 +306,7 @@ onMounted(() => {
         </div>
 
         <div v-if="mostrarDetalles"
-            class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/90 backdrop-blur-sm p-4">
+            class="fixed inset-0 z-[808]  flex items-center justify-center bg-slate-900/90 backdrop-blur-sm p-4">
             <div
                 class="w-full max-w-2xl bg-white dark:bg-[#0a1628]  shadow-2xl overflow-hidden border border-slate-200 dark:border-white/10">
                 <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 h-1"></div>
@@ -312,7 +338,7 @@ onMounted(() => {
         </div>
 
         <div v-if="mostrarModalArchivar"
-            class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/90 backdrop-blur-sm p-4">
+            class="fixed inset-0 z-[808]  flex items-center justify-center bg-slate-900/90 backdrop-blur-sm p-4">
             <div
                 class="w-full max-w-sm bg-white dark:bg-[#0a1628]  shadow-2xl p-6 text-center border border-slate-200 dark:border-white/10">
                 <div
@@ -335,7 +361,7 @@ onMounted(() => {
         </div>
 
         <div v-if="mostrarGaleria"
-            class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/90 backdrop-blur-sm p-4">
+            class="fixed inset-0 z-[808]  flex items-center justify-center bg-slate-900/90 backdrop-blur-sm p-4">
             <div
                 class="w-full max-w-4xl bg-white dark:bg-[#0a1628] shadow-2xl overflow-hidden flex flex-col max-h-full border border-slate-200 dark:border-white/10 ">
                 <div
@@ -354,19 +380,45 @@ onMounted(() => {
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div v-for="(ruta, idx) in mediosActivos" :key="idx"
                             class="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 overflow-hidden shadow-sm flex flex-col ">
-                            <div
-                                class="aspect-video bg-slate-200 dark:bg-black/40 flex items-center justify-center relative group overflow-hidden">
-                                <img v-if="esImagen(ruta)" :src="ruta" class="w-full h-full object-cover" />
-                                <video v-else-if="esVideo(ruta)" :src="ruta" controls
-                                    class="w-full h-full object-contain bg-black"></video>
-                                <a :href="ruta" target="_blank"
-                                    class="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white no-underline font-['Barlow_Condensed'] text-sm font-bold uppercase z-10">Abrir
-                                    original</a>
+                           
+                           
+                            <div class="aspect-video bg-slate-200 dark:bg-black/40 flex items-center justify-center relative group overflow-hidden">
+                                
+                                <template v-if="esImagen(ruta)">
+                                    <img :src="ruta" class="w-full h-full object-cover" />
+                                    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                        <button type="button" @click="abrirLightbox(ruta)" 
+                                            class="bg-amber-500 text-black px-4 py-2 rounded-lg font-['Barlow_Condensed'] font-bold uppercase tracking-wider text-sm border-none cursor-pointer hover:bg-amber-400 shadow-lg">
+                                            Ampliar Foto
+                                        </button>
+                                    </div>
+                                </template>
+
+                                <template v-else-if="esVideo(ruta)">
+                                    <video :src="ruta" controls class="w-full h-full object-contain bg-black"></video>
+                                    <a :href="ruta" target="_blank" title="Abrir video en pestaña nueva" class="absolute top-2 right-2 bg-black/60 text-white p-2 rounded hover:bg-amber-500 hover:text-black transition-colors z-10 backdrop-blur-sm">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                                    </a>
+                                </template>
+
+                                <template v-else>
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-slate-400"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                    <a :href="ruta" target="_blank" class="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white no-underline font-['Barlow_Condensed'] text-sm font-bold uppercase z-10">Abrir Archivo</a>
+                                </template>
+
                             </div>
+
+
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        <ImageLightbox 
+            :mostrar="mostrarLightbox" 
+            :imagenes="imagenesRelacionadas" 
+            :imagenInicial="imagenSeleccionada"
+            @cerrar="mostrarLightbox = false"
+        />
     </div>
 </template>

@@ -7,10 +7,12 @@ use App\Models\Action;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
+use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 use App\Models\InventoryItem;
 use Illuminate\Support\Facades\DB;
-
 
 class ActionController extends Controller
 {
@@ -22,13 +24,11 @@ class ActionController extends Controller
             $query->onlyTrashed();
         }
 
-
         return response()->json($query->paginate(15));
     }
 
     public function restore($id)
     {
-    
         $action = Action::withTrashed()->findOrFail($id);
         $action->restore();
         
@@ -43,7 +43,6 @@ class ActionController extends Controller
 
     public function store(Request $request)
     {
-
         $request->validate([
             'toll_id' => 'nullable|exists:tolls,id',
             'category' => 'required|string',
@@ -52,21 +51,37 @@ class ActionController extends Controller
             'media.*' => 'nullable|file|mimes:jpg,jpeg,png,mp4,pdf|max:20480',
         ]);
 
-
         $mediaPaths = [];
         $archivosMedia = $request->file('media');
 
+        // --- BLOQUE DE COMPRESIÓN AÑADIDO AQUÍ ---
         if (!empty($archivosMedia) && is_array($archivosMedia)) {
             foreach ($archivosMedia as $archivo) {
-                $path = $archivo->store('acciones', 'public');
-                $mediaPaths[] = '/storage/' . $path;
+                $extension = strtolower($archivo->getClientOriginalExtension());
+
+                if (in_array($extension, ['jpg', 'jpeg', 'png', 'webp'])) {
+                    $filename = Str::random(40) . '.jpg';
+                    $destinationPath = storage_path('app/public/acciones');
+
+                    if (!file_exists($destinationPath)) {
+                        mkdir($destinationPath, 0755, true);
+                    }
+
+                    $manager = new ImageManager(new Driver());
+                    $manager->read($archivo)
+                        ->scaleDown(width: 1024)
+                        ->toJpeg(quality: 75)
+                        ->save($destinationPath . '/' . $filename);
+
+                    $mediaPaths[] = '/storage/acciones/' . $filename;
+                } else {
+                    $path = $archivo->store('acciones', 'public');
+                    $mediaPaths[] = '/storage/' . $path;
+                }
             }
         }
 
-
         $action = DB::transaction(function () use ($request, $mediaPaths) {
-
-
             $newAction = Action::create([
                 'toll_id' => $request->toll_id,
                 'category' => $request->category,
@@ -75,17 +90,14 @@ class ActionController extends Controller
                 'media_paths' => $mediaPaths
             ]);
 
-
             if ($request->has('materiales')) {
                 $materiales = json_decode($request->materiales, true);
 
                 if (is_array($materiales)) {
                     foreach ($materiales as $mat) {
-
                         $newAction->inventoryItems()->attach($mat['inventory_item_id'], [
                             'quantity_used' => $mat['quantity']
                         ]);
-
 
                         $item = InventoryItem::find($mat['inventory_item_id']);
                         if ($item) {
@@ -104,7 +116,6 @@ class ActionController extends Controller
 
     public function update(Request $request, $id)
     {
-
         $request->validate([
             'toll_id' => 'nullable|exists:tolls,id',
             'category' => 'nullable|string',
@@ -114,7 +125,6 @@ class ActionController extends Controller
         ]);
 
         $action = DB::transaction(function () use ($request, $id) {
-
             $actionToUpdate = Action::with('inventoryItems')->findOrFail($id);
 
             if ($request->has('materiales')) {
@@ -154,7 +164,6 @@ class ActionController extends Controller
                 $actionToUpdate->toll_id = $request->toll_id;
             }
 
-
             $mediaPaths = $actionToUpdate->media_paths ?? [];
 
             if ($request->has('archivos_a_eliminar')) {
@@ -167,16 +176,35 @@ class ActionController extends Controller
             }
 
             $archivosMedia = $request->file('media');
+            
+            // --- BLOQUE DE COMPRESIÓN AÑADIDO AQUÍ TAMBIÉN ---
             if (!empty($archivosMedia) && is_array($archivosMedia)) {
                 foreach ($archivosMedia as $archivo) {
-                    $path = $archivo->store('acciones', 'public');
-                    $mediaPaths[] = '/storage/' . $path;
+                    $extension = strtolower($archivo->getClientOriginalExtension());
+
+                    if (in_array($extension, ['jpg', 'jpeg', 'png', 'webp'])) {
+                        $filename = Str::random(40) . '.jpg';
+                        $destinationPath = storage_path('app/public/acciones');
+
+                        if (!file_exists($destinationPath)) {
+                            mkdir($destinationPath, 0755, true);
+                        }
+
+                        $manager = new ImageManager(new Driver());
+                        $manager->read($archivo)
+                            ->scaleDown(width: 1024)
+                            ->toJpeg(quality: 75)
+                            ->save($destinationPath . '/' . $filename);
+
+                        $mediaPaths[] = '/storage/acciones/' . $filename;
+                    } else {
+                        $path = $archivo->store('acciones', 'public');
+                        $mediaPaths[] = '/storage/' . $path;
+                    }
                 }
             }
 
             $actionToUpdate->media_paths = array_values($mediaPaths);
-
-
             $actionToUpdate->save();
 
             return $actionToUpdate;

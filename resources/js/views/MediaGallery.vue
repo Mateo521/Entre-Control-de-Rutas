@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
 import { toast } from 'vue3-toastify'
-
+import ImageLightbox from '@/components/ImageLightbox.vue'
 const cargando = ref(true)
 const evidencias = ref([])
 const filtroActivo = ref('todos') // 'todos', 'imagen', 'documento', 'video' 
@@ -14,6 +14,33 @@ const observadorRef = ref(null)
 let observador = null
 const urlProcesadas = new Set()
 
+
+
+const mostrarLightbox = ref(false)
+const imagenSeleccionada = ref('')
+const imagenesRelacionadas = ref([])
+
+const abrirLightboxRelacionado = (itemClickeado) => {
+   
+    const relacionadas = evidencias.value.filter(evidencia => 
+        evidencia.tipo === 'imagen' && 
+        evidencia.suceso_id === itemClickeado.suceso_id &&
+        evidencia.suceso_tipo === itemClickeado.suceso_tipo
+    )
+    
+   
+    imagenesRelacionadas.value = relacionadas.map(img => ({
+        url: img.url,
+        title: img.suceso_tipo,        
+        subtitle: img.peaje,           
+        date: img.fecha,             
+        badge: img.campo               
+    }))
+    
+  
+    imagenSeleccionada.value = itemClickeado.url
+    mostrarLightbox.value = true
+}
 
 const esImagen = (ruta) => {
     if (!ruta) return false;
@@ -112,12 +139,23 @@ const cargarSiguientePagina = async () => {
                 accion.media_paths.forEach(ruta => {
                     if (!urlProcesadas.has(ruta)) {
                         urlProcesadas.add(ruta);
-                        nuevaMedia.push(formatearMedia(ruta, accion.id, accion.category, accion.toll?.name || 'Traza', accion.created_at, 'Evidencia Operativa'));
+
+                        const nombreSuceso = accion.category === 'Mantenimiento Vial - Bacheo'
+                            ? 'Reparación de Bacheo'
+                            : accion.category;
+
+                        nuevaMedia.push(formatearMedia(
+                            ruta,
+                            accion.id,
+                            nombreSuceso,
+                            accion.toll?.name || 'Traza General',
+                            accion.created_at,
+                            'Evidencia de Reparación'
+                        ));
                     }
                 });
             }
         });
-
 
         evidencias.value.push(...nuevaMedia);
 
@@ -244,18 +282,23 @@ onUnmounted(() => {
                         <strong
                             class="text-white text-sm font-['Barlow_Condensed'] uppercase tracking-wide leading-tight">{{
                             item.suceso_tipo }}</strong>
+
                         <div class="flex items-center justify-between mt-2">
                             <span class="text-slate-300 text-xs">{{ item.fecha }}</span>
-                            <a :href="item.url" target="_blank"
-                                class="bg-white/20 hover:bg-amber-500 hover:text-black text-white p-1.5 rounded transition-colors backdrop-blur-sm cursor-pointer border-none outline-none">
+
+                            <button type="button" @click="abrirLightboxRelacionado(item)"
+                                class="bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold px-3 py-1.5 rounded transition-colors backdrop-blur-sm cursor-pointer border-none uppercase tracking-wider shadow-lg flex items-center gap-1">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
+                                    stroke-width="2.5">
                                     <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
                                 </svg>
-                            </a>
+                                Ampliar
+                            </button>
                         </div>
                     </div>
                 </div>
+
+
 
                 <div v-else-if="item.tipo === 'video'" class="relative flex flex-col bg-black">
                     <video :src="item.url" controls preload="metadata"
@@ -285,7 +328,7 @@ onUnmounted(() => {
                         item.extension }} </span>
                     <strong
                         class="text-sm font-['Barlow_Condensed'] text-slate-800 dark:text-slate-100 uppercase tracking-wide px-2">{{
-                        item.suceso_tipo }}</strong>
+                            item.suceso_tipo }}</strong>
 
                     <div
                         class="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
@@ -299,7 +342,7 @@ onUnmounted(() => {
                 <div v-if="['documento', 'video'].includes(item.tipo)"
                     class="p-3 border-t border-slate-100 dark:border-white/5 bg-white dark:bg-[#0d1b2a] flex justify-between items-center text-left">
                     <span class="text-[10px] text-slate-500 truncate mr-2">Ref: #{{ item.suceso_id }} - {{ item.peaje
-                        }}</span>
+                    }}</span>
                     <span class="text-[10px] text-slate-400">{{ item.fecha }}</span>
                 </div>
 
@@ -326,4 +369,12 @@ onUnmounted(() => {
             </div>
         </div>
     </div>
+
+    <div ref="observadorRef" class="w-full h-16 flex items-center justify-center mt-6 mb-10">
+    </div>
+
+    <ImageLightbox :mostrar="mostrarLightbox" :imagenes="imagenesRelacionadas" :imagenInicial="imagenSeleccionada"
+        @cerrar="mostrarLightbox = false" />
+
+
 </template>
