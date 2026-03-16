@@ -10,7 +10,7 @@ use Carbon\Carbon;
 class NoteController extends Controller
 {
   
-    public function index(Request $request)
+   public function index(Request $request)
     {
         $query = Note::query();
 
@@ -20,8 +20,8 @@ class NoteController extends Controller
             $query->where('is_archived', false);
         }
 
-     
-        $notas = $query->orderByRaw('due_date IS NULL, due_date ASC')->get();
+        
+        $notas = $query->orderByRaw('due_date IS NULL, due_date ASC')->paginate(12);
 
         return response()->json($notas);
     }

@@ -12,6 +12,7 @@ import InventoryDashboard from "../views/InventoryDashboard.vue";
 import BacheoDashboard from "../views/BacheoDashboard.vue";
 import PasterosDashboard from "../views/PasterosDashboard.vue";
 import NotesDashboard from "../views/NotesDashboard.vue";
+import GruasDashboard from '../views/GruasDashboard.vue'
 const routes = [
     {
         path: "/",
@@ -92,13 +93,18 @@ const routes = [
             },
             {
                 path: "pasteros",
-                name: "PasterosDashboard",
+                name: "Pasteros",
                 component: PasterosDashboard,
             },
-             {
+            {
                 path: "notas",
                 name: "NotessDashboard",
                 component: NotesDashboard,
+            },
+            {
+                path: "gruas",
+                name: "Gruas",
+                component: GruasDashboard,
             },
         ],
     },

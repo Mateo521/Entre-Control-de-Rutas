@@ -18,12 +18,29 @@ const formulario = ref({
     due_date: ''
 })
 
-const cargarNotas = async () => {
+const paginacion = ref({
+    current_page: 1,
+    last_page: 1,
+    total: 0
+})
+
+const cargarNotas = async (page = 1) => {
     cargando.value = true
     try {
-        const url = vistaActual.value === 'archivadas' ? '/api/notes?archived=true' : '/api/notes'
-        const respuesta = await axios.get(url)
-        notas.value = respuesta.data
+        const respuesta = await axios.get('/api/notes', {
+            params: {
+                archived: vistaActual.value === 'archivadas',
+                page: page
+            }
+        })
+        
+        notas.value = respuesta.data.data
+        
+        paginacion.value = {
+            current_page: respuesta.data.current_page,
+            last_page: respuesta.data.last_page,
+            total: respuesta.data.total
+        }
     } catch (error) {
         toast.error('Error al cargar las notas.')
     } finally {
@@ -33,7 +50,7 @@ const cargarNotas = async () => {
 
 const cambiarVista = (vista) => {
     vistaActual.value = vista
-    cargarNotas()
+    cargarNotas(1)
 }
 
 const abrirModalNuevo = () => {
@@ -46,7 +63,7 @@ const abrirModalNuevo = () => {
 const abrirModalEditar = (nota) => {
     modoEdicion.value = true
     idEdicion.value = nota.id
-    // Formateamos la fecha para el input type="date" (YYYY-MM-DD)
+ 
     const fechaFormat = nota.due_date ? nota.due_date.split('T')[0] : ''
     
     formulario.value = { 
@@ -85,7 +102,7 @@ const guardarNota = async () => {
     }
 }
 
-// Cambiar estado del Checkbox (Completada / Pendiente)
+ 
 const toggleCompletada = async (nota) => {
     try {
         const nuevoEstado = !nota.is_completed
@@ -96,12 +113,12 @@ const toggleCompletada = async (nota) => {
         if(nuevoEstado) toast.success('Tarea marcada como completada.')
     } catch (error) {
         toast.error('Error al actualizar el estado de la tarea.')
-        // Revertir visualmente si falla el backend
+     
         nota.is_completed = !nota.is_completed
     }
 }
 
-// Enviar al archivo o restaurar
+ 
 const archivarNota = async (nota) => {
     try {
         await axios.patch(`/api/notes/${nota.id}/status`, {
@@ -290,5 +307,21 @@ onMounted(() => {
             </div>
         </div>
 
+
+        <div v-if="paginacion.total > 0 && !cargando" class="flex items-center justify-between bg-white dark:bg-[#0d1b2a] border border-slate-200 dark:border-white/10  px-6 py-4 shadow-sm mt-6">
+            <span class="text-xs text-slate-500 dark:text-slate-400">
+                Página <strong>{{ paginacion.current_page }}</strong> de <strong>{{ paginacion.last_page }}</strong> ({{ paginacion.total }} notas totales)
+            </span>
+            <div class="flex items-center gap-2">
+                <button @click="cargarNotas(paginacion.current_page - 1)" :disabled="paginacion.current_page === 1"
+                    class="px-3 py-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-white/20 rounded hover:bg-slate-50 dark:hover:bg-white/5 disabled:opacity-50 cursor-pointer transition-colors bg-transparent">
+                    Anterior
+                </button>
+                <button @click="cargarNotas(paginacion.current_page + 1)" :disabled="paginacion.current_page === paginacion.last_page"
+                    class="px-3 py-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-white/20 rounded hover:bg-slate-50 dark:hover:bg-white/5 disabled:opacity-50 cursor-pointer transition-colors bg-transparent">
+                    Siguiente
+                </button>
+            </div>
+        </div>
     </div>
 </template>

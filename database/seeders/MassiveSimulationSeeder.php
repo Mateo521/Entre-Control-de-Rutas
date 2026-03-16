@@ -203,5 +203,8 @@ class MassiveSimulationSeeder extends Seeder
         Note::insert($notes);
 
         $this->command->info('¡Simulación completada con éxito! Sistema listo para pruebas de estrés.');
+
+
+         $this->call(TowServiceSeeder::class);
     }
 }

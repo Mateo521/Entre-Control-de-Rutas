@@ -51,13 +51,22 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/inventory/movements', [InventoryController::class, 'storeMovement']);
 
-    Route::get('/contractors', [ContractorWorkController::class, 'index']);
 
-
-    Route::get('/contractors', [ContractorWorkController::class, 'index']);
-    Route::post('/contractors', [ContractorWorkController::class, 'store']);
+    Route::apiResource('contractors', ContractorWorkController::class);
 
     Route::get('/notes/alerts', [App\Http\Controllers\Api\NoteController::class, 'alerts']);
     Route::patch('/notes/{note}/status', [App\Http\Controllers\Api\NoteController::class, 'changeStatus']);
     Route::apiResource('notes', App\Http\Controllers\Api\NoteController::class);
+
+ 
+
+    Route::apiResource('work-types', App\Http\Controllers\Api\WorkTypeController::class)->only(['index', 'store']);
+
+    Route::post('/contractors/{id}/restore', [App\Http\Controllers\ContractorWorkController::class, 'restore']);
+
+    Route::apiResource('tow-services', App\Http\Controllers\Api\TowServiceController::class);
+    Route::post('/tow-services/{id}/restore', [App\Http\Controllers\Api\TowServiceController::class, 'restore']);  
+
+    Route::post('/actions/{id}/restore', [\App\Http\Controllers\ActionController::class, 'restore']);
+
 });

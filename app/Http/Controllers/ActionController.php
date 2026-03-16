@@ -26,6 +26,15 @@ class ActionController extends Controller
         return response()->json($query->paginate(15));
     }
 
+    public function restore($id)
+    {
+    
+        $action = Action::withTrashed()->findOrFail($id);
+        $action->restore();
+        
+        return response()->json(['message' => 'Acción restaurada correctamente'], 200);
+    }
+
     public function show($id)
     {
         $action = Action::withTrashed()->with('toll')->findOrFail($id);
